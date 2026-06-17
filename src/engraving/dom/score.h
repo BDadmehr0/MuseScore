@@ -68,6 +68,8 @@
 #include "systemlock.h"
 #include "tuplet.h"
 
+#include "tuningsystem.h"
+
 namespace mu::engraving {
 class IMimeData;
 }
@@ -1210,6 +1212,7 @@ private:
     std::map<String, String> m_metaTags;
 
     Selection m_selection;
+    std::unique_ptr<TuningSystem> m_tuningSystem;
     SelectionFilter m_selectionFilter;
     Audio* m_audio = nullptr;
     PlayMode m_playMode = PlayMode::SYNTHESIZER;
@@ -1255,6 +1258,7 @@ public:
     ScoreLoad() { ++m_loading; }
     ~ScoreLoad() { --m_loading; }
     static bool loading() { return m_loading > 0; }
+    TuningSystem* tuningSystem() const { return m_tuningSystem.get(); }
 };
 
 DECLARE_OPERATORS_FOR_FLAGS(LayoutFlags)
