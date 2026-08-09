@@ -102,6 +102,8 @@ void EditStaveSharing::toggleStaveSharing(Transaction& tx, Score* score, bool on
         cmdCreateSharedStaves(tx, score);
     }
 
+    score->setBracketsAndBarlines();
+
     score->update();
 }
 
@@ -246,7 +248,7 @@ void EditStaveSharing::addStaffToSharedPart(SharedPart* sharedPart, const KeyLis
 
     score->undoInsertStaff(staff, relStaffIdx);
 
-    staff_idx_t absStaffIdx = track2staff(sharedPart->startTrack()) + relStaffIdx;
+    staff_idx_t absStaffIdx = track2staff(sharedPart->trackRange().startTrack) + relStaffIdx;
     score->adjustKeySigs(absStaffIdx, absStaffIdx + 1, keyList);
 }
 

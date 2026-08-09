@@ -28,6 +28,7 @@
 #include "dom/score.h"
 #include "dom/masterscore.h"
 #include "dom/system.h"
+#include "dom/systemlockindicator.h"
 #include "dom/spanner.h"
 #include "dom/page.h"
 #include "dom/durationelement.h"
@@ -257,13 +258,14 @@ void ScoreHorizontalViewLayout::layoutSystemLockIndicators(System* system)
 {
     // TODO: layout StaffVisibilityIndicator here
 
-    system->deleteLockIndicators();
+    system->deleteSystemLockIndicators();
 
-    std::vector<const SystemLock*> systemLocks = system->score()->systemLocks()->allLocks();
-    for (const SystemLock* lock : systemLocks) {
+    std::vector<const RangeLock*> systemLocks = system->score()->systemLocks()->allLocks();
+    for (const RangeLock* lock : systemLocks) {
         SystemLockIndicator* lockIndicator = Factory::createSystemLockIndicator(system, lock);
+        lockIndicator->setTrack(0);
         lockIndicator->setParent(system);
-        system->addLockIndicator(lockIndicator);
+        system->addSystemLockIndicator(lockIndicator);
         TLayout::layoutIndicatorIcon(lockIndicator, lockIndicator->mutldata());
     }
 }
@@ -454,7 +456,9 @@ std::pair<double, double> ScoreHorizontalViewLayout::computeCellWidth(const Segm
     Fraction quantum = calculateQuantumCell(s->measure(), visibleParts);
 
     auto calculateWidth = [quantum, sc = s->score()->masterScore()](ChordRest* cr) {
-        return sc->widthOfSegmentCell()
+        //! width of a segment cell, in spatiums per quantum unit
+        static constexpr double WIDTH_OF_SEGMENT_CELL = 3;
+        return WIDTH_OF_SEGMENT_CELL
                * sc->style().spatium()
                * cr->globalTicks().numerator() / cr->globalTicks().denominator()
                * quantum.denominator() / quantum.numerator();

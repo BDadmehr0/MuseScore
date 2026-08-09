@@ -52,6 +52,7 @@
 #include "../editing/editdata.h"
 #include "../editing/editproperty.h"
 #include "../editing/elementeditdata.h"
+#include "../editing/navigation.h"
 
 #include "chord.h"
 #include "factory.h"
@@ -406,7 +407,6 @@ void EngravingItem::reset()
     undoResetProperty(Pid::MIN_DISTANCE);
     undoResetProperty(Pid::OFFSET);
     undoResetProperty(Pid::LEADING_SPACE);
-    setOffsetChanged(false);
     EngravingObject::reset();
 }
 
@@ -690,9 +690,9 @@ Color EngravingItem::curColor(bool isVisible, const rendering::PaintOptions& opt
 
 Color EngravingItem::curColor(bool isVisible, Color normalColor, const rendering::PaintOptions& opt) const
 {
-    // the default element color is always interpreted as black in printing
     if (opt.isPrinting) {
-        return (normalColor == configuration()->defaultColor()) ? Color::BLACK : normalColor;
+        // For printing, always use the actual color of the item (default black unless overridden by the user)
+        return normalColor;
     }
 
     if (flag(ElementFlag::DROP_TARGET)) {
@@ -727,13 +727,13 @@ Color EngravingItem::curColor(bool isVisible, Color normalColor, const rendering
         return configuration()->invisibleColor();
     }
 
-    if (opt.invertColors) {
-        if (normalColor == configuration()->defaultColor()) {
-            return maybeOverrideColor(configuration()->scoreInversionColor());
-        }
-        return maybeOverrideColor(normalColor.inverted());
+    if (!opt.ignoreDisplayedDefaultColor && normalColor == configuration()->defaultColor()) {
+        return maybeOverrideColor(configuration()->displayedDefaultColor(opt.invertColors));
     }
 
+    if (opt.invertColors) {
+        return maybeOverrideColor(normalColor.inverted());
+    }
     return maybeOverrideColor(normalColor);
 }
 
@@ -1628,6 +1628,14 @@ void EngravingItem::undoChangeProperty(Pid pid, const PropertyValue& val, Proper
     EngravingObject::undoChangeProperty(pid, val, ps);
 }
 
+void EngravingItem::undoResetProperty(Pid id)
+{
+    EngravingObject::undoResetProperty(id);
+    if (id == Pid::OFFSET) {
+        setOffsetChanged(false);
+    }
+}
+
 //---------------------------------------------------------
 //   propertyDefault
 //---------------------------------------------------------
@@ -2043,7 +2051,7 @@ EngravingItem* EngravingItem::nextSegmentElement()
         }
         p = p->parentItem();
     }
-    return score()->firstElement();
+    return Navigation::firstElement(score());
 }
 
 //------------------------------------------------------------------------------------------
@@ -2091,7 +2099,7 @@ EngravingItem* EngravingItem::prevSegmentElement()
         }
         p = p->parentItem();
     }
-    return score()->firstElement();
+    return Navigation::firstElement(score());
 }
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
@@ -2790,9 +2798,11 @@ bool EngravingItem::elementAppliesToTrack(const track_idx_t elementTrack, const 
         return false;
     }
 
-    if (voiceAssignment == VoiceAssignment::ALL_VOICE_IN_INSTRUMENT && (part->startTrack() <= refTrack
-                                                                        && part->endTrack() - 1 >= refTrack)) {
-        return true;
+    if (voiceAssignment == VoiceAssignment::ALL_VOICE_IN_INSTRUMENT) {
+        const TrackRange range = part->trackRange();
+        if (range.startTrack <= refTrack && range.endTrack - 1 >= refTrack) {
+            return true;
+        }
     }
     return false;
 }

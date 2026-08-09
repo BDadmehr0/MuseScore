@@ -25,6 +25,7 @@
 
 #include "dom/slur.h"
 #include "dom/chord.h"
+#include "dom/clef.h"
 #include "dom/score.h"
 #include "dom/system.h"
 #include "dom/staff.h"
@@ -80,6 +81,12 @@ SpannerSegment* SlurTieLayout::layoutSystem(Slur* item, System* system, LayoutCo
         if (item->startCR() == 0 || item->startCR()->measure() == 0) {
             LOGD("Slur::layout(): track %zu-%zu  %p - %p tick %d-%d null start anchor",
                  item->track(), item->track2(), item->startCR(), item->endCR(), item->tick().ticks(), item->tick2().ticks());
+            return slurSegment;
+        }
+        if (item->ticks().isZero() && !(item->startCR() && item->startCR()->isGrace()) && !(item->endCR() && item->endCR()->isGrace())
+            && !item->isIncoming() && !item->isOutgoing()) {
+            LOGD("Slur::layout(): track %zu tick %d zero-length slur, skipping",
+                 item->track(), item->tick().ticks());
             return slurSegment;
         }
         if (item->endCR() == 0) {         // sanity check
@@ -262,7 +269,7 @@ SpannerSegment* SlurTieLayout::layoutSystem(Slur* item, System* system, LayoutCo
             }
         }
 
-        double endingX = outgoingPartialSlur ? measure->endingXForOpenEndedLines() : system->endingXForOpenEndedLines();
+        double endingX = endingXForOpenEndedSlurTie(outgoingPartialSlur ? measure : system->lastMeasure(), item->startCR()->vStaffIdx());
         p2 = PointF(endingX, y);
 
         // adjust for ties at the end of the system
@@ -345,6 +352,35 @@ void SlurTieLayout::adjustSlurFloatingEndPointAngles(SlurSegment* slurSeg, Point
         double yCur = p2.y();
         p2.setY(up ? std::min(yCur, p1.y() - heightDiff) : std::max(yCur, p1.y() + heightDiff));
     }
+}
+
+double SlurTieLayout::endingXForOpenEndedSlurTie(const Measure* measure, staff_idx_t staffIdx)
+{
+    double endingX = measure->endingXForOpenEndedLines();
+
+    const SegmentType segmentTypesToAvoid = SegmentType::TimeSigTypes | SegmentType::KeySigTypes | SegmentType::ClefTypes;
+
+    // Find the first segment at the end of the measure which meets the criteria for the SlurTie to stop before it:
+    const Segment* endSegment = measure->findSegmentR(segmentTypesToAvoid, measure->ticks());
+    const EngravingItem* endItem = nullptr;
+    while (endSegment) {
+        if (endSegment->isType(segmentTypesToAvoid) && endSegment->enabled()) {
+            endItem = endSegment->element(staff2track(staffIdx));
+            if (endItem && endItem->visible() && endItem->addToSkyline()) {
+                break;
+            }
+        }
+        endSegment = endSegment->next();
+    }
+
+    if (!endSegment || !endItem) {
+        return endingX;
+    }
+
+    const double margin = endItem->style().styleAbsolute(Sid::lineEndToBarlineDistance);
+    const double itemLeftX = measure->x() + endSegment->x() + endItem->ldata()->shape().translated(endItem->pos()).left();
+
+    return std::min(endingX, itemLeftX - margin);
 }
 
 //---------------------------------------------------------
@@ -1556,7 +1592,7 @@ TieSegment* SlurTieLayout::layoutTieFor(Tie* item, System* system)
 
     int segmentCount = sPos.system1 == sPos.system2 ? 1 : 2;
     if (segmentCount == 2) {
-        sPos.p2 = PointF(system->endingXForOpenEndedLines(), sPos.p1.y());
+        sPos.p2 = PointF(endingXForOpenEndedSlurTie(system->lastMeasure(), item->startNote()->vStaffIdx()), sPos.p1.y());
     } else {
         sPos.p2 = computeDefaultStartOrEndPoint(item, Grip::END);
     }
@@ -2316,7 +2352,7 @@ void SlurTieLayout::adjustXforLedgerLines(TieSegment* tieSegment, bool start, Ch
         return !s.item()->addToSkyline() || s.item()->isNoteDot() || (tieSegment->isLaissezVibSegment() && s.item()->isLaissezVibSegment());
     });
     noteShape.translate(note->pos() + chordSystemPos);
-    double xNoteEdge = (start ? noteShape.right() : -noteShape.left()) + padding;
+    double xNoteEdge = (start ? noteShape.right() : noteShape.left()) + padding;
 
     resultingX = start ? std::max(resultingX, xNoteEdge) : std::min(resultingX, xNoteEdge);
 }

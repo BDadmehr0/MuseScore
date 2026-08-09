@@ -19,10 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MU_NOTATION_NOTATIONMIDIINPUT_H
-#define MU_NOTATION_NOTATIONMIDIINPUT_H
+
+#pragma once
+
+#include <vector>
 
 #include <QTimer>
+
+#include "midi/midievent.h"
 
 #include "modularity/ioc.h"
 #include "playback/iplaybackcontroller.h"
@@ -36,6 +40,7 @@
 #include "inotationundostack.h"
 
 namespace mu::engraving {
+class Note;
 class Score;
 }
 
@@ -95,6 +100,8 @@ private:
     QTimer m_processTimer;
     std::vector<muse::midi::Event> m_eventsQueue;
 
+    std::vector<int> m_activeMidiPitches; // pitches of MIDI keys currently being held down
+
     QTimer m_realtimeTimer;
     QTimer m_extendNoteTimer;
     bool m_allowRealtimeRests = false;
@@ -110,5 +117,3 @@ private:
     std::map<int, PlayingNote> m_playingNotes;
 };
 }
-
-#endif // MU_NOTATION_NOTATIONMIDIINPUT_H

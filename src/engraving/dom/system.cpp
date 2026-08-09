@@ -29,15 +29,19 @@
 
 #include "style/style.h"
 
+#include "../editing/navigation.h"
+
 #include "beam.h"
 #include "box.h"
 #include "bracket.h"
-#include "bracketItem.h"
+#include "bracketitem.h"
+#include "chord.h"
 #include "chordrest.h"
 #include "factory.h"
 #include "measure.h"
 #include "mscore.h"
 #include "page.h"
+#include "pagelockindicator.h"
 #include "part.h"
 #include "score.h"
 #include "segment.h"
@@ -47,6 +51,7 @@
 #include "staffvisibilityindicator.h"
 #include "system.h"
 #include "systemdivider.h"
+#include "systemlockindicator.h"
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
 #include "accessibility/accessibleitem.h"
@@ -155,9 +160,12 @@ System::~System()
     }
     muse::DeleteAll(m_staves);
     muse::DeleteAll(m_brackets);
-    muse::DeleteAll(m_lockIndicators);
+    muse::DeleteAll(m_systemLockIndicators);
     if (m_staffVisibilityIndicator) {
         delete m_staffVisibilityIndicator;
+    }
+    if (m_pageLockIndicator) {
+        delete m_pageLockIndicator;
     }
 }
 
@@ -287,11 +295,11 @@ void System::adjustStavesNumber(size_t nstaves)
     }
 }
 
-size_t System::getBracketsColumnsCount()
+size_t System::getBracketsColumnsCount() const
 {
     size_t columns = 0;
     for (const Staff* staff : score()->staves()) {
-        for (auto bi : staff->brackets()) {
+        for (auto bi : score()->brackets(staff->idx())) {
             columns = std::max(columns, bi->column() + 1);
         }
     }
@@ -314,21 +322,32 @@ bool System::isLocked() const
     return m_ml.front()->isStartOfSystemLock();
 }
 
-const SystemLock* System::systemLock() const
+const RangeLock* System::systemLock() const
 {
     return m_ml.front()->systemLock();
 }
 
-void System::addLockIndicator(SystemLockIndicator* sli)
+void System::addSystemLockIndicator(SystemLockIndicator* sli)
 {
     assert(sli);
-    m_lockIndicators.push_back(sli);
+    m_systemLockIndicators.push_back(sli);
 }
 
-void System::deleteLockIndicators()
+void System::deleteSystemLockIndicators()
 {
-    muse::DeleteAll(m_lockIndicators);
-    m_lockIndicators.clear();
+    muse::DeleteAll(m_systemLockIndicators);
+    m_systemLockIndicators.clear();
+}
+
+void System::setPageLockIndicator(PageLockIndicator* pli)
+{
+    m_pageLockIndicator = pli;
+}
+
+void System::deletePageLockIndicator()
+{
+    delete m_pageLockIndicator;
+    m_pageLockIndicator = nullptr;
 }
 
 //---------------------------------------------------------
@@ -724,7 +743,11 @@ void System::scanElements(std::function<void(EngravingItem*)> func)
         func(m_staffVisibilityIndicator);
     }
 
-    for (auto i : m_lockIndicators) {
+    if (m_pageLockIndicator) {
+        func(m_pageLockIndicator);
+    }
+
+    for (auto i : m_systemLockIndicators) {
         func(i);
     }
 
@@ -753,7 +776,7 @@ void System::scanElements(std::function<void(EngravingItem*)> func)
         }
         bool v = true;
         Spanner* spanner = ss->spanner();
-        if (spanner->anchor() == Spanner::Anchor::SEGMENT || spanner->anchor() == Spanner::Anchor::CHORD) {
+        if (spanner->anchor() == Spanner::Anchor::SEGMENT || spanner->anchor() == Spanner::Anchor::CHORDREST) {
             EngravingItem* se = spanner->startElement();
             EngravingItem* ee = spanner->endElement();
             bool v1 = true;
@@ -823,7 +846,7 @@ EngravingItem* System::nextSegmentElement()
             return firstSeg->element(0);
         }
     }
-    return score()->lastElement();
+    return Navigation::lastElement(score());
 }
 
 //---------------------------------------------------------
@@ -839,7 +862,7 @@ EngravingItem* System::prevSegmentElement()
         while (!re) {
             seg = seg->prev1MM();
             if (!seg) {
-                return score()->firstElement();
+                return Navigation::firstElement(score());
             }
 
             if (seg->segmentType() == SegmentType::EndBarLine) {

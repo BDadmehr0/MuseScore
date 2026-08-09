@@ -27,11 +27,18 @@
 
 #include "measure.h"
 
+#include "../editing/editstaffbrackets.h"
+#include "../editing/editclef.h"
+#include "../editing/editkeysig.h"
 #include "../editing/editmeasures.h"
+#include "../editing/editmeasurerepeat.h"
 #include "../editing/editstaff.h"
 #include "../editing/editsystemlocks.h"
+#include "../editing/editpagelocks.h"
+#include "../editing/edittimesig.h"
 #include "../editing/inserttime.h"
 #include "../editing/mscoreview.h"
+#include "../editing/navigation.h"
 #include "../editing/transaction/transaction.h"
 
 #include "accidental.h"
@@ -40,7 +47,7 @@
 #include "barline.h"
 #include "beam.h"
 #include "bracket.h"
-#include "bracketItem.h"
+#include "bracketitem.h"
 #include "chord.h"
 #include "clef.h"
 #include "durationelement.h"
@@ -373,49 +380,39 @@ void Measure::setParent(System* s)
 }
 
 //---------------------------------------------------------
-//   AcEl
-//---------------------------------------------------------
-
-struct AcEl {
-    Note* note;
-    double x;
-};
-
-//---------------------------------------------------------
 //   findAccidental
 ///   return current accidental value at note position
 //---------------------------------------------------------
 
-AccidentalVal Measure::findAccidental(Note* note) const
+AccidentalVal Measure::findAccidental(const Note* note) const
 {
-    Chord* chord = note->chord();
-    Staff* vStaff = chord->score()->staff(chord->vStaffIdx());
+    const Chord* chord = note->chord();
+    const Staff* vStaff = chord->score()->staff(chord->vStaffIdx());
     AccidentalState tversatz;    // state of already set accidentals for this measure
     tversatz.init(vStaff->keySigEvent(tick()));
 
-    track_idx_t startTrack = vStaff->part()->startTrack();
+    const TrackRange trackRange = vStaff->part()->trackRange();
     track_idx_t mainTrack = chord->vStaffIdx() * VOICES;
-    track_idx_t endTrack = vStaff->part()->endTrack();
 
-    for (Segment* segment = first(); segment; segment = segment->next()) {
+    for (const Segment* segment = first(); segment; segment = segment->next()) {
         if (segment->isKeySigType()) {
-            KeySig* ks = toKeySig(segment->element(mainTrack));
+            const KeySig* ks = toKeySig(segment->element(mainTrack));
             if (!ks) {
                 continue;
             }
             tversatz.init(vStaff->keySigEvent(segment->tick()));
         } else if (segment->segmentType() == SegmentType::ChordRest) {
-            for (track_idx_t track = startTrack; track < endTrack; ++track) {
-                EngravingItem* e = segment->element(track);
+            for (track_idx_t track = trackRange.startTrack; track < trackRange.endTrack; ++track) {
+                const EngravingItem* e = segment->element(track);
                 if (!e || !e->isChord()) {
                     continue;
                 }
-                Chord* crd = toChord(e);
-                for (Chord* chord1 : crd->graceNotes()) {
+                const Chord* crd = toChord(e);
+                for (const Chord* chord1 : crd->graceNotes()) {
                     if (chord1->vStaffIdx() != chord->vStaffIdx()) {
                         continue;
                     }
-                    for (Note* note1 : chord1->notes()) {
+                    for (const Note* note1 : chord1->notes()) {
                         if (note1->tieBack() && !note1->accidental()) {
                             continue;
                         }
@@ -434,7 +431,7 @@ AccidentalVal Measure::findAccidental(Note* note) const
                 if (crd->vStaffIdx() != chord->vStaffIdx()) {
                     continue;
                 }
-                for (Note* note1 : crd->notes()) {
+                for (const Note* note1 : crd->notes()) {
                     if (note1->tieBack() && !note1->accidental()) {
                         continue;
                     }
@@ -452,7 +449,7 @@ AccidentalVal Measure::findAccidental(Note* note) const
             }
         }
     }
-    LOGD("Measure::findAccidental: note not found");
+    LOGD() << "Measure::findAccidental: note not found";
     return AccidentalVal::NATURAL;
 }
 
@@ -462,32 +459,31 @@ AccidentalVal Measure::findAccidental(Note* note) const
 ///   relative staff line.
 //---------------------------------------------------------
 
-AccidentalVal Measure::findAccidental(Segment* s, staff_idx_t staffIdx, int line, bool& error) const
+AccidentalVal Measure::findAccidental(const Segment* s, staff_idx_t staffIdx, int line, bool& error) const
 {
     AccidentalState tversatz;    // state of already set accidentals for this measure
-    Staff* staff = score()->staff(staffIdx);
+    const Staff* staff = score()->staff(staffIdx);
     tversatz.init(staff->keySigEvent(tick()));
 
     SegmentType st = SegmentType::ChordRest;
-    track_idx_t startTrack = staff->part()->startTrack();
-    track_idx_t endTrack = staff->part()->endTrack();
-    for (Segment* segment = first(st); segment; segment = segment->next(st)) {
+    const TrackRange trackRange = staff->part()->trackRange();
+    for (const Segment* segment = first(st); segment; segment = segment->next(st)) {
         if (segment == s && staff->isPitchedStaff(tick())) {
             ClefType clef = staff->clef(s->tick());
             int l = relStep(line, clef);
             return tversatz.accidentalVal(l, error);
         }
-        for (track_idx_t track = startTrack; track < endTrack; ++track) {
-            EngravingItem* e = segment->element(track);
+        for (track_idx_t track = trackRange.startTrack; track < trackRange.endTrack; ++track) {
+            const EngravingItem* e = segment->element(track);
             if (!e || !e->isChord()) {
                 continue;
             }
-            Chord* chord = toChord(e);
-            for (Chord* chord1 : chord->graceNotes()) {
+            const Chord* chord = toChord(e);
+            for (const Chord* chord1 : chord->graceNotes()) {
                 if (chord1->vStaffIdx() != staffIdx) {
                     continue;
                 }
-                for (Note* note : chord1->notes()) {
+                for (const Note* note : chord1->notes()) {
                     if (note->tieBack() && !note->accidental()) {
                         continue;
                     }
@@ -499,7 +495,7 @@ AccidentalVal Measure::findAccidental(Segment* s, staff_idx_t staffIdx, int line
             if (chord->vStaffIdx() != staffIdx) {
                 continue;
             }
-            for (Note* note : chord->notes()) {
+            for (const Note* note : chord->notes()) {
                 if (note->tieBack() && !note->accidental()) {
                     continue;
                 }
@@ -509,7 +505,7 @@ AccidentalVal Measure::findAccidental(Segment* s, staff_idx_t staffIdx, int line
             }
         }
     }
-    LOGD("segment not found");
+    LOGD() << "segment not found";
     return AccidentalVal::NATURAL;
 }
 
@@ -1413,7 +1409,7 @@ bool Measure::acceptDrop(EditData& data) const
     case ElementType::LAYOUT_BREAK:
         // Always drop to all staves
         if (viewer) {
-            viewer->setDropRectangle(canvasBoundingRect());
+            viewer->setDropRectangles({ canvasBoundingRect() });
         }
         return true;
 
@@ -1424,9 +1420,9 @@ bool Measure::acceptDrop(EditData& data) const
         // Drop to all staves or single staff depending on modifier
         if (viewer) {
             if (data.modifiers & ControlModifier) {
-                viewer->setDropRectangle(staffRect);
+                viewer->setDropRectangles({ staffRect });
             } else {
-                viewer->setDropRectangle(canvasBoundingRect());
+                viewer->setDropRectangles({ canvasBoundingRect() });
             }
         }
         return true;
@@ -1442,14 +1438,14 @@ bool Measure::acceptDrop(EditData& data) const
     case ElementType::STAFFTYPE_CHANGE:
         // Always drop to single staff
         if (viewer) {
-            viewer->setDropRectangle(staffRect);
+            viewer->setDropRectangles({ staffRect });
         }
         return true;
 
     case ElementType::STRING_TUNINGS: {
         const bool canAdd = canAddStringTunings(staffIdx);
         if (viewer && canAdd) {
-            viewer->setDropRectangle(staffRect);
+            viewer->setDropRectangles({ staffRect });
         }
         return canAdd;
     }
@@ -1468,7 +1464,7 @@ bool Measure::acceptDrop(EditData& data) const
                 }
             }
             if (viewer) {
-                viewer->setDropRectangle(canvasBoundingRect());
+                viewer->setDropRectangles({ canvasBoundingRect() });
             }
             return true;
         }
@@ -1477,7 +1473,7 @@ bool Measure::acceptDrop(EditData& data) const
                 return false;
             }
             if (viewer) {
-                viewer->setDropRectangle(staffRect);
+                viewer->setDropRectangles({ staffRect });
             }
             return true;
         case ActionIconType::SYSTEM_LOCK:
@@ -1485,7 +1481,38 @@ bool Measure::acceptDrop(EditData& data) const
             LayoutMode layoutMode = score()->layoutMode();
             if (layoutMode == LayoutMode::PAGE || layoutMode == LayoutMode::SYSTEM) {
                 if (viewer) {
-                    viewer->setDropRectangle(canvasBoundingRect().adjusted(-x(), 0.0, 0.0, 0.0));
+                    const MeasureBase* first = system() ? system()->first() : nullptr;
+                    const PointF topLeft = first ? first->canvasBoundingRect().topLeft() : PointF(0.0, 0.0);
+                    viewer->setDropRectangles({ RectF(topLeft, canvasBoundingRect().bottomRight()) });
+                }
+                return true;
+            }
+            return false;
+        }
+        case ActionIconType::PAGE_LOCK:
+        {
+            LayoutMode layoutMode = score()->layoutMode();
+            if (layoutMode == LayoutMode::PAGE) {
+                if (viewer) {
+                    std::vector<RectF> dropRects;
+                    for (System* sys : page()->systems()) {
+                        const bool lastSelectedSys = sys == system();
+                        const MeasureBase* first = sys ? sys->first() : nullptr;
+                        const MeasureBase* last = sys ? sys->last() : nullptr;
+                        if (lastSelectedSys) {
+                            last = this;
+                        }
+                        if (!first || !last) {
+                            continue;
+                        }
+                        dropRects.push_back(RectF(first->canvasBoundingRect().topLeft(),
+                                                  last->canvasBoundingRect().bottomRight()));
+
+                        if (lastSelectedSys) {
+                            break;
+                        }
+                    }
+                    viewer->setDropRectangles(dropRects);
                 }
                 return true;
             }
@@ -1509,7 +1536,7 @@ bool Measure::acceptDrop(EditData& data) const
 ///   element \a type and \a subtype.
 //---------------------------------------------------------
 
-EngravingItem* Measure::drop(EditData& data)
+EngravingItem* Measure::drop(Transaction& tx, EditData& data)
 {
     EngravingItem* e = data.dropElement;
     staff_idx_t staffIdx = track2staff(data.track);
@@ -1518,9 +1545,6 @@ EngravingItem* Measure::drop(EditData& data)
         return nullptr;
     }
     Staff* staff = score()->staff(staffIdx);
-    //bool fromPalette = (e->track() == -1);
-
-    Transaction& tx = score()->transactionManager()->currentOrDummyTransaction();
 
     switch (e->type()) {
     case ElementType::MARKER:
@@ -1561,7 +1585,7 @@ EngravingItem* Measure::drop(EditData& data)
         staff_idx_t lastStaff = sel.staffEnd() - 1;
         size_t level = 0;
         for (staff_idx_t idx = 0; idx < score()->nstaves(); ++idx) {
-            for (const BracketItem* bi : score()->staff(idx)->brackets()) {
+            for (const BracketItem* bi : score()->brackets(idx)) {
                 if (bi->intersects(firstStaff, lastStaff)) {
                     level = std::max(level, bi->column() + 1);
                 }
@@ -1570,16 +1594,16 @@ EngravingItem* Measure::drop(EditData& data)
 
         Bracket* b = toBracket(e);
         if (sel.isRange()) {
-            score()->undoAddBracket(staff, level, b->bracketType(), sel.staffEnd() - sel.staffStart());
+            EditStaffBrackets::undoAddBracket(score(), staff, level, b->bracketType(), sel.staffEnd() - sel.staffStart());
         } else {
-            score()->undoAddBracket(staff, level, b->bracketType(), 1);
+            EditStaffBrackets::undoAddBracket(score(), staff, level, b->bracketType(), 1);
         }
         delete b;
     }
     break;
 
     case ElementType::CLEF:
-        score()->undoChangeClef(staff, this, toClef(e)->clefType());
+        EditClef::undoChangeClef(tx, score(), staff, this, toClef(e)->clefType());
         delete e;
         break;
 
@@ -1590,20 +1614,21 @@ EngravingItem* Measure::drop(EditData& data)
 
         if (data.modifiers & ControlModifier) {
             // apply only to this stave
-            score()->undoChangeKeySig(staff, tick(), k);
+            EditKeySig::undoChangeKeySig(tx, score(), staff, tick(), k);
         } else {
             // apply to all staves:
             for (Staff* s : score()->staves()) {
-                score()->undoChangeKeySig(s, tick(), k);
+                EditKeySig::undoChangeKeySig(tx, score(), s, tick(), k);
             }
         }
 
         break;
     }
 
-    case ElementType::TIMESIG:
-        score()->cmdAddTimeSig(this, staffIdx, toTimeSig(e), data.modifiers & ControlModifier);
+    case ElementType::TIMESIG: {
+        EditTimeSig::addTimeSig(tx, score(), this, staffIdx, toTimeSig(e), data.modifiers & ControlModifier);
         break;
+    }
 
     case ElementType::LAYOUT_BREAK: {
         LayoutBreak* b = toLayoutBreak(e);
@@ -1634,7 +1659,7 @@ EngravingItem* Measure::drop(EditData& data)
             }
             break;
         case LayoutBreakType::NOBREAK:
-            if (measure->noBreak()) {
+            if (measure->noBreak() || measure->isEndOfSystemLock() || measure->isEndOfPageLock()) {
                 delete b;
                 b = 0;
             } else {
@@ -1644,6 +1669,9 @@ EngravingItem* Measure::drop(EditData& data)
             break;
         }
         if (b) {
+            if (b->layoutBreakType() != LayoutBreakType::NOBREAK) {
+                EditSystemLocks::removeSystemLocksOnAddLayoutBreak(tx, score(), b->layoutBreakType(), this);
+            }
             b->setTrack(0);
             b->setParent(measure);
             score()->undoAddElement(b);
@@ -1709,7 +1737,7 @@ EngravingItem* Measure::drop(EditData& data)
             Segment* seg = undoGetSegmentR(SegmentType::EndBarLine, ticks());
             BarLine* cbl = toBarLine(seg->element(trackZeroVoice(data.track)));
             if (cbl) {
-                return cbl->drop(data);
+                return cbl->drop(tx, data);
             }
         } else if (bl->barLineType() == BarLineType::START_REPEAT) {
             Measure* m2 = isMMRest() ? mmRestFirst() : this;
@@ -1771,7 +1799,7 @@ EngravingItem* Measure::drop(EditData& data)
                 }
             }
             // drop to barline
-            return seg->element(trackZeroVoice(data.track))->drop(data);
+            return seg->element(trackZeroVoice(data.track))->drop(tx, data);
         }
         break;
     }
@@ -1780,7 +1808,7 @@ EngravingItem* Measure::drop(EditData& data)
     {
         int numMeasures = toMeasureRepeat(e)->numMeasures();
         delete e;
-        score()->cmdAddMeasureRepeat(this, numMeasures, staffIdx);
+        EditMeasureRepeat::addMeasureRepeat(tx, score(), this, numMeasures, staffIdx);
         break;
     }
     case ElementType::ACTION_ICON:
@@ -1812,6 +1840,9 @@ EngravingItem* Measure::drop(EditData& data)
         }
         case ActionIconType::SYSTEM_LOCK:
             EditSystemLocks::makeIntoSystem(tx, score(), system()->first(), this);
+            break;
+        case ActionIconType::PAGE_LOCK:
+            EditPageLocks::makeIntoPage(tx, score(), page()->firstMeasureBase(), this);
             break;
         default:
             break;
@@ -2590,17 +2621,17 @@ bool Measure::isOnlyRests(track_idx_t track) const
 }
 
 //---------------------------------------------------------
-//   isOnlyDeletedRests
+//   isOnlyGapRests
 //---------------------------------------------------------
 
-bool Measure::isOnlyDeletedRests(track_idx_t track) const
+bool Measure::isOnlyGapRests(track_idx_t track) const
 {
     static const SegmentType st { SegmentType::ChordRest };
     for (const Segment* s = first(st); s; s = s->next(st)) {
         if (s->segmentType() != st || !s->element(track)) {
             continue;
         }
-        if (s->element(track)->isRest() ? !toRest(s->element(track))->isGap() : !s->element(track)->isRest()) {
+        if (!s->element(track)->isRest() || !toRest(s->element(track))->isGap()) {
             return false;
         }
     }
@@ -3275,7 +3306,7 @@ EngravingItem* Measure::nextElementStaff(staff_idx_t staff, EngravingItem* fromI
         return next;
     }
 
-    return score()->lastElement();
+    return Navigation::lastElement(score());
 }
 
 //---------------------------------------------------------
@@ -3309,7 +3340,7 @@ EngravingItem* Measure::prevElementStaff(staff_idx_t staff, EngravingItem* fromI
             return seg->lastElementForNavigation(staff);
         }
     }
-    return score()->firstElement();
+    return Navigation::firstElement(score());
 }
 
 double Measure::firstNoteRestSegmentX(bool leading) const

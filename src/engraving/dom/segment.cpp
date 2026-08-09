@@ -27,6 +27,7 @@
 #include "translation.h"
 
 #include "../editing/editspanner.h"
+#include "../editing/navigation.h"
 #include "types/typesconv.h"
 #include "rendering/score/tlayout.h"
 
@@ -52,11 +53,10 @@
 #include "staff.h"
 #include "staffstate.h"
 #include "system.h"
+#include "systemlockindicator.h"
 #include "timesig.h"
 #include "tuplet.h"
 #include "utils.h"
-
-#include "navigate.h"
 
 #ifndef ENGRAVING_NO_ACCESSIBILITY
 #include "accessibility/accessibleitem.h"
@@ -785,13 +785,13 @@ void Segment::add(EngravingItem* el)
         assert(m_segmentType & SegmentType::KeySigTypes);
         checkElement(el, track);
         m_elist[track] = el;
-        if (!el->generated()) {
+        if (m_segmentType & SegmentType::CourtesyKeySigTypes) {
+            toKeySig(el)->setIsCourtesy(true);
+        }
+        if (!el->generated() && !toKeySig(el)->isCourtesy()) {
             el->staff()->setKey(tick(), toKeySig(el)->keySigEvent());
         }
         setEmpty(false);
-        if (m_segmentType == SegmentType::CourtesyKeySigTypes) {
-            toKeySig(el)->setIsCourtesy(true);
-        }
         break;
 
     case ElementType::CHORD:
@@ -963,7 +963,7 @@ void Segment::remove(EngravingItem* el)
 
     case ElementType::KEYSIG:
         m_elist[track] = 0;
-        if (!el->generated()) {
+        if (!el->generated() && !toKeySig(el)->isCourtesy()) {
             el->staff()->removeKey(tick());
         }
         break;
@@ -1807,7 +1807,7 @@ EngravingItem* Segment::prevElementOfSegment(EngravingItem* e, staff_idx_t activ
             Chord* chord = toChord(el);
             GraceNotesGroup& graceNotesBefore = chord->graceNotesBefore();
             if (!graceNotesBefore.empty()) {
-                ChordRest* next = prevChordRest(chord);
+                ChordRest* next = Navigation::prevChordRest(chord);
                 if (next) {
                     if (next->isChord()) {
                         return toChord(next)->notes().back();
@@ -2135,7 +2135,7 @@ EngravingItem* Segment::nextElement(staff_idx_t activeStaff)
         }
         if (!nextSegment) {
             MeasureBase* mb = measure()->next();
-            return mb && mb->isBox() ? mb : score()->lastElement();
+            return mb && mb->isBox() ? mb : Navigation::lastElement(score());
         }
 
         Measure* nsm = nextSegment->measure();
@@ -2151,9 +2151,18 @@ EngravingItem* Segment::nextElement(staff_idx_t activeStaff)
                 return nme;
             } else if (nmb->isEndOfSystemLock()) {
                 System* system = nmb->system();
-                SystemLockIndicator* lockInd = system ? system->lockIndicators().front() : nullptr;
-                if (lockInd) {
-                    return lockInd;
+                if (system) {
+                    for (SystemLockIndicator* lockInd : system->systemLockIndicators()) {
+                        if (nmb->systemLock() == lockInd->systemLock()) {
+                            return lockInd;
+                        }
+                    }
+                }
+            } else if (nmb->isEndOfPageLock()) {
+                System* system = nmb->system();
+                PageLockIndicator* pli = system ? system->pageLockIndicator() : nullptr;
+                if (pli) {
+                    return pli;
                 }
             } //TODO: StaffVisibilityIndicator handling
         }
@@ -2349,7 +2358,7 @@ EngravingItem* Segment::prevElement(staff_idx_t activeStaff)
         }
         if (!prevSeg) {
             MeasureBase* mb = measure()->prev();
-            return mb && mb->isBox() ? mb : score()->firstElement();
+            return mb && mb->isBox() ? mb : Navigation::firstElement(score());
         }
 
         Measure* psm = prevSeg->measure();
@@ -2361,11 +2370,20 @@ EngravingItem* Segment::prevElement(staff_idx_t activeStaff)
                 return me;
             } else if (me && me->isLayoutBreak() && e->staffIdx() == 0) {
                 return me;
+            } else if (measure()->isEndOfPageLock()) {
+                System* system = measure()->system();
+                PageLockIndicator* pli = system ? system->pageLockIndicator() : nullptr;
+                if (pli) {
+                    return pli;
+                }
             } else if (measure()->isEndOfSystemLock()) {
                 System* system = measure()->system();
-                SystemLockIndicator* lockInd = system ? system->lockIndicators().front() : nullptr;
-                if (lockInd) {
-                    return lockInd;
+                if (system) {
+                    for (SystemLockIndicator* lockInd : system->systemLockIndicators()) {
+                        if (measure()->systemLock() == lockInd->systemLock()) {
+                            return lockInd;
+                        }
+                    }
                 }
             } else if (psm != pmb) {
                 return pmb;
@@ -2389,7 +2407,7 @@ EngravingItem* Segment::prevElement(staff_idx_t activeStaff)
             }
         }
         if (!prevSeg) {
-            return score()->firstElement();
+            return Navigation::firstElement(score());
         }
 
         if (prevSeg->notChordRestType()) {
@@ -2767,15 +2785,15 @@ double Segment::minRight() const
 
 double Segment::minLeft() const
 {
-    double distance = -DBL_MAX;
+    double distance = DBL_MAX;
     for (Shape sh : shapes()) {
         sh.remove_if([](ShapeElement& el) { return el.item() && el.item()->isArticulationOrFermata(); });
         double l = sh.left();
-        if (l > distance) {
+        if (l < distance) {
             distance = l;
         }
     }
-    return distance != -DBL_MAX ? distance : 0.0;
+    return distance != DBL_MAX ? -distance : 0.0;
 }
 
 void Segment::setSpacing(double val)

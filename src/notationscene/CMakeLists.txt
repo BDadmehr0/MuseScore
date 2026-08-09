@@ -25,8 +25,12 @@ target_sources(notationscene PRIVATE
     notationscenemodule.h
 
     inotationsceneconfiguration.h
+    inotationcommandscontroller.h
     iselectinstrumentscenario.h
 
+    notationcommands.h
+
+    internal/inotationviewcontroller.h
     internal/notationsceneconfiguration.cpp
     internal/notationsceneconfiguration.h
     internal/midiinputoutputcontroller.cpp
@@ -37,11 +41,21 @@ target_sources(notationscene PRIVATE
     internal/notationuiactions.h
     internal/notationactionsshortcutsmigrator.cpp
     internal/notationactionsshortcutsmigrator.h
+    internal/notationcommandsregister.cpp
+    internal/notationcommandsregister.h
+    internal/notationcommandsstate.cpp
+    internal/notationcommandsstate.h
 
     utilities/engravingitempreviewpainter.cpp
     utilities/engravingitempreviewpainter.h
     utilities/percussionutilities.cpp
     utilities/percussionutilities.h
+)
+
+set_source_files_properties(
+    internal/notationuiactions.cpp
+    PROPERTIES
+        SKIP_UNITY_BUILD_INCLUSION ON
 )
 
 add_subdirectory(widgets)

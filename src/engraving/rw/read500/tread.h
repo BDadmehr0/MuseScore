@@ -390,13 +390,13 @@ public:
     static bool readProperties(TextLineBase* b, XmlReader& e, ReadContext& ctx);
     static bool readProperties(Volta* v, XmlReader& e, ReadContext& ctx);
 
-    static void readSpanner(XmlReader& e, ReadContext& ctx, EngravingItem* current, track_idx_t track);
-    static void readSpanner(XmlReader& e, ReadContext& ctx, Score* current, track_idx_t track);
-
+    static void readPageLocks(Score* score, XmlReader& e);
     static void readSystemLocks(Score* score, XmlReader& e);
     static void readSystemDividers(Score* score, XmlReader& e, ReadContext& ctx);
 
-    static void readItemEID(EngravingObject* item, XmlReader& xml);
+    static void readScoreSpanners(Score* score, XmlReader& e, ReadContext& ctx);
+
+    static void readItemEID(EngravingObject* item, XmlReader& xml, ReadContext& ctx);
     static void readItemLink(EngravingItem* item, XmlReader& xml, ReadContext& ctx);
 
     static String readLegacyStaffName(XmlReader& xml);
@@ -411,6 +411,7 @@ private:
     static bool readProperties(TextBase* t, XmlReader& xml, ReadContext& ctx);
     static bool readProperties(StaffTextBase* t, XmlReader& xml, ReadContext& ctx);
 
+    static void readPageLock(Score* score, XmlReader& e);
     static void readSystemLock(Score* score, XmlReader& e);
 
     static void readHopoText(HammerOnPullOffSegment* hopoSeg, XmlReader& xml, ReadContext& ctx, int idx);

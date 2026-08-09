@@ -21,25 +21,25 @@
  */
 #include "notationparts.h"
 
-#include "engraving/editing/transaction/transaction.h"
 #include "translation.h"
 
 #include "engraving/dom/barline.h"
 #include "engraving/dom/excerpt.h"
 #include "engraving/dom/factory.h"
-#include "engraving/dom/instrchange.h"
 #include "engraving/dom/instrument.h"
 #include "engraving/dom/page.h"
 #include "engraving/editing/addremoveelement.h"
 #include "engraving/editing/editexcerpt.h"
+#include "engraving/editing/editpagelocks.h"
 #include "engraving/editing/editpart.h"
-#include "engraving/editing/editscoreproperties.h"
 #include "engraving/editing/editstaff.h"
 #include "engraving/editing/editstavesharing.h"
 #include "engraving/editing/editsystemlocks.h"
+#include "engraving/editing/transaction/transaction.h"
 #include "engraving/editing/transpose.h"
 
 #include "igetscore.h"
+#include "inotationnoteinput.h" // IWYU pragma: keep
 
 #include "log.h"
 
@@ -248,6 +248,7 @@ void NotationParts::setPartVisible(const ID& partId, bool visible)
 
     if (visible) {
         engraving::Transaction& tx = score()->transactionManager()->currentOrDummyTransaction();
+        EditPageLocks::removePageLocksContainingMMRests(tx, score());
         EditSystemLocks::removeSystemLocksContainingMMRests(tx, score());
     }
 
@@ -573,6 +574,7 @@ void NotationParts::setStaffVisible(const ID& staffId, bool visible)
 
     if (visible) {
         engraving::Transaction& tx = score()->transactionManager()->currentOrDummyTransaction();
+        EditPageLocks::removePageLocksContainingMMRests(tx, score());
         EditSystemLocks::removeSystemLocksContainingMMRests(tx, score());
     }
 
@@ -734,6 +736,7 @@ void NotationParts::insertPart(Part* part, size_t index)
     startEdit(TranslatableString("undoableAction", "Add instrument"));
 
     engraving::Transaction& tx = score()->transactionManager()->currentOrDummyTransaction();
+    EditPageLocks::removePageLocksContainingMMRests(tx, score());
     EditSystemLocks::removeSystemLocksContainingMMRests(tx, score());
 
     doInsertPart(part, index);
@@ -1145,9 +1148,9 @@ void NotationParts::appendStaves(Part* part, const InstrumentTemplate& templ, co
         if (!staffType) {
             staffType = mu::engraving::StaffType::preset(StaffTypeId::STANDARD);
         }
-        initStaff(staff, templ, staffType, staffIndex);
 
         insertStaff(staff, staffIndex);
+        staff->init(&templ, staffType, staffIndex);
     }
 
     if (!part->nstaves()) {
@@ -1164,28 +1167,6 @@ void NotationParts::insertStaff(Staff* staff, staff_idx_t destinationStaffIndex,
     TRACEFUNC;
 
     score()->undoInsertStaff(staff, destinationStaffIndex, createRest);
-}
-
-void NotationParts::initStaff(Staff* staff, const InstrumentTemplate& templ, const mu::engraving::StaffType* staffType, size_t cleffIndex)
-{
-    TRACEFUNC;
-
-    const mu::engraving::StaffType* staffTypePreset = staffType ? staffType : templ.staffTypePreset;
-    if (!staffTypePreset) {
-        staffTypePreset = mu::engraving::StaffType::getDefaultPreset(templ.staffGroup);
-    }
-
-    mu::engraving::StaffType* stt = staff->setStaffType(DEFAULT_TICK, *staffTypePreset);
-    if (cleffIndex >= MAX_STAVES) {
-        stt->setSmall(false);
-    } else {
-        stt->setSmall(templ.smallStaff[cleffIndex]);
-        stt->setLines(templ.staffLines[cleffIndex]);
-        staff->setBracketType(0, templ.bracket[cleffIndex]);
-        staff->setBracketSpan(0, templ.bracketSpan[cleffIndex]);
-        staff->setBarLineSpan(templ.barlineSpan[cleffIndex]);
-    }
-    staff->setDefaultClefType(templ.clefType(cleffIndex));
 }
 
 void NotationParts::removeMissingParts(const PartInstrumentList& newParts)

@@ -19,7 +19,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "stavesharingpagemodel.h"
+
+#include "notation/inotation.h" // IWYU pragma: keep
+#include "notation/inotationparts.h" // IWYU pragma: keep
 
 using namespace mu::engraving;
 
@@ -27,6 +31,13 @@ namespace mu::notation {
 StaveSharingPageModel::StaveSharingPageModel(QObject* parent)
     : AbstractStyleDialogModel(parent, { StyleId::enableStaveSharing,
                                          StyleId::allowVoiceCrossing,
+                                         StyleId::textForUnisonLabel,
+                                         StyleId::sharedOnStaffNumeralsFollowInstrumentNumerals,
+                                         StyleId::sharedOnStaffNumeralsTrailingDotSingle,
+                                         StyleId::sharedOnStaffNumeralsTrailingDotMultiple,
+                                         StyleId::sharedOnStaffNumeralsHyphenEnable,
+                                         StyleId::sharedOnStaffNumeralsHyphenThreshold,
+                                         StyleId::unisonLabelRestateOnNewSystem,
                                })
 {
 }
@@ -49,5 +60,40 @@ void StaveSharingPageModel::setIsStaveSharingEnabled(bool v)
 StyleItem* StaveSharingPageModel::allowVoiceCrossing() const
 {
     return styleItem(StyleId::allowVoiceCrossing);
+}
+
+StyleItem* StaveSharingPageModel::textForUnisonLabel() const
+{
+    return styleItem(StyleId::textForUnisonLabel);
+}
+
+StyleItem* StaveSharingPageModel::sharedOnStaffNumeralsFollowInstrumentNumerals() const
+{
+    return styleItem(StyleId::sharedOnStaffNumeralsFollowInstrumentNumerals);
+}
+
+StyleItem* StaveSharingPageModel::sharedOnStaffNumeralsTrailingDotSingle() const
+{
+    return styleItem(StyleId::sharedOnStaffNumeralsTrailingDotSingle);
+}
+
+StyleItem* StaveSharingPageModel::sharedOnStaffNumeralsTrailingDotMultiple() const
+{
+    return styleItem(StyleId::sharedOnStaffNumeralsTrailingDotMultiple);
+}
+
+StyleItem* StaveSharingPageModel::sharedOnStaffNumeralsHyphenEnable() const
+{
+    return styleItem(StyleId::sharedOnStaffNumeralsHyphenEnable);
+}
+
+StyleItem* StaveSharingPageModel::sharedOnStaffNumeralsHyphenThreshold() const
+{
+    return styleItem(StyleId::sharedOnStaffNumeralsHyphenThreshold);
+}
+
+StyleItem* StaveSharingPageModel::unisonLabelRestateOnNewSystem() const
+{
+    return styleItem(StyleId::unisonLabelRestateOnNewSystem);
 }
 }

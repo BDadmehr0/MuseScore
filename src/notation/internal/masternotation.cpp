@@ -19,6 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #include "masternotation.h"
 
 #include <QFileInfo>
@@ -41,9 +42,16 @@
 #include "engraving/dom/sig.h"
 #include "engraving/dom/tempotext.h"
 
+#include "engraving/editing/editkeysig.h"
+#include "engraving/editing/edittimesig.h"
+#include "engraving/editing/transaction/transaction.h"
+
+#include "inotationelements.h" // IWYU pragma: keep
+#include "inotationsolomutestate.h"
 #include "excerptnotation.h"
 #include "masternotationparts.h"
 #include "notationautomation.h"
+#include "types/scorecreateoptions.h"
 
 #ifdef MUE_BUILD_ENGRAVING_PLAYBACK
 #include "notationplayback.h"
@@ -160,6 +168,7 @@ void MasterNotation::setMasterScore(mu::engraving::MasterScore* score, bool disa
     TRACEFUNC;
 
     setScore(score);
+    std::static_pointer_cast<NotationAutomation>(m_notationAutomation)->setMasterScore(score);
 
     score->updateSwing();
 
@@ -241,11 +250,12 @@ static void createMeasures(MasterScore* masterScore, const ScoreCreateOptions& s
         // Add timesigs...
         TimeSig* timesig = Factory::createTimeSig(masterScore->dummy()->segment());
         timesig->setSig(scoreOptions.globalTimesig, scoreOptions.timesigType);
-        masterScore->cmdAddTimeSig(measure, /*staffIdx*/ 0, timesig, /*local*/ false);
+        Transaction& tx = masterScore->transactionManager()->currentOrDummyTransaction();
+        EditTimeSig::addTimeSig(tx, masterScore, measure, /*staffIdx*/ 0, timesig, /*local*/ false);
 
         for (Staff* staff : masterScore->staves()) {
             // Add keysig for each staff...
-            masterScore->undoChangeKeySig(staff, measure->tick(), keySigEvent);
+            mu::engraving::EditKeySig::undoChangeKeySig(tx, masterScore, staff, measure->tick(), keySigEvent);
         }
     }
 }
@@ -267,6 +277,8 @@ Ret MasterNotation::setupNewScore(mu::engraving::MasterScore* score, const Score
     score->updateCapo();
 
     applyOptions(score, scoreOptions);
+
+    score->initAutomation();
 
     initAfterSettingScore(score);
     addExcerptsToMasterScore(score->excerpts());
@@ -298,7 +310,9 @@ void MasterNotation::applyOptions(mu::engraving::MasterScore* score, const Score
             nvb->setAutoSizeEnabled(tvb->isAutoSizeEnabled());
         }
 
-        score->clearSystemLocks();
+        for (mu::engraving::Score* s : score->scoreList()) {
+            s->clearSystemLocks();
+        }
         clearMeasures(score);
 
         // for templates using built-in base page style, set score page style to default (may be user-defined)
@@ -527,7 +541,7 @@ void MasterNotation::setExcerpts(const ExcerptNotationList& excerpts)
     doSetExcerpts(excerpts);
 }
 
-void MasterNotation::resetExcerpt(IExcerptNotationPtr excerptNotation)
+void MasterNotation::resetExcerpt(IExcerptNotationPtr& excerptNotation)
 {
     if (!excerptNotation || !excerptNotation->isInited()) {
         return;

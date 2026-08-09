@@ -24,7 +24,7 @@
 
 #include "types/typesconv.h"
 
-#include "bracketItem.h"
+#include "bracketitem.h"
 #include "measure.h"
 #include "score.h"
 #include "staff.h"
@@ -203,7 +203,7 @@ bool Bracket::acceptDrop(EditData& data) const
 //   drop
 //---------------------------------------------------------
 
-EngravingItem* Bracket::drop(EditData& data)
+EngravingItem* Bracket::drop(Transaction&, EditData& data)
 {
     EngravingItem* e = data.dropElement;
     Bracket* b = 0;

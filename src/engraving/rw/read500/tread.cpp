@@ -31,7 +31,6 @@
 #include "../../dom/ambitus.h"
 #include "../../dom/arpeggio.h"
 #include "../../dom/articulation.h"
-#include "../../dom/audio.h"
 #include "../../dom/bagpembell.h"
 #include "../../dom/barline.h"
 #include "../../dom/beam.h"
@@ -137,12 +136,13 @@
 #include "../../dom/volta.h"
 #include "../../dom/whammybar.h"
 
+#include "../../editing/editstaffbrackets.h"
+
 #include "../xmlreader.h"
 #include "../read206/read206.h"
 #include "../compat/compatutils.h"
 #include "../compat/tremolocompat.h"
 #include "readcontext.h"
-#include "connectorinforeader.h"
 
 #include "log.h"
 
@@ -546,7 +546,7 @@ bool TRead::readItemProperties(EngravingItem* item, XmlReader& e, ReadContext& c
     const AsciiStringView tag(e.name());
 
     if (tag == "eid") {
-        readItemEID(item, e);
+        readItemEID(item, e, ctx);
     } else if (TRead::readProperty(item, tag, e, ctx, Pid::SIZE_SPATIUM_DEPENDENT)) {
     } else if (TRead::readProperty(item, tag, e, ctx, Pid::OFFSET)) {
     } else if (TRead::readProperty(item, tag, e, ctx, Pid::MIN_DISTANCE)) {
@@ -582,11 +582,58 @@ bool TRead::readItemProperties(EngravingItem* item, XmlReader& e, ReadContext& c
     return true;
 }
 
-void TRead::readItemEID(EngravingObject* item, XmlReader& xml)
+static Spanner* tryCreateSpanner(const AsciiStringView& tag, ReadContext& ctx, bool requireNoteAnchor)
+{
+    ElementType type = TConv::fromXml(tag, ElementType::INVALID);
+    if (type == ElementType::INVALID) {
+        return nullptr;
+    }
+
+    EngravingItem* item = Factory::createItem(type, ctx.dummy());
+    if (!item || !item->isSpanner()) {
+        delete item;
+        return nullptr;
+    }
+
+    Spanner* spanner = toSpanner(item);
+    if ((spanner->anchor() == Spanner::Anchor::NOTE) != requireNoteAnchor) {
+        delete item;
+        return nullptr;
+    }
+
+    return spanner;
+}
+
+void TRead::readScoreSpanners(Score* score, XmlReader& e, ReadContext& ctx)
+{
+    while (e.readNextStartElement()) {
+        const AsciiStringView tag(e.name());
+        if (Spanner* spanner = tryCreateSpanner(tag, ctx, /*requireNoteAnchor*/ false)) {
+            TRead::readItem(spanner, e, ctx);
+            if (ctx.pasteMode()) {
+                score->undoAddElement(spanner);
+            } else {
+                score->addSpanner(spanner);
+            }
+        } else {
+            e.unknown();
+        }
+    }
+}
+
+void TRead::readItemEID(EngravingObject* item, XmlReader& xml, ReadContext& ctx)
 {
     AsciiStringView s = xml.readAsciiText();
     EID eid = EID::fromStdString(s);
     IF_ASSERT_FAILED(eid.isValid()) {
+        return;
+    }
+
+    if (ctx.pasteMode()) {
+        // On pasting we must create new EIDs for the elements, as the serialized EID is the EID of the item which was copied
+        // This could still be in use elsewhere in the score
+        EID realEid = item->assignNewEID();
+        ctx.registerPastedEID(eid, realEid);
         return;
     }
 
@@ -683,7 +730,6 @@ void TRead::read(StaffText* t, XmlReader& xml, ReadContext& ctx)
 void TRead::read(StaveSharingLabel* t, XmlReader& xml, ReadContext& ctx)
 {
     while (xml.readNextStartElement()) {
-        const AsciiStringView tag(xml.name());
         if (!readProperties(static_cast<StaffTextBase*>(t), xml, ctx)) {
             xml.unknown();
         }
@@ -1836,7 +1882,8 @@ static void setActionIconTypeFromAction(ActionIcon* i, const std::string& action
 
         { "add-noteline", ActionIconType::NOTE_ANCHORED_LINE },
 
-        { "toggle-system-lock", ActionIconType::SYSTEM_LOCK }
+        { "toggle-system-lock", ActionIconType::SYSTEM_LOCK },
+        { "toggle-page-lock", ActionIconType::PAGE_LOCK }
     };
 
     auto it = map.find(actionCode);
@@ -2013,17 +2060,6 @@ void TRead::read(TappingHalfSlur* t, XmlReader& xml, ReadContext& ctx)
             t->setIsHalfSlurAbove(xml.readBool());
         } else if (!readProperties(toSlur(t), xml, ctx)) {
             xml.unknown();
-        }
-    }
-}
-
-void TRead::read(Audio* a, XmlReader& e, ReadContext&)
-{
-    while (e.readNextStartElement()) {
-        if (e.name() == "path") {
-            a->setPath(e.readText());
-        } else {
-            e.unknown();
         }
     }
 }
@@ -2617,8 +2653,6 @@ bool TRead::readProperties(ChordRest* ch, XmlReader& e, ReadContext& ctx)
     } else if (tag == "staffMove") {
         ch->setStaffMove(e.readInt());
         ch->checkStaffMoveValidity();
-    } else if (tag == "Spanner") {
-        readSpanner(e, ctx, ch, ch->track());
     } else if (tag == "Lyrics") {
         Lyrics* lyr = Factory::createLyrics(ch);
         lyr->setTrack(ctx.track());
@@ -3319,8 +3353,6 @@ bool TRead::readProperties(Note* n, XmlReader& e, ReadContext& ctx)
         a->setTrack(n->track());
         TRead::read(a, e, ctx);
         n->add(a);
-    } else if (tag == "Spanner") {
-        readSpanner(e, ctx, n, n->track());
     } else if (tag == "tpc2") {
         n->setTpc2(e.readInt());
     } else if (tag == "small") {
@@ -3427,6 +3459,8 @@ bool TRead::readProperties(Note* n, XmlReader& e, ReadContext& ctx)
             pt->setEndNote(n);
         }
         n->add(pt);
+    } else if (Spanner* spanner = tryCreateSpanner(tag, ctx, /*requireNoteAnchor*/ true)) {
+        TRead::readItem(spanner, e, ctx);
     } else if (tag == "overrideBendVisibilityRules") {
         n->setOverrideBendVisibilityRules(e.readBool());
     } else if (TRead::readProperty(n, tag, e, ctx, Pid::HIDE_GENERATED_PARENTHESES)) {
@@ -3607,7 +3641,7 @@ bool TRead::readProperties(Part* p, XmlReader& e, ReadContext& ctx)
     if (tag == "id") {
         p->setId(e.readInt());
     } else if (tag == "eid") {
-        readItemEID(p, e);
+        readItemEID(p, e, ctx);
     } else if (tag == "sharedPart") {
         AsciiStringView s = e.readAsciiText();
         EID eid = EID::fromStdString(s);
@@ -3742,16 +3776,13 @@ bool TRead::readProperties(SLine* l, XmlReader& e, ReadContext& ctx)
 {
     const AsciiStringView tag(e.name());
 
-    if (tag == "ticks") {
-        l->setTicks(Fraction::fromTicks(e.readInt()));
-    } else if (tag == "Segment") {
+    if (tag == "Segment") {
         LineSegment* ls = l->createLineSegment(l->score()->dummy()->system());
         ls->setTrack(l->track());     // needed in read to get the right staff mag
         l->add(ls);
         TRead::read(ls, e, ctx);
         ls->setVisible(l->visible());
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::DIAGONAL)) {
-    } else if (TRead::readProperty(l, tag, e, ctx, Pid::ANCHOR)) {
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::LINE_WIDTH)) {
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::LINE_STYLE)) {
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::DASH_LINE_LEN)) {
@@ -3798,6 +3829,7 @@ bool TRead::readProperties(SlurTie* s, XmlReader& e, ReadContext& ctx)
     const AsciiStringView tag(e.name());
 
     if (TRead::readProperty(s, tag, e, ctx, Pid::SLUR_DIRECTION)) {
+    } else if (TRead::readProperty(s, tag, e, ctx, Pid::MASK_SLURTIE)) {
     } else if (tag == "lineType") {
         s->setStyleType(static_cast<SlurStyleType>(e.readInt()));
     } else if (tag == "SlurSegment" || tag == "TieSegment" || tag == "LaissezVibSegment" || tag == "PartialTieSegment"
@@ -3884,14 +3916,21 @@ void TRead::readNoteParenGroup(Chord* ch, XmlReader& e, ReadContext& ctx)
         } else if (t == "Notes") {
             while (e.readNextStartElement()) {
                 const AsciiStringView noteTag(e.name());
-                if (noteTag == "NoteIdx") {
-                    size_t idx = e.readInt();
-                    if (idx >= ch->notes().size()) {
-                        LOGE() << "Note index " << idx << " out of bounds " << ch->notes().size();
+                if (noteTag == "NoteEID") {
+                    AsciiStringView s = e.readAsciiText();
+                    EID eid = EID::fromStdString(s);
+                    IF_ASSERT_FAILED(eid.isValid()) {
                         continue;
                     }
-                    Note* note = ch->notes().at(idx);
-                    notes.push_back(note);
+                    if (ctx.pasteMode()) {
+                        eid = ctx.resolvePastedEID(eid);
+                    }
+                    EIDRegister* eidRegister = ctx.score()->masterScore()->eidRegister();
+                    EngravingObject* obj = eidRegister->itemFromEID(eid);
+                    IF_ASSERT_FAILED(obj && obj->isNote()) {
+                        continue;
+                    }
+                    notes.push_back(toNote(obj));
                 } else {
                     e.unknown();
                 }
@@ -3935,12 +3974,66 @@ void TRead::readNoteParenGroup(Chord* ch, XmlReader& e, ReadContext& ctx)
 bool TRead::readProperties(Spanner* s, XmlReader& e, ReadContext& ctx)
 {
     const AsciiStringView tag(e.name());
-    if (ctx.pasteMode() && (tag == "ticks_f")) {
-        s->setTicks(e.readFraction());
-        return true;
-    } else if (tag == "play") {
+    if (tag == "play") {
         s->setPlaySpanner(e.readBool());
         return true;
+    } else if (tag == "track2") {
+        track_idx_t track2 = e.readInt();
+        s->setTrack2(track2 + ctx.trackOffset());
+    } else if (tag == "startTick") {
+        Fraction startTick = e.readFraction() + ctx.tickOffset();
+        s->setTick(startTick);
+    } else if (tag == "ticks") {
+        Fraction ticks = e.readFraction();
+        s->setTicks(ticks);
+    } else if (tag == "startElement") {
+        EIDRegister* eidRegister = ctx.score()->masterScore()->eidRegister();
+        EID startElEID = EID::fromStdString(e.readAsciiText());
+        IF_ASSERT_FAILED(startElEID.isValid()) {
+            return false;
+        }
+        if (ctx.pasteMode()) {
+            startElEID = ctx.resolvePastedEID(startElEID);
+        }
+        if (s->anchor() == Spanner::Anchor::NOTE && !(s->isPartialTie() || s->isLaissezVib())) {
+            // Store spanner and EIDs to be connected at the end of file reading
+            ctx.addNoteAnchoredSpannerStartEl(s, startElEID);
+            return true;
+        }
+
+        EngravingItem* startEl = toEngravingItem(eidRegister->itemFromEID(startElEID));
+        IF_ASSERT_FAILED(startEl) {
+            return false;
+        }
+        s->setStartElement(startEl);
+        s->setTick(startEl->tick());
+        s->setTrack(startEl->track());
+    } else if (tag == "endElement") {
+        EIDRegister* eidRegister = ctx.score()->masterScore()->eidRegister();
+        EID endElEID = EID::fromStdString(e.readAsciiText());
+        IF_ASSERT_FAILED(endElEID.isValid()) {
+            return false;
+        }
+        if (ctx.pasteMode()) {
+            endElEID = ctx.resolvePastedEID(endElEID);
+        }
+        if (s->anchor() == Spanner::Anchor::NOTE && !(s->isPartialTie() || s->isLaissezVib())) {
+            // Store spanner and EIDs to be connected at the end of file reading
+            ctx.addNoteAnchoredSpannerEndEl(s, endElEID);
+            return true;
+        }
+
+        EngravingItem* endEl = toEngravingItem(eidRegister->itemFromEID(endElEID));
+        IF_ASSERT_FAILED(endEl) {
+            return false;
+        }
+        s->setEndElement(endEl);
+        if (s->anchor() == Spanner::Anchor::MEASURE) {
+            s->setTick2(s->endMeasure()->endTick());
+        } else {
+            s->setTick2(endEl->tick());
+            s->setTrack2(endEl->track());
+        }
     } else if (!readItemProperties(s, e, ctx)) {
         return false;
     }
@@ -4114,21 +4207,21 @@ bool TRead::readProperties(Staff* s, XmlReader& e, ReadContext& ctx)
         Color color = Color::fromString(e.attribute("color"));
         int col = e.intAttribute("col", -1);
         if (col == -1) {
-            col = static_cast<int>(s->brackets().size());
+            col = static_cast<int>(ctx.score()->brackets(s->idx()).size());
         }
-        s->setBracketType(col, BracketType(e.intAttribute("type", -1)));
-        s->setBracketSpan(col, e.intAttribute("span", 0));
-        s->setBracketVisible(col, static_cast<bool>(e.intAttribute("visible", 1)));
-        BracketItem* bi = s->brackets().at(col);
+        EditStaffBrackets::setBracketType(ctx.score(), s->idx(), col, BracketType(e.intAttribute("type", -1)));
+        EditStaffBrackets::setBracketSpan(ctx.score(), s->idx(), col, e.intAttribute("span", 0));
+        EditStaffBrackets::setBracketVisible(ctx.score(), s->idx(), col, static_cast<bool>(e.intAttribute("visible", 1)));
+        BracketItem* bi = ctx.score()->brackets(s->idx()).at(col);
         if (color.isValid()) {
             bi->setColor(color);
         }
         e.readNext();
     } else if (tag == "BracketItem") {
         BracketItem* b = Factory::createBracketItem(s);
-        b->setStaff(s);
+        b->setStartStaffIdx(s->idx());
         read(b, e, ctx);
-        s->insertBracket(b);
+        EditStaffBrackets::insertBracket(ctx.score(), s->idx(), b);
     } else if (tag == "barLineSpan") {
         const int barLineSpan = e.readInt();
         if (barLineSpan < 0) {
@@ -4150,7 +4243,7 @@ bool TRead::readProperties(Staff* s, XmlReader& e, ReadContext& ctx)
         /*_userMag =*/
         e.readDouble(0.1, 10.0);
     } else if (tag == "eid") {
-        readItemEID(s, e);
+        readItemEID(s, e, ctx);
     } else if (tag == "linkedTo") {
         readItemLink(s, e, ctx);
     } else if (tag == "color") {
@@ -4753,25 +4846,18 @@ bool TRead::readProperties(Volta* v, XmlReader& e, ReadContext& ctx)
         return false;
     }
 
-    if (v->anchor() != Volta::VOLTA_ANCHOR) {
-        // Volta strictly assumes that its anchor is measure, so don't let old scores override this.
-        LOGW("Correcting volta anchor type from %d to %d", int(v->anchor()), int(Volta::VOLTA_ANCHOR));
-        v->setAnchor(Volta::VOLTA_ANCHOR);
-    }
-
     return true;
 }
 
-void TRead::readSpanner(XmlReader& e, ReadContext& ctx, EngravingItem* current, track_idx_t track)
+void TRead::readPageLocks(Score* score, XmlReader& e)
 {
-    std::shared_ptr<ConnectorInfoReader> info(new ConnectorInfoReader(e, &ctx, current, static_cast<int>(track)));
-    ConnectorInfoReader::readConnector(info, e, ctx);
-}
-
-void TRead::readSpanner(XmlReader& e, ReadContext& ctx, Score* current, track_idx_t track)
-{
-    std::shared_ptr<ConnectorInfoReader> info(new ConnectorInfoReader(e, &ctx, current, static_cast<int>(track)));
-    ConnectorInfoReader::readConnector(info, e, ctx);
+    while (e.readNextStartElement()) {
+        if (e.name() == "pageLock") {
+            readPageLock(score, e);
+        } else {
+            e.unknown();
+        }
+    }
 }
 
 void TRead::readSystemLocks(Score* score, XmlReader& e)
@@ -4783,6 +4869,32 @@ void TRead::readSystemLocks(Score* score, XmlReader& e)
             e.unknown();
         }
     }
+}
+
+void TRead::readPageLock(Score* score, XmlReader& e)
+{
+    MeasureBase* startMeas = nullptr;
+    MeasureBase* endMeas = nullptr;
+    EIDRegister* eidRegister = score->masterScore()->eidRegister();
+
+    while (e.readNextStartElement()) {
+        AsciiStringView tag(e.name());
+        if (tag == "startMeasure") {
+            EID startMeasId = EID::fromStdString(e.readAsciiText());
+            startMeas = toMeasureBase(eidRegister->itemFromEID(startMeasId));
+        } else if (tag == "endMeasure") {
+            EID endMeasId = EID::fromStdString(e.readAsciiText());
+            endMeas = toMeasureBase(eidRegister->itemFromEID(endMeasId));
+        } else {
+            e.unknown();
+        }
+    }
+
+    IF_ASSERT_FAILED(startMeas && endMeas) {
+        return;
+    }
+
+    score->addPageLock(new RangeLock(startMeas, endMeas));
 }
 
 void TRead::readSystemLock(Score* score, XmlReader& e)
@@ -4808,7 +4920,7 @@ void TRead::readSystemLock(Score* score, XmlReader& e)
         return;
     }
 
-    score->addSystemLock(new SystemLock(startMeas, endMeas));
+    score->addSystemLock(new RangeLock(startMeas, endMeas));
 }
 
 void TRead::readSystemDividers(Score* score, XmlReader& e, ReadContext& ctx)

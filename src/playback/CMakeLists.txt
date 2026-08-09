@@ -29,6 +29,11 @@ target_sources(playback PRIVATE
     playbacktypes.h
     playbackcommands.h
 
+    internal/iplaybackcommandscontroller.h
+    internal/playbackuiactions.cpp
+    internal/playbackuiactions.h
+    internal/playbackcommandscontroller.cpp
+    internal/playbackcommandscontroller.h
     internal/playbackcontroller.cpp
     internal/playbackcontroller.h
     internal/onlinesoundscontroller.cpp
@@ -43,6 +48,8 @@ target_sources(playback PRIVATE
     internal/soundprofilesrepository.h
     internal/drumsetloader.cpp
     internal/drumsetloader.h
+    internal/knownaudiopluginsconfigurator.cpp
+    internal/knownaudiopluginsconfigurator.h
 )
 
 if (MUE_BUILD_PLAYBACK_TESTS)

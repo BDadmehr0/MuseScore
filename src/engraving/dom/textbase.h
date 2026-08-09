@@ -36,6 +36,7 @@
 namespace mu::engraving {
 class TextBase;
 class TextBlock;
+class Transaction;
 
 static constexpr double SUBSCRIPT_SIZE     = 0.6;
 static constexpr double SUBSCRIPT_OFFSET   = 0.5;  // of x-height
@@ -381,7 +382,7 @@ public:
     std::vector<LineF> dragAnchorLines() const override;
 
     virtual bool acceptDrop(EditData&) const override;
-    virtual EngravingItem* drop(EditData&) override;
+    virtual EngravingItem* drop(Transaction& tx, EditData&) override;
 
     friend class TextBlock;
     friend class TextFragment;
@@ -535,6 +536,8 @@ protected:
     bool prepareFormat(const String& token, CharFormat& format);
 
     virtual void commitText();
+
+    bool textWasEdited(EditData& ed) const;
 
     bool m_layoutToParentWidth = false;
 

@@ -317,8 +317,13 @@ public:
 
     static void writeProperty(const EngravingItem* item, XmlWriter& xml, Pid pid, bool force = false);
 
+    static void writePageLocks(const Score* score, XmlWriter& xml);
     static void writeSystemLocks(const Score* score, XmlWriter& xml);
     static void writeSystemDividers(const Score* score, XmlWriter& xml, WriteContext& ctx);
+
+    static void writeScoreSpanners(const Score* score, XmlWriter& xml, WriteContext& ctx);
+    static void writeScoreSpanners(const Score* score, track_idx_t startTrack, track_idx_t endTrack, Segment* startSegment,
+                                   Segment* endSegment, XmlWriter& xml, WriteContext& ctx);
 
     static void writeItemEid(const EngravingObject* item, XmlWriter& xml, WriteContext& ctx);
     static void writeItemLink(const EngravingObject* item, XmlWriter& xml, WriteContext& ctx);
@@ -360,15 +365,11 @@ private:
     static void writeProperties(const TextLineBase* item, XmlWriter& xml, WriteContext& ctx);
     static void writeProperties(const TextBase* item, XmlWriter& xml, WriteContext& ctx, bool writeText);
 
-    static void writeSpannerStart(Spanner* s, XmlWriter& xml, WriteContext& ctx, const EngravingItem* current, track_idx_t track,
-                                  Fraction frac = { -1, 1 });
-    static void writeSpannerEnd(Spanner* s, XmlWriter& xml, WriteContext& ctx, const EngravingItem* current, track_idx_t track,
-                                Fraction frac = { -1, 1 });
-
     static void writeTupletStart(DurationElement* item, XmlWriter& xml, WriteContext& ctx);
     static void writeTupletEnd(DurationElement* item, XmlWriter& xml, WriteContext& ctx);
 
-    static void writeSystemLock(const SystemLock* systemLock, XmlWriter& xml);
+    static void writePageLock(const RangeLock* pageLock, XmlWriter& xml);
+    static void writeSystemLock(const RangeLock* systemLock, XmlWriter& xml);
 
     static muse::String lineBreakToTag(const String& str);
     static void writeProperties(const StaffLabel& item, XmlWriter& xml);

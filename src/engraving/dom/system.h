@@ -38,7 +38,7 @@ class MeasureBase;
 class Page;
 class SpannerSegment;
 class StaffVisibilityIndicator;
-class SystemLock;
+class RangeLock;
 
 //---------------------------------------------------------
 //   SysStaff
@@ -206,7 +206,7 @@ public:
     AccessibleItemPtr createAccessible() override;
 #endif
 
-    size_t getBracketsColumnsCount();
+    size_t getBracketsColumnsCount() const;
 
     void resetShortestLongestChordRest();
 
@@ -214,11 +214,15 @@ public:
     void setHasStaffVisibilityIndicator(bool has);
 
     bool isLocked() const;
-    const SystemLock* systemLock() const;
+    const RangeLock* systemLock() const;
 
-    const std::vector<SystemLockIndicator*> lockIndicators() const { return m_lockIndicators; }
-    void addLockIndicator(SystemLockIndicator* sli);
-    void deleteLockIndicators();
+    const std::vector<SystemLockIndicator*> systemLockIndicators() const { return m_systemLockIndicators; }
+    void addSystemLockIndicator(SystemLockIndicator* sli);
+    void deleteSystemLockIndicators();
+
+    PageLockIndicator* pageLockIndicator() const { return m_pageLockIndicator; }
+    void setPageLockIndicator(PageLockIndicator* pli);
+    void deletePageLockIndicator();
 
     struct LayoutData : public EngravingItem::LayoutData {
     public:
@@ -278,7 +282,8 @@ private:
     std::vector<SysStaff*> m_staves;
     std::vector<Bracket*> m_brackets;
     std::list<SpannerSegment*> m_spannerSegments;
-    std::vector<SystemLockIndicator*> m_lockIndicators;
+    std::vector<SystemLockIndicator*> m_systemLockIndicators;
+    PageLockIndicator* m_pageLockIndicator = nullptr;
 
     StaffVisibilityIndicator* m_staffVisibilityIndicator = nullptr;
 

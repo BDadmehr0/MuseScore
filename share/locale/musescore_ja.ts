@@ -810,7 +810,7 @@
     <message>
         <location filename="../../src/notationscene/widgets/editstafftype.ui" line="452"/>
         <source>Tab font preset</source>
-        <translation type="unfinished"/>
+        <translation>タブフォントのプリセット</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/widgets/editstafftype.ui" line="466"/>
@@ -5206,7 +5206,7 @@ followed by dashes</source>
     <message>
         <location filename="../../src/notationscene/widgets/transposedialog.ui" line="513"/>
         <source>Transpose chord symbols and fretboard diagrams</source>
-        <translation type="unfinished"/>
+        <translation>コード記号とフレットボードダイアグラムを移調</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/widgets/transposedialog.ui" line="523"/>
@@ -5674,7 +5674,7 @@ followed by dashes</source>
     <message>
         <location filename="../../src/appshell/internal/applicationuiactions.cpp" line="261"/>
         <location filename="../../src/appshell/internal/applicationuiactions.cpp" line="262"/>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="281"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="282"/>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2662"/>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2663"/>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/internal/undoredotoolbarmodel.cpp" line="76"/>
@@ -5685,7 +5685,7 @@ followed by dashes</source>
     <message>
         <location filename="../../src/appshell/internal/applicationuiactions.cpp" line="269"/>
         <location filename="../../src/appshell/internal/applicationuiactions.cpp" line="270"/>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="287"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="288"/>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2669"/>
         <location filename="../../src/notationscene/internal/notationuiactions.cpp" line="2670"/>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/internal/undoredotoolbarmodel.cpp" line="84"/>
@@ -5706,19 +5706,19 @@ followed by dashes</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="215"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="216"/>
         <source>Parts…</source>
         <translation>パート…</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="282"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="283"/>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/internal/undoredotoolbarmodel.cpp" line="77"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="160"/>
         <source>Undo ‘%1’</source>
         <translation>「%1」を元に戻す</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="288"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="289"/>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/internal/undoredotoolbarmodel.cpp" line="85"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="166"/>
         <source>Redo ‘%1’</source>
@@ -5732,7 +5732,7 @@ followed by dashes</source>
     <message>
         <location filename="../../src/framework/autobot/internal/autobotactions.cpp" line="38"/>
         <source>Show scripts</source>
-        <translation type="unfinished"/>
+        <translation>スクリプトを表示</translation>
     </message>
     <message>
         <location filename="../../src/framework/diagnostics/internal/diagnosticsactions.cpp" line="37"/>
@@ -9703,31 +9703,41 @@ followed by dashes</source>
     </message>
     <message>
         <location filename="../../src/project/internal/projectuiactions.cpp" line="117"/>
+        <source>Import A&amp;udio to Score…</source>
+        <translation>スコアにオーディオをインポート(&amp;U)…</translation>
+    </message>
+    <message>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="118"/>
+        <source>Import Audio to Score</source>
+        <translation>スコアにオーディオをインポート</translation>
+    </message>
+    <message>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="124"/>
         <source>Project propert&amp;ies…</source>
         <translation>プロジェクトのプロパティ…(&amp;I)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectuiactions.cpp" line="118"/>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="125"/>
         <source>Project properties</source>
         <translation>プロジェクトのプロパティ</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectuiactions.cpp" line="123"/>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="130"/>
         <source>&amp;Print…</source>
         <translation>印刷…(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectuiactions.cpp" line="124"/>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="131"/>
         <source>Print</source>
         <translation>印刷</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectuiactions.cpp" line="130"/>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="137"/>
         <source>&amp;Clear list of recent files</source>
         <translation>最近開いたファイル一覧をクリア(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectuiactions.cpp" line="131"/>
+        <location filename="../../src/project/internal/projectuiactions.cpp" line="138"/>
         <source>Clear list of recent files</source>
         <translation>最近開いたファイル一覧をクリア</translation>
     </message>
@@ -9758,7 +9768,8 @@ followed by dashes</source>
     </message>
     <message>
         <location filename="../../src/appshell/qml/MuseScore/AppShell/HomePage/HomeMenu.qml" line="93"/>
-        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="88"/>
+        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="71"/>
+        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="96"/>
         <source>MuseSounds</source>
         <translation>MuseSounds</translation>
     </message>
@@ -10080,12 +10091,12 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
         <translation>閉じる</translation>
     </message>
     <message>
-        <location filename="../../src/framework/dockwindow/qml/Muse/Dock/dockpanelview.cpp" line="117"/>
+        <location filename="../../src/framework/dockwindow/qml/Muse/Dock/dockpanelview.cpp" line="121"/>
         <source>Dock</source>
         <translation>ドック</translation>
     </message>
     <message>
-        <location filename="../../src/framework/dockwindow/qml/Muse/Dock/dockpanelview.cpp" line="117"/>
+        <location filename="../../src/framework/dockwindow/qml/Muse/Dock/dockpanelview.cpp" line="121"/>
         <source>Undock</source>
         <translation>アンドック</translation>
     </message>
@@ -10183,54 +10194,54 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/add</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="333"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="334"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="205"/>
         <source>&amp;Notes</source>
         <translation>音符(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="334"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="335"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="206"/>
         <source>&amp;Intervals</source>
         <translation>音程(&amp;I)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="335"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="336"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="207"/>
         <source>T&amp;uplets</source>
         <translation>連符(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="337"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="338"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="209"/>
         <source>&amp;Measures</source>
         <translation>小節(&amp;M)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="338"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="339"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="210"/>
         <source>&amp;Frames</source>
         <translation>フレーム(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="339"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="340"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="211"/>
         <source>&amp;Text</source>
         <translation>テキスト(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="340"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="341"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="212"/>
         <source>&amp;Lines</source>
         <translation>線(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="341"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="342"/>
         <source>&amp;Chords and fretboard diagrams</source>
         <translation>コードとフレットボードダイアグラム(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="345"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="346"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="215"/>
         <source>&amp;Add</source>
         <translation>追加(&amp;A)</translation>
@@ -10247,52 +10258,52 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/diagnostics</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="497"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="498"/>
         <source>&amp;System</source>
         <translation>システム(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="509"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="510"/>
         <source>&amp;MuseSampler</source>
         <translation>&amp;MuseSampler</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="566"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="567"/>
         <source>A&amp;ctions</source>
         <translation>操作(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="567"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="568"/>
         <source>&amp;Accessibility</source>
         <translation>アクセシビリティ(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="568"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="569"/>
         <source>&amp;Engraving</source>
         <translation>浄書(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="569"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="570"/>
         <source>E&amp;xtensions</source>
         <translation>拡張機能(&amp;X)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="570"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="571"/>
         <source>Auto&amp;bot</source>
         <translation>自動ボット(&amp;B)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="573"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="574"/>
         <source>&amp;VST</source>
         <translation>VST(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="576"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="577"/>
         <source>&amp;Audio</source>
         <translation>&amp;オーディオ</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="580"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="581"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="291"/>
         <source>&amp;Diagnostics</source>
         <translation>診断(&amp;D)</translation>
@@ -10301,7 +10312,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/edit</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="265"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="266"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="143"/>
         <source>&amp;Edit</source>
         <translation>編集(&amp;E)</translation>
@@ -10325,7 +10336,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
         <translation>オンラインに公開(&amp;B)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="222"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="223"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="120"/>
         <source>&amp;File</source>
         <translation>ファイル(&amp;F)</translation>
@@ -10334,13 +10345,13 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/format</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="361"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="362"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="231"/>
         <source>Str&amp;etch</source>
         <translation>ストレッチ(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="372"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="373"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="239"/>
         <source>F&amp;ormat</source>
         <translation>フォーマット(&amp;O)</translation>
@@ -10349,7 +10360,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/help</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="483"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="484"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
@@ -10357,7 +10368,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/plugins</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="430"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="431"/>
         <source>&amp;Plugins</source>
         <translation>プラグイン(&amp;P)</translation>
     </message>
@@ -10365,24 +10376,24 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/tools</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="403"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="404"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="264"/>
         <source>&amp;Voices</source>
         <translation>声部(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="404"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="405"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="265"/>
         <source>&amp;Measures</source>
         <translation>小節(&amp;M)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="412"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="413"/>
         <source>Enharmonic spelling</source>
         <translation>異名同音表記</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="425"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="426"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="282"/>
         <source>&amp;Tools</source>
         <translation>ツール(&amp;T)</translation>
@@ -10391,25 +10402,25 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
 <context>
     <name>appshell/menu/view</name>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="315"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="316"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="187"/>
         <source>&amp;Toolbars</source>
         <translation>ツールバー(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="319"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="320"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="191"/>
         <source>W&amp;orkspaces</source>
         <translation>ワークスペース(&amp;O)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="323"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="324"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="195"/>
         <source>&amp;Show</source>
         <translation>表示(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="327"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="328"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="199"/>
         <source>&amp;View</source>
         <translation>表示(&amp;V)</translation>
@@ -10425,7 +10436,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/commonaudioapiconfigurationmodel.cpp" line="99"/>
         <source>The driver for this device could not be opened.</source>
-        <translation type="unfinished"/>
+        <translation>このデバイスのドライバーを開けませんでした。</translation>
     </message>
 </context>
 <context>
@@ -10567,7 +10578,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
         <location filename="../../src/braille/internal/notationbraille.cpp" line="880"/>
         <source>Six-key input mode</source>
         <extracomment>Braille input with 6 keyboard keys (F,D,S &amp; J,K,L) to represent the 6 dots in a braille cell.</extracomment>
-        <translation type="unfinished"/>
+        <translation>6キー入力モード</translation>
     </message>
     <message>
         <location filename="../../src/braille/internal/notationbraille.cpp" line="882"/>
@@ -10586,7 +10597,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
         <location filename="../../src/braille/qml/MuseScore/Braille/BrailleView.qml" line="172"/>
         <source>Six-key input mode</source>
         <extracomment>Braille input with 6 keyboard keys (F,D,S &amp; J,K,L) to represent the 6 dots in a braille cell.</extracomment>
-        <translation type="unfinished"/>
+        <translation>6キー入力モード</translation>
     </message>
     <message>
         <location filename="../../src/braille/qml/MuseScore/Braille/BrailleView.qml" line="174"/>
@@ -10733,7 +10744,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
         <location filename="../../src/engraving/dom/chordrest.cpp" line="1142"/>
         <location filename="../../src/engraving/dom/note.cpp" line="3436"/>
         <location filename="../../src/engraving/dom/note.cpp" line="3448"/>
-        <location filename="../../src/engraving/dom/segment.cpp" line="2540"/>
+        <location filename="../../src/engraving/dom/segment.cpp" line="2543"/>
         <source>Start of %1</source>
         <translation>%1の始め</translation>
     </message>
@@ -10743,7 +10754,7 @@ Published under the &lt;a href=&quot;%1&quot;&gt;GNU General Public License vers
         <location filename="../../src/engraving/dom/chordrest.cpp" line="1144"/>
         <location filename="../../src/engraving/dom/note.cpp" line="3440"/>
         <location filename="../../src/engraving/dom/note.cpp" line="3456"/>
-        <location filename="../../src/engraving/dom/segment.cpp" line="2555"/>
+        <location filename="../../src/engraving/dom/segment.cpp" line="2558"/>
         <source>End of %1</source>
         <translation>%1の終わり</translation>
     </message>
@@ -10869,17 +10880,17 @@ Fret %1 on strings %2</source>
         <translation>%1の始めと終わり</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/engravingitem.cpp" line="2629"/>
+        <location filename="../../src/engraving/dom/engravingitem.cpp" line="2623"/>
         <source>Measure: %1</source>
         <translation>小節: %1</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/engravingitem.cpp" line="2632"/>
+        <location filename="../../src/engraving/dom/engravingitem.cpp" line="2626"/>
         <source>Displayed measure: %1</source>
         <translation>表示小節: %1</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/engravingitem.cpp" line="2636"/>
+        <location filename="../../src/engraving/dom/engravingitem.cpp" line="2630"/>
         <source>Beat: %1</source>
         <translation>拍: %1</translation>
     </message>
@@ -10963,18 +10974,18 @@ Fret %1 on strings %2</source>
         <translation><numerusform>合計 %n 弦</numerusform></translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/harmony.cpp" line="1303"/>
+        <location filename="../../src/engraving/dom/harmony.cpp" line="1290"/>
         <source>Roman numeral</source>
         <translation>ローマ数字</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/harmony.cpp" line="1305"/>
+        <location filename="../../src/engraving/dom/harmony.cpp" line="1292"/>
         <location filename="../../src/engraving/types/typesconv.cpp" line="1737"/>
         <source>Nashville number</source>
         <translation>ナッシュビルナンバー</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/harmony.cpp" line="1355"/>
+        <location filename="../../src/engraving/dom/harmony.cpp" line="1342"/>
         <source>lower case</source>
         <translation>小文字</translation>
     </message>
@@ -11130,7 +11141,7 @@ Fret %1 on strings %2</source>
         <translation>%1; 音価: %2; %3</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/dom/segment.cpp" line="2514"/>
+        <location filename="../../src/engraving/dom/segment.cpp" line="2517"/>
         <source>Annotations:</source>
         <translation>アノテーション:</translation>
     </message>
@@ -11419,20 +11430,30 @@ Fret %1 on strings %2</source>
         <translation>音価 %2 には比率 %1 の連符を作成できません</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/editing/edit.cpp" line="7957"/>
-        <location filename="../../src/engraving/editing/edit.cpp" line="8112"/>
+        <location filename="../../src/engraving/editing/edit.cpp" line="7975"/>
+        <location filename="../../src/engraving/editing/edit.cpp" line="8155"/>
         <source>Remove stale partial tie</source>
-        <translation type="unfinished"/>
+        <translation>無効なタイを削除</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/editing/edit.cpp" line="8019"/>
+        <location filename="../../src/engraving/editing/edit.cpp" line="8041"/>
+        <source>Remove invalid incoming partial slur</source>
+        <translation>無効な入力側スラーを削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/engraving/editing/edit.cpp" line="8049"/>
         <source>Reset incoming partial slur</source>
-        <translation type="unfinished"/>
+        <translation>入力側スラーをリセット</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/editing/edit.cpp" line="8032"/>
+        <location filename="../../src/engraving/editing/edit.cpp" line="8064"/>
+        <source>Remove invalid outgoing partial slur</source>
+        <translation>無効な出力側スラーを削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/engraving/editing/edit.cpp" line="8072"/>
         <source>Reset outgoing partial slur</source>
-        <translation type="unfinished"/>
+        <translation>出力側スラーをリセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/engravingerrors.h" line="66"/>
@@ -11717,12 +11738,12 @@ Fret %1 on strings %2</source>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="239"/>
         <source>chord bracket(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>和音の括弧</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="240"/>
         <source>Chord bracket(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>和音の括弧</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="242"/>
@@ -12128,12 +12149,12 @@ Fret %1 on strings %2</source>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="362"/>
         <source>triplet feel</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>3連符感</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="363"/>
         <source>Triplet feel</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>3連符感</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="365"/>
@@ -12208,12 +12229,12 @@ Fret %1 on strings %2</source>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="386"/>
         <source>tremolo bar(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>トレモロバー</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="387"/>
         <source>Tremolo bar(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>トレモロバー</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="389"/>
@@ -12508,32 +12529,32 @@ Fret %1 on strings %2</source>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="476"/>
         <source>lasso(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>なげなわ</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="477"/>
         <source>Lasso(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>なげなわ</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="479"/>
         <source>shadow note(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>ガイド音</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="480"/>
         <source>Shadow note(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>ガイド音</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="482"/>
         <source>tab duration symbol(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>タブ音価記号</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="483"/>
         <source>Tab duration symbol(s)</source>
-        <translation type="unfinished"><numerusform></numerusform></translation>
+        <translation><numerusform>タブ音価記号</numerusform></translation>
     </message>
     <message numerus="yes">
         <location filename="../../src/engraving/types/typesconv.cpp" line="485"/>
@@ -13626,22 +13647,22 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2930"/>
         <source>Slide out down (rough)</source>
-        <translation type="unfinished"/>
+        <translation>スライドアウト下（勢いよく）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2931"/>
         <source>Slide out up (rough)</source>
-        <translation type="unfinished"/>
+        <translation>スライドアウト上（勢いよく）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2932"/>
         <source>Slide in above (rough)</source>
-        <translation type="unfinished"/>
+        <translation>スライドイン上（勢いよく）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2933"/>
         <source>Slide in below (rough)</source>
-        <translation type="unfinished"/>
+        <translation>スライドイン下（勢いよく）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3050"/>
@@ -13844,7 +13865,7 @@ Fret %1 on strings %2</source>
         <translation>不定 / 無調</translation>
     </message>
     <message>
-        <location filename="../../src/notationscene/qml/MuseScore/NotationScene/elementpopups/partialtiepopupmodel.cpp" line="218"/>
+        <location filename="../../src/notationscene/qml/MuseScore/NotationScene/elementpopups/partialtiepopupmodel.cpp" line="222"/>
         <source>Remove partial tie</source>
         <translation>部分的なタイを削除</translation>
     </message>
@@ -13861,7 +13882,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/notationscene/widgets/editstyle.cpp" line="780"/>
         <source>Extra long</source>
-        <translation type="unfinished"/>
+        <translation>とても長い</translation>
     </message>
     <message>
         <location filename="../../src/playback/qml/MuseScore/Playback/soundflagsettingsmodel.cpp" line="374"/>
@@ -14939,7 +14960,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="1313"/>
         <source>G clef ottava bassa with C clef</source>
-        <translation type="unfinished"/>
+        <translation>オッターヴァバッサ付きト音記号（ハ音記号付き）</translation>
     </message>
 </context>
 <context>
@@ -16116,33 +16137,33 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2112"/>
         <source>Swing up</source>
-        <translation type="unfinished"/>
+        <translation>スイング↑</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2114"/>
         <source>Swing down</source>
-        <translation type="unfinished"/>
+        <translation>スイング↓</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2115"/>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2116"/>
         <source>Echo</source>
-        <translation type="unfinished"/>
+        <translation>エコー</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2117"/>
         <source>Damp</source>
-        <translation type="unfinished"/>
+        <translation>ダンプ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2118"/>
         <source>Let vibrate</source>
-        <translation type="unfinished"/>
+        <translation>響かせたまま</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="2119"/>
         <source>Ring</source>
-        <translation type="unfinished"/>
+        <translation>鳴らす</translation>
     </message>
 </context>
 <context>
@@ -16150,7 +16171,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="60"/>
         <source>subtype</source>
-        <translation type="unfinished"/>
+        <translation>サブタイプ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="61"/>
@@ -16160,7 +16181,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="62"/>
         <source>generated</source>
-        <translation type="unfinished"/>
+        <translation>生成された</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="63"/>
@@ -16206,7 +16227,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="71"/>
         <source>key signature mode</source>
-        <translation type="unfinished"/>
+        <translation>調号モード</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="72"/>
@@ -16226,12 +16247,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="76"/>
         <source>tonal pitch class</source>
-        <translation type="unfinished"/>
+        <translation>調性ピッチクラス</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="77"/>
         <source>transposed tonal pitch class</source>
-        <translation type="unfinished"/>
+        <translation>移調後の調性ピッチクラス</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="78"/>
@@ -16241,12 +16262,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="79"/>
         <source>fixed</source>
-        <translation type="unfinished"/>
+        <translation>固定</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="80"/>
         <source>fixed line</source>
-        <translation type="unfinished"/>
+        <translation>固定線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="81"/>
@@ -16273,7 +16294,7 @@ Fret %1 on strings %2</source>
         <location filename="../../src/engraving/dom/property.cpp" line="85"/>
         <location filename="../../src/engraving/dom/property.cpp" line="258"/>
         <source>anchor</source>
-        <translation type="unfinished"/>
+        <translation>アンカー</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="87"/>
@@ -16283,7 +16304,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="88"/>
         <source>horizontal direction</source>
-        <translation type="unfinished"/>
+        <translation>水平方向</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="89"/>
@@ -16304,17 +16325,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="92"/>
         <source>leading space</source>
-        <translation type="unfinished"/>
+        <translation>先頭スペース</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="93"/>
         <source>end of measure change</source>
-        <translation type="unfinished"/>
+        <translation>小節の終わりの変更</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="94"/>
         <source>mirror</source>
-        <translation type="unfinished"/>
+        <translation>反転</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="95"/>
@@ -16324,7 +16345,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="96"/>
         <source>hide generated parentheses</source>
-        <translation type="unfinished"/>
+        <translation>生成された括弧を隠す</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="97"/>
@@ -16334,17 +16355,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="98"/>
         <source>combine voice</source>
-        <translation type="unfinished"/>
+        <translation>声部を結合</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="99"/>
         <source>tuning</source>
-        <translation type="unfinished"/>
+        <translation>調弦</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="100"/>
         <source>pause</source>
-        <translation type="unfinished"/>
+        <translation>休止</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="102"/>
@@ -16354,22 +16375,22 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="103"/>
         <source>span</source>
-        <translation type="unfinished"/>
+        <translation>次譜表まで延長</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="104"/>
         <source>span from</source>
-        <translation type="unfinished"/>
+        <translation>開始位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="105"/>
         <source>span to</source>
-        <translation type="unfinished"/>
+        <translation>終了位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="106"/>
         <source>show tips</source>
-        <translation type="unfinished"/>
+        <translation>先端を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="108"/>
@@ -16379,37 +16400,37 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="109"/>
         <source>fret</source>
-        <translation type="unfinished"/>
+        <translation>フレット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="110"/>
         <source>string</source>
-        <translation type="unfinished"/>
+        <translation>弦</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="111"/>
         <source>ghost</source>
-        <translation type="unfinished"/>
+        <translation>ゴースト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="112"/>
         <source>dead</source>
-        <translation type="unfinished"/>
+        <translation>デッド</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="113"/>
         <source>played</source>
-        <translation type="unfinished"/>
+        <translation>再生する</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="114"/>
         <source>nominal time signature</source>
-        <translation type="unfinished"/>
+        <translation>表記上の拍子記号</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="115"/>
         <source>actual time signature</source>
-        <translation type="unfinished"/>
+        <translation>実際の拍子記号</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="116"/>
@@ -16424,32 +16445,32 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="118"/>
         <source>normal notes</source>
-        <translation type="unfinished"/>
+        <translation>通常の音符数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="119"/>
         <source>actual notes</source>
-        <translation type="unfinished"/>
+        <translation>実際の音符数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="120"/>
         <source>bracket start offset</source>
-        <translation type="unfinished"/>
+        <translation>括弧開始オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="121"/>
         <source>bracket end offset</source>
-        <translation type="unfinished"/>
+        <translation>括弧終了オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="122"/>
         <source>grow left</source>
-        <translation type="unfinished"/>
+        <translation>左に伸ばす</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="123"/>
         <source>grow right</source>
-        <translation type="unfinished"/>
+        <translation>右に伸ばす</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="125"/>
@@ -16464,7 +16485,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="127"/>
         <source>autosize frame</source>
-        <translation type="unfinished"/>
+        <translation>フレームを自動サイズ調整</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="128"/>
@@ -16514,7 +16535,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="138"/>
         <source>autoscale</source>
-        <translation type="unfinished"/>
+        <translation>自動スケール</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="139"/>
@@ -16535,7 +16556,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="143"/>
         <source>image framed</source>
-        <translation type="unfinished"/>
+        <translation>画像を枠で囲む</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="145"/>
@@ -16570,7 +16591,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="151"/>
         <source>diagrams order</source>
-        <translation type="unfinished"/>
+        <translation>ダイアグラムの順序</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="153"/>
@@ -16580,12 +16601,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="154"/>
         <source>aspect ratio locked</source>
-        <translation type="unfinished"/>
+        <translation>縦横比を固定</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="155"/>
         <source>size is spatium</source>
-        <translation type="unfinished"/>
+        <translation>サイズを譜表のスペース単位にする</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="156"/>
@@ -16606,12 +16627,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="161"/>
         <source>without slope</source>
-        <translation type="unfinished"/>
+        <translation>傾きなし</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="162"/>
         <source>beam staff move</source>
-        <translation type="unfinished"/>
+        <translation>連桁の譜表移動</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="163"/>
@@ -16621,7 +16642,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="164"/>
         <source>show stem slash</source>
-        <translation type="unfinished"/>
+        <translation>符幹スラッシュを表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="166"/>
@@ -16636,7 +16657,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="168"/>
         <source>following text</source>
-        <translation type="unfinished"/>
+        <translation>後続テキスト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="169"/>
@@ -16646,7 +16667,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="171"/>
         <source>bracket</source>
-        <translation type="unfinished"/>
+        <translation>括弧</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="172"/>
@@ -16661,32 +16682,32 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="174"/>
         <source>numerator string</source>
-        <translation type="unfinished"/>
+        <translation>分子の文字列</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="175"/>
         <source>denominator string</source>
-        <translation type="unfinished"/>
+        <translation>分母の文字列</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="176"/>
         <source>prefix</source>
-        <translation type="unfinished"/>
+        <translation>接頭辞</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="177"/>
         <source>digit</source>
-        <translation type="unfinished"/>
+        <translation>数字</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="178"/>
         <source>suffix</source>
-        <translation type="unfinished"/>
+        <translation>接尾辞</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="179"/>
         <source>continuation line</source>
-        <translation type="unfinished"/>
+        <translation>継続線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="187"/>
@@ -16711,7 +16732,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="191"/>
         <source>hairpin with circled tip</source>
-        <translation type="unfinished"/>
+        <translation>先端が丸いヘアピン</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="193"/>
@@ -16731,17 +16752,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="196"/>
         <source>velocity change</source>
-        <translation type="unfinished"/>
+        <translation>ベロシティ変化</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="197"/>
         <source>velocity change method</source>
-        <translation type="unfinished"/>
+        <translation>ベロシティ変化の方法</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="198"/>
         <source>velocity change speed</source>
-        <translation type="unfinished"/>
+        <translation>ベロシティ変化の速さ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="199"/>
@@ -16751,12 +16772,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="201"/>
         <source>single note dynamics</source>
-        <translation type="unfinished"/>
+        <translation>単音の強弱</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="202"/>
         <source>change method</source>
-        <translation type="unfinished"/>
+        <translation>変化の方法</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="203"/>
@@ -16771,27 +16792,27 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="205"/>
         <source>multimeasure rest range bracket type</source>
-        <translation type="unfinished"/>
+        <translation>長休符の範囲の括弧の種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="207"/>
         <source>jump to</source>
-        <translation type="unfinished"/>
+        <translation>ジャンプ先</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="208"/>
         <source>play until</source>
-        <translation type="unfinished"/>
+        <translation>ここまで再生</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="209"/>
         <source>continue at</source>
-        <translation type="unfinished"/>
+        <translation>継続位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="210"/>
         <source>label</source>
-        <translation type="unfinished"/>
+        <translation>ラベル</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="211"/>
@@ -16806,37 +16827,37 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="213"/>
         <source>marker center on symbol</source>
-        <translation type="unfinished"/>
+        <translation>マーカーを記号の中央に合わせる</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="214"/>
         <source>length 1</source>
-        <translation type="unfinished"/>
+        <translation>長さ1</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="215"/>
         <source>length 2</source>
-        <translation type="unfinished"/>
+        <translation>長さ2</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="216"/>
         <source>repeat end</source>
-        <translation type="unfinished"/>
+        <translation>リピート終了</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="217"/>
         <source>repeat start</source>
-        <translation type="unfinished"/>
+        <translation>リピート開始</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="218"/>
         <source>repeat jump</source>
-        <translation type="unfinished"/>
+        <translation>リピートジャンプ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="219"/>
         <source>measure number mode</source>
-        <translation type="unfinished"/>
+        <translation>小節番号モード</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="221"/>
@@ -16846,7 +16867,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="223"/>
         <source>showing text</source>
-        <translation type="unfinished"/>
+        <translation>テキストを表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="224"/>
@@ -16856,17 +16877,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="225"/>
         <source>glissando shift</source>
-        <translation type="unfinished"/>
+        <translation>グリッサンドのシフト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="226"/>
         <source>ease in</source>
-        <translation type="unfinished"/>
+        <translation>イーズイン</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="227"/>
         <source>ease out</source>
-        <translation type="unfinished"/>
+        <translation>イーズアウト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="228"/>
@@ -16876,7 +16897,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="229"/>
         <source>groups</source>
-        <translation type="unfinished"/>
+        <translation>グループ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="230"/>
@@ -16891,7 +16912,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="232"/>
         <source>time stretch</source>
-        <translation type="unfinished"/>
+        <translation>時間伸縮</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="233"/>
@@ -16911,27 +16932,27 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="236"/>
         <source>ornament show accidental</source>
-        <translation type="unfinished"/>
+        <translation>装飾音の臨時記号を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="237"/>
         <source>ornament show cue note</source>
-        <translation type="unfinished"/>
+        <translation>装飾音の小音符を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="238"/>
         <source>start on upper note</source>
-        <translation type="unfinished"/>
+        <translation>上の音から開始</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="240"/>
         <source>time signature</source>
-        <translation type="unfinished"/>
+        <translation>拍子記号</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="241"/>
         <source>time signature stretch</source>
-        <translation type="unfinished"/>
+        <translation>拍子記号の伸縮</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="242"/>
@@ -16942,54 +16963,54 @@ Fret %1 on strings %2</source>
         <location filename="../../src/engraving/dom/property.cpp" line="243"/>
         <location filename="../../src/engraving/dom/property.cpp" line="297"/>
         <source>tick</source>
-        <translation type="unfinished"/>
+        <translation>ティック</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="244"/>
         <location filename="../../src/engraving/dom/property.cpp" line="267"/>
         <source>ticks</source>
-        <translation type="unfinished"/>
+        <translation>ティック数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="245"/>
         <source>end track</source>
-        <translation type="unfinished"/>
+        <translation>終了トラック</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="246"/>
         <location filename="../../src/engraving/dom/property.cpp" line="262"/>
         <source>end offset</source>
-        <translation type="unfinished"/>
+        <translation>終了オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="247"/>
         <source>breaking multimeasure rest</source>
-        <translation type="unfinished"/>
+        <translation>長休符を分割</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="248"/>
         <source>vertical position of multimeasure rest number</source>
-        <translation type="unfinished"/>
+        <translation>長休符数の垂直位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="249"/>
         <source>vertical offset of multimeasure rest number</source>
-        <translation type="unfinished"/>
+        <translation>長休符数の垂直オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="250"/>
         <source>visibility of multimeasure rest number</source>
-        <translation type="unfinished"/>
+        <translation>長休符数の表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="252"/>
         <source>vertical position of measure repeat number</source>
-        <translation type="unfinished"/>
+        <translation>連続小節数の垂直位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="253"/>
         <source>repeat count</source>
-        <translation type="unfinished"/>
+        <translation>リピート回数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="255"/>
@@ -16999,67 +17020,67 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="256"/>
         <source>numbering offset</source>
-        <translation type="unfinished"/>
+        <translation>番号付きオフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="257"/>
         <source>irregular</source>
-        <translation type="unfinished"/>
+        <translation>変則</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="259"/>
         <source>start offset</source>
-        <translation type="unfinished"/>
+        <translation>開始オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="260"/>
         <source>left shoulder offset</source>
-        <translation type="unfinished"/>
+        <translation>左ショルダーオフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="261"/>
         <source>right shoulder offset</source>
-        <translation type="unfinished"/>
+        <translation>右ショルダーオフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="263"/>
         <source>staff move</source>
-        <translation type="unfinished"/>
+        <translation>譜表移動</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="264"/>
         <source>verse</source>
-        <translation type="unfinished"/>
+        <translation>節</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="266"/>
         <source>syllabic</source>
-        <translation type="unfinished"/>
+        <translation>音節</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="268"/>
         <source>endings</source>
-        <translation type="unfinished"/>
+        <translation>エンディング</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="269"/>
         <source>visible line</source>
-        <translation type="unfinished"/>
+        <translation>可視の線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="270"/>
         <source>magnification</source>
-        <translation type="unfinished"/>
+        <translation>拡大率</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="271"/>
         <source>using drumset</source>
-        <translation type="unfinished"/>
+        <translation>ドラムセットを使用</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="272"/>
         <source>duration</source>
-        <translation type="unfinished"/>
+        <translation>音価</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="273"/>
@@ -17069,77 +17090,77 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="274"/>
         <source>role</source>
-        <translation type="unfinished"/>
+        <translation>役割</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="275"/>
         <source>track</source>
-        <translation type="unfinished"/>
+        <translation>トラック</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="277"/>
         <source>strings</source>
-        <translation type="unfinished"/>
+        <translation>弦数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="278"/>
         <source>frets</source>
-        <translation type="unfinished"/>
+        <translation>フレット数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="279"/>
         <source>show nut</source>
-        <translation type="unfinished"/>
+        <translation>ナットを表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="280"/>
         <source>fret offset</source>
-        <translation type="unfinished"/>
+        <translation>フレットオフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="281"/>
         <source>fret number position</source>
-        <translation type="unfinished"/>
+        <translation>フレット番号の位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="282"/>
         <source>orientation</source>
-        <translation type="unfinished"/>
+        <translation>向き</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="283"/>
         <source>fretboard diagram fingering visible</source>
-        <translation type="unfinished"/>
+        <translation>フレットボードダイアグラムの運指を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="284"/>
         <source>fretboard diagram fingering</source>
-        <translation type="unfinished"/>
+        <translation>フレットボードダイアグラムの運指</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="286"/>
         <source>chord symbol interpretation</source>
-        <translation type="unfinished"/>
+        <translation>コード記号の解釈</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="287"/>
         <source>chord symbol voicing</source>
-        <translation type="unfinished"/>
+        <translation>コード記号のボイシング</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="288"/>
         <source>chord symbol duration</source>
-        <translation type="unfinished"/>
+        <translation>コード記号の音価</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="289"/>
         <source>chord symbol bass scale</source>
-        <translation type="unfinished"/>
+        <translation>コード記号のベース音階</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="290"/>
         <source>chord symbol do not stack modifiers</source>
-        <translation type="unfinished"/>
+        <translation>コード記号の修飾を積み重ねない</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="292"/>
@@ -17149,7 +17170,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="293"/>
         <source>gap</source>
-        <translation type="unfinished"/>
+        <translation>間隔</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="294"/>
@@ -17159,72 +17180,72 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="295"/>
         <source>dash line length</source>
-        <translation type="unfinished"/>
+        <translation>破線の線分の長さ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="296"/>
         <source>dash gap length</source>
-        <translation type="unfinished"/>
+        <translation>破線の間隔の長さ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="298"/>
         <source>playback voice 1</source>
-        <translation type="unfinished"/>
+        <translation>声部1を再生</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="299"/>
         <source>playback voice 2</source>
-        <translation type="unfinished"/>
+        <translation>声部2を再生</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="300"/>
         <source>playback voice 3</source>
-        <translation type="unfinished"/>
+        <translation>声部3を再生</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="302"/>
         <source>playback voice 4</source>
-        <translation type="unfinished"/>
+        <translation>声部4を再生</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="303"/>
         <source>symbol</source>
-        <translation type="unfinished"/>
+        <translation>記号</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="304"/>
         <source>playing repeats</source>
-        <translation type="unfinished"/>
+        <translation>リピートを再生</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="305"/>
         <source>creating system header</source>
-        <translation type="unfinished"/>
+        <translation>段のヘッダーを作成</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="306"/>
         <source>lines</source>
-        <translation type="unfinished"/>
+        <translation>線数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="307"/>
         <source>line distance</source>
-        <translation type="unfinished"/>
+        <translation>線の間隔</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="308"/>
         <source>step offset</source>
-        <translation type="unfinished"/>
+        <translation>ステップオフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="309"/>
         <source>showing barlines</source>
-        <translation type="unfinished"/>
+        <translation>小節線を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="310"/>
         <source>showing ledgerlines</source>
-        <translation type="unfinished"/>
+        <translation>加線を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="312"/>
@@ -17239,47 +17260,47 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="316"/>
         <source>generating clefs</source>
-        <translation type="unfinished"/>
+        <translation>音部記号を生成</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="317"/>
         <source>generating time signature</source>
-        <translation type="unfinished"/>
+        <translation>拍子記号を生成</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="318"/>
         <source>generating key signature</source>
-        <translation type="unfinished"/>
+        <translation>調号を生成</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="319"/>
         <source>y-offset</source>
-        <translation type="unfinished"/>
+        <translation>縦方向オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="320"/>
         <source>distance offset</source>
-        <translation type="unfinished"/>
+        <translation>距離オフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="321"/>
         <source>barline span</source>
-        <translation type="unfinished"/>
+        <translation>次譜表まで延長</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="322"/>
         <source>barline span from</source>
-        <translation type="unfinished"/>
+        <translation>小節線の開始位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="323"/>
         <source>barline span to</source>
-        <translation type="unfinished"/>
+        <translation>小節線の終了位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="324"/>
         <source>bracket span</source>
-        <translation type="unfinished"/>
+        <translation>括弧の範囲</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="326"/>
@@ -17289,7 +17310,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="327"/>
         <source>layout position</source>
-        <translation type="unfinished"/>
+        <translation>レイアウト位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="328"/>
@@ -17299,7 +17320,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="329"/>
         <source>family</source>
-        <translation type="unfinished"/>
+        <translation>フォントファミリー</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="331"/>
@@ -17309,7 +17330,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="332"/>
         <source>user line distancing</source>
-        <translation type="unfinished"/>
+        <translation>行間</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="334"/>
@@ -17344,17 +17365,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="340"/>
         <source>spatium dependent size</source>
-        <translation type="unfinished"/>
+        <translation>サイズを譜表のスペースに連動</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="341"/>
         <source>spatium dependent text size</source>
-        <translation type="unfinished"/>
+        <translation>テキストサイズを譜表のスペースに連動</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="342"/>
         <source>musical symbols scale</source>
-        <translation type="unfinished"/>
+        <translation>音楽記号の拡大率</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="343"/>
@@ -17364,12 +17385,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="344"/>
         <source>text script align</source>
-        <translation type="unfinished"/>
+        <translation>上下付き文字の揃え</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="345"/>
         <source>system flag</source>
-        <translation type="unfinished"/>
+        <translation>段要素</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="347"/>
@@ -17444,7 +17465,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="361"/>
         <source>continue text musical symbols scale</source>
-        <translation type="unfinished"/>
+        <translation>継続テキストの音楽記号拡大率</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="362"/>
@@ -17474,7 +17495,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="367"/>
         <source>gap between text and line</source>
-        <translation type="unfinished"/>
+        <translation>テキストと線の間隔</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="369"/>
@@ -17489,7 +17510,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="371"/>
         <source>continue text position</source>
-        <translation type="unfinished"/>
+        <translation>継続テキストの位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="372"/>
@@ -17589,92 +17610,92 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="393"/>
         <source>note-anchored line placement</source>
-        <translation type="unfinished"/>
+        <translation>音符固定線の配置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="395"/>
         <source>avoid barlines</source>
-        <translation type="unfinished"/>
+        <translation>小節線を避ける</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="396"/>
         <source>dynamic size</source>
-        <translation type="unfinished"/>
+        <translation>強弱記号のサイズ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="397"/>
         <source>use text alignment</source>
-        <translation type="unfinished"/>
+        <translation>テキスト揃えを使用</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="398"/>
         <source>anchor to end of previous</source>
-        <translation type="unfinished"/>
+        <translation>前の小節の終わりに固定</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="400"/>
         <source>snap expression</source>
-        <translation type="unfinished"/>
+        <translation>強弱記号にスナップ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="401"/>
         <source>snap before</source>
-        <translation type="unfinished"/>
+        <translation>前にスナップ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="402"/>
         <source>snap after</source>
-        <translation type="unfinished"/>
+        <translation>後にスナップ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="404"/>
         <source>voice assignment</source>
-        <translation type="unfinished"/>
+        <translation>声部の割り当て</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="405"/>
         <source>center between staves</source>
-        <translation type="unfinished"/>
+        <translation>譜表間の中央</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="407"/>
         <source>position above</source>
-        <translation type="unfinished"/>
+        <translation>上側の位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="409"/>
         <source>staves distance</source>
-        <translation type="unfinished"/>
+        <translation>譜表の差</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="410"/>
         <source>voices distance</source>
-        <translation type="unfinished"/>
+        <translation>声部の差</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="411"/>
         <source>measures distance</source>
-        <translation type="unfinished"/>
+        <translation>小節の差</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="412"/>
         <source>position distance</source>
-        <translation type="unfinished"/>
+        <translation>小節内位置の差</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="413"/>
         <source>grace note index</source>
-        <translation type="unfinished"/>
+        <translation>装飾音符のインデックス</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="414"/>
         <source>note index</source>
-        <translation type="unfinished"/>
+        <translation>音符のインデックス</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="416"/>
         <source>voice</source>
-        <translation type="unfinished"/>
+        <translation>声部</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="417"/>
@@ -17684,62 +17705,62 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="419"/>
         <source>concert clef type</source>
-        <translation type="unfinished"/>
+        <translation>実音の音部記号の種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="420"/>
         <source>transposing clef type</source>
-        <translation type="unfinished"/>
+        <translation>移調譜の音部記号の種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="421"/>
         <source>clef to barline position</source>
-        <translation type="unfinished"/>
+        <translation>音部記号と小節線の位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="422"/>
         <source>is header</source>
-        <translation type="unfinished"/>
+        <translation>ヘッダー</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="423"/>
         <source>concert key</source>
-        <translation type="unfinished"/>
+        <translation>実音の調</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="424"/>
         <source>key</source>
-        <translation type="unfinished"/>
+        <translation>調</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="426"/>
         <source>autoplace minimum distance</source>
-        <translation type="unfinished"/>
+        <translation>自動配置の最小距離</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="428"/>
         <source>arpeggio type</source>
-        <translation type="unfinished"/>
+        <translation>アルペジオの種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="429"/>
         <source>chord line type</source>
-        <translation type="unfinished"/>
+        <translation>和音線の種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="430"/>
         <source>straight chord line</source>
-        <translation type="unfinished"/>
+        <translation>直線の和音線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="431"/>
         <source>wavy chord line</source>
-        <translation type="unfinished"/>
+        <translation>波形の和音線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="432"/>
         <source>tremolo type</source>
-        <translation type="unfinished"/>
+        <translation>トレモロの種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="433"/>
@@ -17749,27 +17770,27 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="434"/>
         <source>harmony type</source>
-        <translation type="unfinished"/>
+        <translation>コード記号の形式</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="436"/>
         <source>arpeggio span</source>
-        <translation type="unfinished"/>
+        <translation>アルペジオの範囲</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="438"/>
         <source>bracket hook length</source>
-        <translation type="unfinished"/>
+        <translation>括弧のかぎの長さ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="439"/>
         <source>bracket hook position</source>
-        <translation type="unfinished"/>
+        <translation>括弧のかぎの位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="440"/>
         <source>bracket right side</source>
-        <translation type="unfinished"/>
+        <translation>括弧を右に配置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="443"/>
@@ -17779,72 +17800,72 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="444"/>
         <source>bend curve</source>
-        <translation type="unfinished"/>
+        <translation>ベンド曲線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="445"/>
         <source>bend vertex offset</source>
-        <translation type="unfinished"/>
+        <translation>ベンド頂点のオフセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="446"/>
         <source>bend show hold line</source>
-        <translation type="unfinished"/>
+        <translation>ベンドのホールド線を表示</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="447"/>
         <source>bend start time factor</source>
-        <translation type="unfinished"/>
+        <translation>ベンド開始時間の係数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="448"/>
         <source>bend target time factor</source>
-        <translation type="unfinished"/>
+        <translation>ベンド到達時間の係数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="449"/>
         <source>bend end time factor</source>
-        <translation type="unfinished"/>
+        <translation>ベンド終了時間の係数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="450"/>
         <source>guitar dive tab pos</source>
-        <translation type="unfinished"/>
+        <translation>ギターダイブのタブ位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="451"/>
         <source>guitar bend amount</source>
-        <translation type="unfinished"/>
+        <translation>ギターベンド量</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="452"/>
         <source>guitar dip tremolo line</source>
-        <translation type="unfinished"/>
+        <translation>ディップのトレモロ線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="453"/>
         <source>guitar dive is slack</source>
-        <translation type="unfinished"/>
+        <translation>弦を弛ませる</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="455"/>
         <source>tremolobar type</source>
-        <translation type="unfinished"/>
+        <translation>トレモロバーの種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="456"/>
         <source>tremolobar curve</source>
-        <translation type="unfinished"/>
+        <translation>トレモロバーの曲線</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="458"/>
         <source>start with long names</source>
-        <translation type="unfinished"/>
+        <translation>長い楽器名で開始</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="459"/>
         <source>start with measure one</source>
-        <translation type="unfinished"/>
+        <translation>小節番号1から開始</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="460"/>
@@ -17854,52 +17875,52 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="462"/>
         <source>path</source>
-        <translation type="unfinished"/>
+        <translation>描画パス</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="464"/>
         <source>prefer sharps or flats</source>
-        <translation type="unfinished"/>
+        <translation>シャープまたはフラットを優先</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="466"/>
         <source>playing technique type</source>
-        <translation type="unfinished"/>
+        <translation>奏法の種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="468"/>
         <source>gradual tempo change type</source>
-        <translation type="unfinished"/>
+        <translation>テンポ変化の種類</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="469"/>
         <source>tempo easing method</source>
-        <translation type="unfinished"/>
+        <translation>テンポ変化の仕方</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="470"/>
         <source>tempo change factor</source>
-        <translation type="unfinished"/>
+        <translation>テンポの倍率</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="472"/>
         <source>is diagram</source>
-        <translation type="unfinished"/>
+        <translation>図形式</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="474"/>
         <source>active</source>
-        <translation type="unfinished"/>
+        <translation>有効</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="476"/>
         <source>fret position</source>
-        <translation type="unfinished"/>
+        <translation>フレット位置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="477"/>
         <source>ignored strings</source>
-        <translation type="unfinished"/>
+        <translation>無視する弦</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="478"/>
@@ -17909,37 +17930,37 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="479"/>
         <source>transposition behaviour</source>
-        <translation type="unfinished"/>
+        <translation>移調の扱い</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="481"/>
         <source>tie placement</source>
-        <translation type="unfinished"/>
+        <translation>タイの配置</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="482"/>
         <source>minimum length</source>
-        <translation type="unfinished"/>
+        <translation>最小の長さ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="483"/>
         <source>partial spanner direction</source>
-        <translation type="unfinished"/>
+        <translation>部分スパナーの方向</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="485"/>
         <source>position linked to main score</source>
-        <translation type="unfinished"/>
+        <translation>位置を総譜にリンク</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="486"/>
         <source>appearance linked to main score</source>
-        <translation type="unfinished"/>
+        <translation>外観を総譜にリンク</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="487"/>
         <source>text linked to main score</source>
-        <translation type="unfinished"/>
+        <translation>テキストを総譜にリンク</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="488"/>
@@ -17949,17 +17970,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="490"/>
         <source>strings count</source>
-        <translation type="unfinished"/>
+        <translation>弦の本数</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="491"/>
         <source>strings preset</source>
-        <translation type="unfinished"/>
+        <translation>調弦プリセット</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="492"/>
         <source>visible strings</source>
-        <translation type="unfinished"/>
+        <translation>表示する弦</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="494"/>
@@ -17974,22 +17995,22 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="496"/>
         <source>symbol angle</source>
-        <translation type="unfinished"/>
+        <translation>記号の角度</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="498"/>
         <source>apply to all staves</source>
-        <translation type="unfinished"/>
+        <translation>すべての譜表に適用</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="499"/>
         <source>is courtesy</source>
-        <translation type="unfinished"/>
+        <translation>予告記号</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="500"/>
         <source>exclude vertical align</source>
-        <translation type="unfinished"/>
+        <translation>垂直揃えから除外</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="502"/>
@@ -17999,12 +18020,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="503"/>
         <source>play count text setting</source>
-        <translation type="unfinished"/>
+        <translation>再生回数テキストの設定</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="504"/>
         <source>play count text</source>
-        <translation type="unfinished"/>
+        <translation>再生回数テキスト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="506"/>
@@ -18014,7 +18035,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="508"/>
         <source>cutaway</source>
-        <translation type="unfinished"/>
+        <translation>カッタウェイ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="509"/>
@@ -18024,12 +18045,12 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="510"/>
         <source>merge matching rests</source>
-        <translation type="unfinished"/>
+        <translation>一致する休符を結合</translation>
     </message>
     <message>
         <location filename="../../src/engraving/dom/property.cpp" line="511"/>
         <source>reflect transposition</source>
-        <translation type="unfinished"/>
+        <translation>移調を反映</translation>
     </message>
 </context>
 <context>
@@ -18174,17 +18195,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3216"/>
         <source>25 small diesis up, (25S, ~5:13S, ~37S, 5C plus 5C), 2° up [53 EDO]</source>
-        <translation type="unfinished"/>
+        <translation>25小ディーシス上向き（25S、~5:13S、~37S、5C plus 5C）、2°上 [53 EDO]</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3224"/>
         <source>35 medium diesis up, (35M, ~13M, ~125M, 5C plus 7C), 2/9-tone up</source>
-        <translation type="unfinished"/>
+        <translation>35中ディーシス上向き（35M、~13M、~125M、5C plus 7C）、2/9トーン上</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3254"/>
         <source>5:7 kleisma up, (5:7k, ~11:13k, 7C less 5C)</source>
-        <translation type="unfinished"/>
+        <translation>5:7クライスマ上向き（5:7k、~11:13k、7C less 5C）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3257"/>
@@ -18724,17 +18745,17 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3546"/>
         <source>Enharmonically reinterpret accidental almost equal to</source>
-        <translation type="unfinished"/>
+        <translation>異名同音でほぼ等しい臨時記号に読み替え</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3547"/>
         <source>Enharmonically reinterpret accidental equals</source>
-        <translation type="unfinished"/>
+        <translation>異名同音で等しい臨時記号に読み替え</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3548"/>
         <source>Enharmonically reinterpret accidental tilde</source>
-        <translation type="unfinished"/>
+        <translation>異名同音でチルダ臨時記号に読み替え</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="3554"/>
@@ -19639,47 +19660,47 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4392"/>
         <source>Gyro</source>
-        <translation type="unfinished"/>
+        <translation>ジャイロ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4393"/>
         <source>Hand martellato</source>
-        <translation type="unfinished"/>
+        <translation>ハンド・マルテラート</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4394"/>
         <source>Mallet, bell on table</source>
-        <translation type="unfinished"/>
+        <translation>マレット、ベルをテーブルに置いて</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4395"/>
         <source>Mallet, bell suspended</source>
-        <translation type="unfinished"/>
+        <translation>マレット、ベルを吊るして</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4396"/>
         <source>Mallet lift</source>
-        <translation type="unfinished"/>
+        <translation>マレットリフト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4397"/>
         <source>Martellato</source>
-        <translation type="unfinished"/>
+        <translation>マルテラート</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4398"/>
         <source>Martellato lift</source>
-        <translation type="unfinished"/>
+        <translation>マルテラートリフト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4399"/>
         <source>Muted martellato</source>
-        <translation type="unfinished"/>
+        <translation>ミュート・マルテラート</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4400"/>
         <source>Pluck lift</source>
-        <translation type="unfinished"/>
+        <translation>プラックリフト</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4595"/>
@@ -19719,57 +19740,57 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4798"/>
         <source>Tempus perfectum cum prolatione perfecta (9/8)</source>
-        <translation type="unfinished"/>
+        <translation>完全テンプス・完全プロラツィオ（9/8）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4799"/>
         <source>Tempus imperfectum cum prolatione imperfecta diminution 4</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・不完全プロラツィオ・ディミヌツィオン4</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4800"/>
         <source>Tempus imperfectum cum prolatione imperfecta diminution 5</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・不完全プロラツィオ・ディミヌツィオン5</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4801"/>
         <source>Tempus perfectum cum prolatione imperfecta (3/4)</source>
-        <translation type="unfinished"/>
+        <translation>完全テンプス・不完全プロラツィオ（3/4）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4802"/>
         <source>Tempus perfectum cum prolatione imperfecta diminution 1 (3/8)</source>
-        <translation type="unfinished"/>
+        <translation>完全テンプス・不完全プロラツィオ・ディミヌツィオン1（3/8）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4803"/>
         <source>Tempus perfectum cum prolatione perfecta diminution 2 (9/16)</source>
-        <translation type="unfinished"/>
+        <translation>完全テンプス・完全プロラツィオ・ディミヌツィオン2（9/16）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4804"/>
         <source>Tempus imperfectum cum prolatione perfecta (6/8)</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・完全プロラツィオ（6/8）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4805"/>
         <source>Tempus imperfectum cum prolatione imperfecta (2/4)</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・不完全プロラツィオ（2/4）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4806"/>
         <source>Tempus imperfectum cum prolatione imperfecta diminution 1 (2/2)</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・不完全プロラツィオ・ディミヌツィオン1（2/2）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4807"/>
         <source>Tempus imperfectum cum prolatione imperfecta diminution 2 (6/16)</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・不完全プロラツィオ・ディミヌツィオン2（6/16）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4808"/>
         <source>Tempus imperfectum cum prolatione imperfecta diminution 3 (2/2)</source>
-        <translation type="unfinished"/>
+        <translation>不完全テンプス・不完全プロラツィオ・ディミヌツィオン3（2/2）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="4851"/>
@@ -19914,7 +19935,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="5595"/>
         <source>Half-open 2 (Weinberg)</source>
-        <translation type="unfinished"/>
+        <translation>ハーフオープン2（ワインバーグ）</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/symnames.cpp" line="5702"/>
@@ -20284,27 +20305,27 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3251"/>
         <source>Thumb damp</source>
-        <translation type="unfinished"/>
+        <translation>サム・ダンプ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3252"/>
         <source>Brush damp</source>
-        <translation type="unfinished"/>
+        <translation>ブラッシュ・ダンプ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3253"/>
         <source>Ring touch</source>
-        <translation type="unfinished"/>
+        <translation>リング・タッチ</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3254"/>
         <source>Pluck</source>
-        <translation type="unfinished"/>
+        <translation>プラック</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3255"/>
         <source>Singing bell</source>
-        <translation type="unfinished"/>
+        <translation>シンギング・ベル</translation>
     </message>
     <message>
         <location filename="../../src/engraving/types/typesconv.cpp" line="3256"/>
@@ -20558,7 +20579,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/framework/extensions/extensionsmodule.cpp" line="72"/>
         <source>Manually</source>
-        <translation type="unfinished"/>
+        <translation>手動</translation>
     </message>
     <message>
         <location filename="../../src/framework/extensions/internal/extensioninstaller.cpp" line="34"/>
@@ -20685,7 +20706,7 @@ Fret %1 on strings %2</source>
     <message>
         <location filename="../../src/framework/cloud/qml/Muse/Cloud/CloudScoresView.qml" line="219"/>
         <location filename="../../src/framework/learn/qml/Muse/Learn/internal/Playlist.qml" line="142"/>
-        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="178"/>
+        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="202"/>
         <source>Please check your internet connection or try again later.</source>
         <translation>インターネットの接続を確認するか、時間をおいてもう一度お試しください。</translation>
     </message>
@@ -21169,6 +21190,7 @@ Fret %1 on strings %2</source>
         <translation>この設定は環境設定でいつでも変更できます</translation>
     </message>
     <message>
+        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="215"/>
         <location filename="../../src/palette/qml/MuseScore/Palette/PalettesPanel.qml" line="129"/>
         <location filename="../../src/project/qml/MuseScore/Project/internal/NewScore/TitleListView.qml" line="129"/>
         <location filename="../../src/project/qml/MuseScore/Project/internal/ScoresPage/ScoreGridItem.qml" line="293"/>
@@ -21243,7 +21265,7 @@ Fret %1 on strings %2</source>
     </message>
     <message>
         <location filename="../../src/project/qml/MuseScore/Project/ProjectUploadedDialog.qml" line="108"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1403"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1405"/>
         <source>Success!</source>
         <translation>成功！</translation>
     </message>
@@ -22980,7 +23002,7 @@ pickup measure</source>
     <message>
         <location filename="../../src/importexport/mnx/internal/export/mnxexporter.cpp" line="103"/>
         <source>MNX export skipped because the score contains no exportable parts. (Tablature is not supported yet).</source>
-        <translation type="unfinished"/>
+        <translation>MNX のエクスポートをスキップしました。エクスポート可能なパートがありません。（タブ譜はまだ未対応です。）</translation>
     </message>
     <message>
         <location filename="../../src/importexport/mnx/internal/notationmnxreader.cpp" line="62"/>
@@ -24177,12 +24199,12 @@ pickup measure</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/frames/internal/VerticalGapsSection.qml" line="72"/>
         <source>Gap to staff/frames above</source>
-        <translation type="unfinished"/>
+        <translation>上の譜表／フレームまでの間隔</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/frames/internal/VerticalGapsSection.qml" line="90"/>
         <source>Gap to staff/frames below</source>
-        <translation type="unfinished"/>
+        <translation>下の譜表／フレームまでの間隔</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/frames/internal/VerticalGapsSection.qml" line="98"/>
@@ -24192,12 +24214,12 @@ pickup measure</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/frames/internal/VerticalGapsSection.qml" line="118"/>
         <source>Clearance for notation above</source>
-        <translation type="unfinished"/>
+        <translation>上の記譜のための余白</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/frames/internal/VerticalGapsSection.qml" line="136"/>
         <source>Clearance for notation below</source>
-        <translation type="unfinished"/>
+        <translation>下の記譜のための余白</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/frames/internal/VerticalMarginsSection.qml" line="49"/>
@@ -24224,7 +24246,7 @@ pickup measure</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/fretdiagrams/FretDiagramSettings.qml" line="168"/>
         <source>Finger for string %1</source>
-        <translation type="unfinished"/>
+        <translation>弦%1の指番号</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/fretdiagrams/internal/FretAdvancedSettingsTab.qml" line="80"/>
@@ -24436,7 +24458,7 @@ pickup measure</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/lines/ChordBracketSettings.qml" line="63"/>
         <source>Hooks</source>
-        <translation type="unfinished"/>
+        <translation>かぎ</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/lines/ChordBracketSettings.qml" line="69"/>
@@ -24599,7 +24621,7 @@ pickup measure</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/lines/internal/PedalStyleSettings.qml" line="62"/>
         <source>Make line to asterisk visible</source>
-        <translation type="unfinished"/>
+        <translation>アスタリスクまでの線を表示</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/lines/internal/VoltaStyleSettings.qml" line="52"/>
@@ -25659,7 +25681,7 @@ pickup measure</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/bends/bendsettingsmodel.cpp" line="284"/>
         <source>Midpoint</source>
-        <translation type="unfinished"/>
+        <translation>中点</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/bends/bendsettingsmodel.cpp" line="285"/>
@@ -26334,7 +26356,7 @@ pickup measure</source>
     <message>
         <location filename="../../src/instrumentsscene/qml/MuseScore/InstrumentsScene/internal/InstrumentsView.qml" line="142"/>
         <source>traits</source>
-        <translation type="unfinished"/>
+        <translation>特性</translation>
     </message>
     <message>
         <location filename="../../src/instrumentsscene/qml/MuseScore/InstrumentsScene/internal/instrumentlistmodel.cpp" line="192"/>
@@ -26773,7 +26795,12 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
         <translation>今すぐ取得</translation>
     </message>
     <message>
-        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="173"/>
+        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="109"/>
+        <source>Search sounds</source>
+        <translation>サウンドを検索</translation>
+    </message>
+    <message>
+        <location filename="../../src/musesounds/qml/MuseScore/MuseSounds/MuseSoundsPage.qml" line="197"/>
         <source>Sorry, we are unable to load these sounds right now</source>
         <translation>申し訳ございませんが、現在これらのサウンドを読み込めません</translation>
     </message>
@@ -26792,7 +26819,7 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/musesounds/internal/musesamplercheckupdatescenario.cpp" line="70"/>
         <source>To apply this update, MuseScore Studio will need to close briefly and MuseSounds Manager will open. Your MuseSounds libraries won’t work until the update is complete.</source>
-        <translation type="unfinished"/>
+        <translation>この更新を適用するため、MuseScore Studio はいったん終了し、MuseSounds Manager が開きます。更新が完了するまで MuseSounds ライブラリは利用できません。</translation>
     </message>
     <message>
         <location filename="../../src/musesounds/internal/musesamplercheckupdatescenario.cpp" line="74"/>
@@ -26803,7 +26830,7 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/musesounds/internal/musesamplercheckupdatescenario.cpp" line="76"/>
         <source>To apply this update, MuseScore Studio will need to close briefly and MuseHub will open. Your MuseSounds libraries won’t work until the update is complete.</source>
-        <translation type="unfinished"/>
+        <translation>この更新を適用するため、MuseScore Studio はいったん終了し、MuseHub が開きます。更新が完了するまで MuseSounds ライブラリは利用できません。</translation>
     </message>
     <message>
         <location filename="../../src/musesounds/internal/musesamplercheckupdatescenario.cpp" line="80"/>
@@ -26941,17 +26968,17 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/elementpopups/CapoPopup.qml" line="119"/>
         <source>Notation/tab in open position</source>
-        <translation type="unfinished"/>
+        <translation>開放位置の記譜／タブ</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/elementpopups/CapoPopup.qml" line="120"/>
         <source>Notation shows sounding pitches</source>
-        <translation type="unfinished"/>
+        <translation>記譜は実音を表示</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/elementpopups/CapoPopup.qml" line="121"/>
         <source>No transposition</source>
-        <translation type="unfinished"/>
+        <translation>移調なし</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/elementpopups/CapoPopup.qml" line="136"/>
@@ -27848,41 +27875,41 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
         <translation>ズームメニュー</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="704"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="705"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="367"/>
         <source>Insert &amp;after selection…</source>
         <translation>選択範囲の後に挿入…(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="703"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="704"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="368"/>
         <source>Insert &amp;before selection…</source>
         <translation>選択範囲の前に挿入…(&amp;B)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="700"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="701"/>
         <source>&amp;Insert one measure before selection</source>
         <translation>選択範囲の前に小節を1つ挿入(&amp;I)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="701"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="702"/>
         <source>Insert &amp;one measure at end of score</source>
         <translation>スコアの終わりに小節を1つ挿入(&amp;O)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="706"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="707"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="370"/>
         <source>Insert at &amp;start of score…</source>
         <translation>スコアの始めに挿入…(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="707"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="708"/>
         <location filename="../../src/web/appshell/view/appmenumodel.cpp" line="371"/>
         <source>Insert at &amp;end of score…</source>
         <translation>スコアの終わりに挿入…(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="721"/>
+        <location filename="../../src/appshell/qml/MuseScore/AppShell/appmenumodel.cpp" line="722"/>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/noteinputbarmodel.cpp" line="685"/>
         <source>Insert at end of score</source>
         <translation>スコアの終わりに挿入</translation>
@@ -28074,7 +28101,7 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="138"/>
         <source>Cannot paste between different local time signatures</source>
-        <translation type="unfinished"/>
+        <translation>異なる局所的な拍子記号の間では貼り付けできません</translation>
     </message>
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="142"/>
@@ -28145,27 +28172,27 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="175"/>
         <source>Make a list selection of notes or rests on the same beat or any range selection and retry.</source>
-        <translation type="unfinished"/>
+        <translation>同じ拍上の音符または休符のリスト選択、または範囲選択をしてから再試行してください。</translation>
     </message>
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="178"/>
         <source>Some fretboard diagrams could not be transposed</source>
-        <translation type="unfinished"/>
+        <translation>一部のフレットボードダイアグラムを移調できませんでした</translation>
     </message>
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="179"/>
         <source>Fretboard diagrams that could not be transposed have been left blank. You can undo this action if required.</source>
-        <translation type="unfinished"/>
+        <translation>移調できなかったフレットボードダイアグラムは空白のままです。必要ならこの操作を元に戻せます。</translation>
     </message>
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="183"/>
         <source>Can’t explode or implode</source>
-        <translation type="unfinished"/>
+        <translation>パートに分解／1つのパートに集結ができません</translation>
     </message>
     <message>
         <location filename="../../src/notation/internal/mscoreerrorscontroller.cpp" line="184"/>
         <source>Cannot explode or implode between different local time signatures</source>
-        <translation type="unfinished"/>
+        <translation>異なる局所的な拍子記号の間ではパートに分解／1つのパートに集結ができません</translation>
     </message>
     <message>
         <location filename="../../src/notation/internal/notationaccessibility.cpp" line="123"/>
@@ -29267,7 +29294,7 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/styledialog/ChordSymbolsPage.qml" line="254"/>
         <source>All caps (for Solfeggio and French)</source>
-        <translation type="unfinished"/>
+        <translation>すべて大文字（ソルフェージュとフランス式）</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/styledialog/ChordSymbolsPage.qml" line="267"/>
@@ -30237,17 +30264,17 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/PercussionPanelPadSwapDialog.qml" line="120"/>
         <source>Do you also want to move the MIDI notes and keyboard shortcuts that trigger these sounds?</source>
-        <translation type="unfinished"/>
+        <translation>これらのサウンドを鳴らす MIDI ノートとキーボードショートカットも移動しますか？</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/PercussionPanelPadSwapDialog.qml" line="132"/>
         <source>Move MIDI notes and keyboard shortcuts with their sounds</source>
-        <translation type="unfinished"/>
+        <translation>MIDI ノートとキーボードショートカットをサウンドと一緒に移動</translation>
     </message>
     <message>
         <location filename="../../src/notationscene/qml/MuseScore/NotationScene/PercussionPanelPadSwapDialog.qml" line="133"/>
         <source>Leave MIDI notes and keyboard shortcuts fixed to original pad positions</source>
-        <translation type="unfinished"/>
+        <translation>MIDI ノートとキーボードショートカットを元のパッド位置のままにする</translation>
     </message>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/PercussionPreferencesPage.qml" line="58"/>
@@ -33321,7 +33348,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/appshell/qml/MuseScore/AppShell/NotationPage/NotationPage.qml" line="627"/>
         <source>Audio is processed in the background while you work. To trigger processing yourself, turn off automatic processing in Preferences &gt; Audio &amp; MIDI &gt; Online sounds.</source>
-        <translation type="unfinished"/>
+        <translation>作業中、オーディオはバックグラウンドで処理されます。自分で処理を開始するには、環境設定 → オーディオと MIDI → オンラインサウンド で自動処理をオフにしてください。</translation>
     </message>
     <message>
         <location filename="../../src/appshell/qml/MuseScore/AppShell/NotationPage/NotationPage.qml" line="641"/>
@@ -33501,7 +33528,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/playback/internal/onlinesoundscontroller.cpp" line="180"/>
         <source>This may be due to a poor internet connection or server issue. Your score will still play, but some sounds may be missing. Please check your connection, and make sure MuseHub is running and you are logged in. &lt;a href=&quot;%1&quot;&gt;Learn more here&lt;/a&gt;.</source>
-        <translation type="unfinished"/>
+        <translation>インターネット接続が不安定な場合やサーバーの問題が考えられます。スコアは再生できますが、一部のサウンドが欠けることがあります。接続を確認し、MuseHub が起動していてログイン済みか確かめてください。&lt;a href=&quot;%1&quot;&gt;詳細はこちら&lt;/a&gt;。</translation>
     </message>
     <message>
         <location filename="../../src/playback/internal/onlinesoundscontroller.cpp" line="186"/>
@@ -33512,7 +33539,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/playback/internal/onlinesoundscontroller.cpp" line="220"/>
         <source>You’ve reached your current render limit for %1. You will be able to process online sounds again after your quota resets on %2. More info: &lt;a href=&quot;%3&quot;&gt;%3&lt;/a&gt;.</source>
-        <translation type="unfinished"/>
+        <translation>現在の %1 向けレンダー上限に達しました。割り当てが %2 にリセットされたあと、再びオンラインサウンドを処理できます。詳細: &lt;a href=&quot;%3&quot;&gt;%3&lt;/a&gt;。</translation>
     </message>
     <message>
         <location filename="../../src/playback/internal/onlinesoundscontroller.cpp" line="227"/>
@@ -33528,7 +33555,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/playback/internal/onlinesoundscontroller.cpp" line="245"/>
         <source>This will delete online sounds data stored on your computer for this score. Online sounds processing will try to restart immediately.</source>
-        <translation type="unfinished"/>
+        <translation>このスコア用にパソコンに保存されたオンラインサウンドのデータを削除します。オンラインサウンドの処理はすぐに再開を試みます。</translation>
     </message>
     <message>
         <location filename="../../src/playback/internal/playbackcontroller.cpp" line="91"/>
@@ -33542,17 +33569,17 @@ failed: %2</source>
         <translation>Aux %1</translation>
     </message>
     <message>
-        <location filename="../../src/playback/internal/playbackcontroller.cpp" line="1077"/>
+        <location filename="../../src/playback/internal/playbackcontroller.cpp" line="1073"/>
         <source>Metronome</source>
         <translation>メトロノーム</translation>
     </message>
     <message>
-        <location filename="../../src/playback/internal/playbackcontroller.cpp" line="1087"/>
+        <location filename="../../src/playback/internal/playbackcontroller.cpp" line="1083"/>
         <source>Chords</source>
         <translation>コード</translation>
     </message>
     <message>
-        <location filename="../../src/playback/internal/playbackcontroller.cpp" line="1414"/>
+        <location filename="../../src/playback/internal/playbackcontroller.cpp" line="1410"/>
         <source>Loading audio samples</source>
         <translation>オーディオサンプルを読み込み中</translation>
     </message>
@@ -33635,12 +33662,12 @@ failed: %2</source>
     <message>
         <location filename="../../src/playback/qml/MuseScore/Playback/onlinesoundsstatusmodel.cpp" line="47"/>
         <source>You’ve reached your current render limit for %1. You will be able to process online sounds again after your quota resets on %2.</source>
-        <translation type="unfinished"/>
+        <translation>現在の %1 向けレンダー上限に達しました。割り当てが %2 にリセットされたあと、再びオンラインサウンドを処理できます。</translation>
     </message>
     <message>
         <location filename="../../src/playback/qml/MuseScore/Playback/onlinesoundsstatusmodel.cpp" line="132"/>
         <source>Please check your connection, and make sure MuseHub is running and you are logged in.</source>
-        <translation type="unfinished"/>
+        <translation>接続を確認し、MuseHub が起動していてログイン済みか確かめてください。</translation>
     </message>
     <message>
         <location filename="../../src/playback/qml/MuseScore/Playback/outputresourceitem.cpp" line="17"/>
@@ -33867,7 +33894,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/internal/FoldersSection.qml" line="86"/>
         <source>Rescan VST3 plugins</source>
-        <translation type="unfinished"/>
+        <translation>VST3 プラグインを再スキャン</translation>
     </message>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/internal/FFmpegSection.qml" line="30"/>
@@ -33995,7 +34022,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/internal/MnxSection.qml" line="32"/>
         <source>Disabling this may cause errors. Try only for files that fail to import otherwise.</source>
-        <translation type="unfinished"/>
+        <translation>無効にするとエラーの原因になることがあります。インポートに失敗するファイルの場合のみ試してください。</translation>
     </message>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/internal/MnxSection.qml" line="42"/>
@@ -34351,7 +34378,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/internal/UiColorsSection.qml" line="49"/>
         <source>Disabled text</source>
-        <translation type="unfinished"/>
+        <translation>無効なテキスト</translation>
     </message>
     <message>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/internal/UiColorsSection.qml" line="50"/>
@@ -34924,7 +34951,7 @@ failed: %2</source>
     </message>
     <message>
         <location filename="../../src/notationscene/internal/notationactioncontroller.cpp" line="2359"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1791"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1793"/>
         <source>File “%1” is corrupted</source>
         <translation>ファイル『%1』は破損しています</translation>
     </message>
@@ -34954,222 +34981,222 @@ failed: %2</source>
         <translation>このスコアは無効です。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="747"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="749"/>
         <source>Do you want to save changes to the score “%1” before closing?</source>
         <translation>閉じる前にスコア『%1』への変更を保存しますか？</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="750"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="752"/>
         <source>Your changes will be lost if you don’t save them.</source>
         <translation>保存しない場合は変更内容が失われます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1527"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1619"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1529"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1621"/>
         <source>Your score cannot be uploaded to the cloud</source>
         <translation>スコアをクラウドにアップロードできません</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1530"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1532"/>
         <source>This score has become corrupted and contains errors. You can fix the errors manually, or save the score to your computer and get help for this issue on MuseScore.org.</source>
         <translation>このスコアは破損しておりエラーが含まれています。エラーを手動で修正するか、スコアをコンピュータに保存して、 MuseScore.org でこの問題のヘルプを取得できます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1538"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1540"/>
         <source>Save as…</source>
         <translation>名前を付けて保存…</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1543"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1585"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1545"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1587"/>
         <source>Revert to last saved</source>
         <translation>最後に保存した状態に戻す</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1566"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1568"/>
         <source>This score has become corrupted and contains errors</source>
         <translation>この楽譜は破損しておりエラーが含まれています</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1570"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1572"/>
         <source>You can continue saving it locally, although the file may become unusable. You can try to fix the errors manually, or get help for this issue on MuseScore.org.</source>
         <translation>ファイルが使用できなくなる可能性がありますが、ローカルに保存を続けることができます。手動でエラーの修正を試みるか、 MuseScore.org でこの問題のヘルプを取得できます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1572"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1574"/>
         <source>You can continue saving it locally, although the file may become unusable. To preserve your score, revert to the last saved version, or fix the errors manually. You can also get help for this issue on MuseScore.org.</source>
         <translation>ファイルが使用できなくなる可能性がありますが、ローカルに保存を続けることができます。スコアを保持するには、最後に保存したバージョンに戻すか、エラーを手動で修正してください。また、 MuseScore.org でこの問題のヘルプを取得できます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1580"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1582"/>
         <source>Save anyway</source>
         <translation>強制的に保存</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1618"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1620"/>
         <source>Your score cannot be saved</source>
         <translation>スコアを保存できません</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1622"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1624"/>
         <source>This score is corrupted. You can get help for this issue on MuseScore.org.</source>
         <translation>このスコアは破損しています。 MuseScore.org でこの問題のヘルプを取得できます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1625"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1813"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1627"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1815"/>
         <source>Get help</source>
         <translation>ヘルプを取得</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1675"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1677"/>
         <source>Try again</source>
         <translation>もう一度試す</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1690"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1692"/>
         <source>Revert to last saved?</source>
         <translation>最後に保存した状態に戻しますか？</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1691"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1693"/>
         <source>Your changes will be lost. This action cannot be undone.</source>
         <translation>変更内容は失われます。この操作は元に戻せません。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1771"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1796"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1773"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1798"/>
         <source>Open anyway</source>
         <translation>強制的に開く</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1783"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1827"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1785"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1829"/>
         <source>Cannot read file %1</source>
         <translation>ファイル %1 を読み込めません</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1784"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1786"/>
         <source>This file was saved using a newer version of MuseScore Studio. Please visit &lt;a href=&quot;%1&quot;&gt;MuseScore.org&lt;/a&gt; to obtain the latest version.</source>
         <translation>このファイルは、新しいバージョンの MuseScore Studio を使用して保存されました。最新バージョンを入手するには、 &lt;a href=&quot;%1&quot;&gt;MuseScore.org&lt;/a&gt; にアクセスしてください。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1793"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1795"/>
         <source>This file contains errors that could cause MuseScore Studio to malfunction.</source>
         <translation>このファイルには、 MuseScore Studio の誤動作を引き起こす可能性のあるエラーが含まれています。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1808"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1810"/>
         <source>File “%1” is corrupted and cannot be opened</source>
         <translation>ファイル『%1』は破損しているため開けません</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1810"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1812"/>
         <source>Get help for this issue on MuseScore.org.</source>
         <translation>MuseScore.org でこの問題に対するヘルプを取得できます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1832"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1834"/>
         <source>This file does not exist or cannot be accessed at the moment.</source>
         <translation>このファイルは存在しないか、現在アクセスできません。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1835"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1837"/>
         <source>This file could not be opened. Please make sure that MuseScore Studio has permission to read this file.</source>
         <translation>このファイルを開けませんでした。 MuseScore Studio にこのファイルを読み取る権限があることを確認してください。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1842"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1844"/>
         <source>An error occurred while reading this file.</source>
         <translation>このファイルを読み込み中にエラーが発生しました。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1898"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1905"/>
         <source>All supported files</source>
         <translation>対応するすべてのファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1899"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1906"/>
         <source>MuseScore files</source>
         <translation>MuseScore ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1900"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1907"/>
         <source>MusicXML files</source>
         <translation>MusicXML ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1901"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1908"/>
         <source>MIDI files</source>
         <translation>MIDI ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1902"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1909"/>
         <source>MNX files (experimental)</source>
         <translation>MNX ファイル (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1903"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1910"/>
         <source>MuseData files</source>
         <translation>MuseData ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1904"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1911"/>
         <source>Capella files</source>
         <translation>Capella ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1905"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1912"/>
         <source>BB files (experimental)</source>
         <translation>BB ファイル (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1906"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1913"/>
         <source>Overture / Score Writer files (experimental)</source>
         <translation>Overture / Score Writer ファイル (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1907"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1914"/>
         <source>Bagpipe Music Writer files (experimental)</source>
         <translation>Bagpipe Music Writer ファイル (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1908"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1915"/>
         <source>Guitar Pro files</source>
         <translation>Guitar Pro ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1909"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1916"/>
         <source>Power Tab Editor files (experimental)</source>
         <translation>Power Tab Editor ファイル (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1910"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1917"/>
         <source>MEI files</source>
         <translation>MEI ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1911"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1918"/>
         <source>TablEdit files (experimental)</source>
         <translation>TablEdit ファイル (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1912"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1919"/>
         <source>Uncompressed MuseScore folders (experimental)</source>
         <translation>非圧縮 MuseScore フォルダー (実験的)</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1913"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1920"/>
         <source>MuseScore developer files</source>
         <translation>MuseScore 開発者ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1914"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1921"/>
         <source>MuseScore backup files</source>
         <translation>MuseScore バックアップファイル</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1926"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1933"/>
         <source>Open</source>
         <translation>開く</translation>
     </message>
@@ -35296,10 +35323,14 @@ failed: %2</source>
         <translation>MuseScore.com が不明なエラーコードを返しました。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="477"/>
-        <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="609"/>
         <source>Please try again later, or get help for this problem on MuseScore.org.</source>
         <translation>時間をおいてもう一度試してみるか、 MuseScore.org でこの問題のヘルプを取得してください。</translation>
+    </message>
+    <message>
+        <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="477"/>
+        <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="609"/>
+        <source>Please try again later, or get help for this problem on MuseScore.com.</source>
+        <translation>後でもう一度試すか、MuseScore.com でこの問題のヘルプを参照してください。</translation>
     </message>
     <message>
         <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="493"/>
@@ -35454,12 +35485,12 @@ failed: %2</source>
     <message>
         <location filename="../../src/project/qml/MuseScore/Project/internal/Export/MnxSettingsPage.qml" line="32"/>
         <source>Disable to let the importing app choose beam groupings.</source>
-        <translation type="unfinished"/>
+        <translation>無効にすると、インポート側アプリが連桁のグループ分けを決定します。</translation>
     </message>
     <message>
         <location filename="../../src/project/qml/MuseScore/Project/internal/Export/MnxSettingsPage.qml" line="34"/>
         <source>Enable to export the staff line of every rest. Disable to let the importing app decide.</source>
-        <translation type="unfinished"/>
+        <translation>有効にすると、すべての休符の譜線をエクスポートします。無効にすると、インポート側アプリが判断します。</translation>
     </message>
     <message>
         <location filename="../../src/project/qml/MuseScore/Project/internal/Export/MnxSettingsPage.qml" line="38"/>
@@ -36479,7 +36510,7 @@ failed: %2</source>
     </message>
     <message>
         <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="235"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1030"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1032"/>
         <source>Log in to MuseScore.com to save this score to the cloud.</source>
         <translation>スコアをクラウドに保存するには、MuseScore.com にログインしてください。</translation>
     </message>
@@ -36528,7 +36559,7 @@ failed: %2</source>
     </message>
     <message>
         <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="411"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1475"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1477"/>
         <source>Unable to connect to the cloud</source>
         <translation>クラウドに接続できません</translation>
     </message>
@@ -36590,53 +36621,53 @@ failed: %2</source>
     </message>
     <message>
         <location filename="../../src/project/internal/opensaveprojectscenario.cpp" line="587"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1671"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1673"/>
         <source>Save as…</source>
         <translation>名前を付けて保存…</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="462"/>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="555"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="464"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="557"/>
         <source>Log in or create a free account on MuseScore.com to open this score.</source>
         <translation>このスコアを開くには、 MuseScore.com にログインするか、無料のアカウントを作成してください。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1397"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1399"/>
         <source>View online</source>
         <translation>オンラインで見る</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1400"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1402"/>
         <source>All saved changes will now update to the cloud. You can manage this file in the score manager on MuseScore.com.</source>
         <translation>保存されたすべての変更がクラウドに更新されます。このファイルは MuseScore.com のスコアマネージャーで管理することができます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1476"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1478"/>
         <source>Your changes will be saved to a local file until the connection resumes.</source>
         <translation>接続が再開されるまで、変更内容はローカルファイルに保存されます。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1491"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1493"/>
         <source>Please add at least one instrument to enable saving.</source>
         <translation>保存を有効にするには、少なくとも1つの楽器を追加してください。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1641"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1643"/>
         <source>An unknown error occurred while saving this file.</source>
         <translation>このファイルを保存中に不明なエラーが発生しました。</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1649"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1651"/>
         <source>Your score could not be saved</source>
         <translation>スコアを保存できませんでした</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1659"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1661"/>
         <source>An error occurred while saving your score</source>
         <translation>スコアを保存中にエラーが発生しました</translation>
     </message>
     <message>
-        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1661"/>
+        <location filename="../../src/project/internal/projectactionscontroller.cpp" line="1663"/>
         <source>To preserve your score, try saving it again. If this message still appears, please save your score as new copy. You can also get help for this issue on %1.&lt;br/&gt;&lt;br/&gt;Error details (please cite when asking for support): %2</source>
         <translation>スコアを保持するには、もう一度保存をお試しください。このメッセージが再度現れる場合は、スコアを新しいコピーとして保存してください。この問題については、%1 でもヘルプを取得できます。&lt;br/&gt;&lt;br/&gt;エラーの詳細 (サポートを求める際に引用してください): %2</translation>
     </message>
@@ -37160,7 +37191,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/framework/uicomponents/qml/Muse/UiComponents/buttonboxmodel.h" line="136"/>
         <source>No button</source>
-        <translation type="unfinished"/>
+        <translation>ボタンなし</translation>
     </message>
     <message>
         <location filename="../../src/framework/uicomponents/qml/Muse/UiComponents/buttonboxmodel.h" line="137"/>
@@ -37355,7 +37386,7 @@ failed: %2</source>
         <translation>レセヴィブレを切り替え</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/editing/edit.cpp" line="4571"/>
+        <location filename="../../src/engraving/editing/edit.cpp" line="4589"/>
         <source>Enter rest</source>
         <translation>休符を入力</translation>
     </message>
@@ -37371,7 +37402,7 @@ failed: %2</source>
         <translation>スコアを破損させる</translation>
     </message>
     <message>
-        <location filename="../../src/engraving/tests/voiceswitching_tests.cpp" line="118"/>
+        <location filename="../../src/engraving/tests/voiceswitching_tests.cpp" line="209"/>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/inspectormodelwithvoiceandpositionoptions.cpp" line="165"/>
         <location filename="../../src/notation/internal/notationinteraction.cpp" line="6098"/>
         <source>Change voice</source>
@@ -37478,7 +37509,7 @@ failed: %2</source>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/notes/noteheads/noteheadsettingsmodel.cpp" line="57"/>
         <source>Remove notehead parentheses</source>
-        <translation type="unfinished"/>
+        <translation>符頭の括弧を削除</translation>
     </message>
     <message>
         <location filename="../../src/inspector/qml/MuseScore/Inspector/notation/notes/stems/stemsettingsmodel.cpp" line="115"/>

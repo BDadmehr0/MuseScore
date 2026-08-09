@@ -30,20 +30,31 @@
 
 #include "context/iglobalcontext.h"
 #include "async/asyncable.h"
+#include "ui/iuiconfiguration.h"
+#include "ui/iuicontextconfiguration.h"
 #include "notation/notationtypes.h"
+#include "notation/inotationconfiguration.h"
+#include "notation/inotationcontextconfiguration.h"
+#include "engraving/automation/automationdata.h"
+#include "engraving/automation/automationtypes.h"
 
 namespace muse::uicomponents {
 class PolylinePlot;
 }
 
 namespace mu::engraving {
-class IAutomation;
+class Staff;
 }
 
 namespace mu::notation {
 class NotationAutomationController : public muse::Contextable, public muse::async::Asyncable
 {
     muse::ContextInject<mu::context::IGlobalContext> globalContext = { this };
+    muse::ContextInject<muse::ui::IUiContextConfiguration> uiContextConfiguration = { this };
+    muse::GlobalInject<muse::ui::IUiConfiguration> uiConfiguration;
+    muse::GlobalInject<INotationConfiguration> notationConfiguration;
+    muse::ContextInject<INotationContextConfiguration> notationContextConfiguration = { this };
+    muse::GlobalInject<mu::engraving::IEngravingConfiguration> engravingConfiguration;
 
 public:
     NotationAutomationController(QQuickItem* linesParent, const muse::modularity::ContextPtr& iocCtx);
@@ -99,21 +110,47 @@ private:
         PointType pointType = PointType::UNKNOWN;
     };
 
+    using PointsDataMap = std::map<SysStaffKey, QVector<PointData> >;
+
     SysStaffToPolylinesMap createPolylinesForSystem(const System* system);
-    QVector<PointData> pointsDataInStaff(const muse::ID& staff, const muse::RectF& sysStaffCanvasRect, int startTick, int endTick) const;
+    muse::uicomponents::PolylinePlot* createPolylineForStaff(const System* system, staff_idx_t staffIdx);
+    QVector<PointData> pointsDataInStaff(const mu::engraving::Staff* staff, const muse::RectF& sysStaffCanvasRect, int startTick,
+                                         int endTick) const;
+
+    mu::engraving::AutomationType currentAutomationType() const;
+
+    void applyPolylineStyle(muse::uicomponents::PolylinePlot* polyline) const;
+    void applyPolylineColors(muse::uicomponents::PolylinePlot* polyline) const;
+
+    QColor inversionRelativeColor(const muse::ui::ThemeStyleKey& key) const;
 
     void updatePolylinesGeometry();
+    void updatePolylinesColors();
     void onCurrentNotationChanged();
+    void rebuildAllPolylines();
 
-    void requestEditPoint(const PointData& oldPointData, const SysStaffKey& key, qreal x, qreal y);
+    void updateStaffPointsInRange(const SysStaffKey& key, int tickFrom, int tickTo);
+
+    void onAutomationChanged(const mu::engraving::AutomationChanges& changes);
+    void mergePendingChanges(const mu::engraving::AutomationChanges& changes);
+    void applyAutomationChanges(const mu::engraving::AutomationChanges& changes);
+
+    bool requestEditPoint(const PointData& oldPointData, const SysStaffKey& key, qreal x, qreal y);
+    bool requestAddPoint(const SysStaffKey& key, qreal x, qreal y);
+    bool requestRemovePoint(const PointData& pointData, const SysStaffKey& key);
+    void editAutomationPoints(const mu::engraving::AutomationCurveKey& key, mu::engraving::AutomationPointEdits& edits);
+
+    const mu::engraving::AutomationPoint* automationPointAt(const SysStaffKey& key, int tick) const;
 
     INotationAutomationPtr automation() const;
-    mu::engraving::IAutomation* engravingAutomation() const;
+    mu::engraving::AutomationDataConstPtr automationData() const;
     INotationPtr currentNotation() const;
     mu::engraving::Score* score() const;
 
     QQuickItem* m_linesParent = nullptr;
     SysStaffToPolylinesMap m_stavesToLinesMap;
+    PointsDataMap m_pointsDataByStaff;
     muse::draw::Transform m_viewMatrix;
+    mu::engraving::AutomationChanges m_pendingChanges;
 };
 }

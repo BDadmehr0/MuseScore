@@ -337,7 +337,8 @@ static InstrumentChange* findInstrumentChange(Score* score, const Part* part, co
         return nullptr;
     }
 
-    EngravingItem* item = segment->findAnnotation(ElementType::INSTRUMENT_CHANGE, part->startTrack(), part->endTrack() - 1);
+    const TrackRange trackRange = part->trackRange();
+    EngravingItem* item = segment->findAnnotation(ElementType::INSTRUMENT_CHANGE, trackRange.startTrack, trackRange.endTrack - 1);
     return item ? toInstrumentChange(item) : nullptr;
 }
 
@@ -768,8 +769,8 @@ void EditPart::insertPart(Score* score, const InstrumentTemplate* templ, size_t 
     for (staff_idx_t i = 0; i < templ->staffCount; ++i) {
         Staff* staff = Factory::createStaff(part);
         StaffType* stt = staff->staffType(Fraction(0, 1));
-        staff->init(templ, stt, int(i));
         score->undoInsertStaff(staff, i);
+        staff->init(templ, stt, int(i));
     }
 
     score->undoInsertPart(part, index);

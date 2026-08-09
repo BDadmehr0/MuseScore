@@ -496,6 +496,9 @@ static const std::array ELEMENT_TYPES {
     Item{ ElementType::PAGE, "Page",
           TranslatableString("engraving", "page(s)", nullptr, 1),
           TranslatableString("engraving", "Page(s)", nullptr, 1) },
+    Item{ ElementType::PAGE_LOCK_INDICATOR, "pageLockIndicator",
+          TranslatableString("engraving", "page lock(s)", nullptr, 1),
+          TranslatableString("engraving", "Page lock(s)", nullptr, 1) },
     Item{ ElementType::PARENTHESIS, "Parenthesis",
           TranslatableString("engraving", "parenthesis", nullptr, 1),
           TranslatableString("engraving", "Parenthesis", nullptr, 1) },
@@ -1147,7 +1150,9 @@ static const std::vector<Item<NoteHeadScheme> > NOTEHEAD_SCHEMES = {
     { NoteHeadScheme::HEAD_AUTO,                "auto",              muse::TranslatableString("engraving", "Auto") },
     { NoteHeadScheme::HEAD_NORMAL,              "normal",            muse::TranslatableString("engraving/noteheadscheme", "Normal") },
     { NoteHeadScheme::HEAD_PITCHNAME,           "name-pitch",        muse::TranslatableString("engraving/noteheadscheme", "Pitch names") },
+    { NoteHeadScheme::HEAD_PITCHNAME_NO_ACCIDENTALS, "name-pitch-no-acc", muse::TranslatableString("engraving/noteheadscheme", "Pitch names, no accidentals") },
     { NoteHeadScheme::HEAD_PITCHNAME_GERMAN,    "name-pitch-german", muse::TranslatableString("engraving/noteheadscheme", "German pitch names") },
+    { NoteHeadScheme::HEAD_PITCHNAME_GERMAN_NO_ACCIDENTALS, "name-pitch-german-no-acc", muse::TranslatableString("engraving/noteheadscheme", "German pitch names, no accidentals") },
     { NoteHeadScheme::HEAD_SOLFEGE,             "solfege-movable",   muse::TranslatableString("engraving/noteheadscheme", "Solf\u00e8ge movable Do") },  // &egrave;
     { NoteHeadScheme::HEAD_SOLFEGE_FIXED,       "solfege-fixed",     muse::TranslatableString("engraving/noteheadscheme", "Solf\u00e8ge fixed Do") },    // &egrave;
     { NoteHeadScheme::HEAD_SHAPE_NOTE_4,        "shape-4",           muse::TranslatableString("engraving/noteheadscheme", "4-shape (Walker)") },
@@ -1931,7 +1936,7 @@ static const std::vector<Item<ChangeMethod> > CHANGE_METHODS = {
     { ChangeMethod::EXPONENTIAL,      "exponential" },
 };
 
-static float easingFactor(const float x, const ChangeMethod method)
+static double easingFactor(const double x, const ChangeMethod method)
 {
     switch (method) {
     case ChangeMethod::NORMAL:
@@ -1942,19 +1947,19 @@ static float easingFactor(const float x, const ChangeMethod method)
         return std::sqrt(1 - std::pow(x - 1, 2));
     case ChangeMethod::EASE_IN_OUT:
         if (x < 0.5) {
-            return (1.f - std::sqrt(1 - std::pow(2 * x, 2))) / 2;
+            return (1.0 - std::sqrt(1 - std::pow(2 * x, 2))) / 2;
         } else {
-            return (std::sqrt(1.f - std::pow(-2 * x + 2, 2)) + 1) / 2;
+            return (std::sqrt(1.0 - std::pow(-2 * x + 2, 2)) + 1) / 2;
         }
     case ChangeMethod::EXPONENTIAL:
-        if (muse::RealIsEqual(x, 1.f)) {
+        if (muse::RealIsEqual(x, 1.0)) {
             return x;
         } else {
-            return 1.f - std::pow(2, -10 * x);
+            return 1.0 - std::pow(2, -10 * x);
         }
     }
 
-    return 1.f;
+    return 1.0;
 }
 
 template<typename T>
@@ -1967,10 +1972,10 @@ static std::map<int /*tickPosition*/, T> buildEasedValueCurve(const int ticksDur
 
     std::map<int, T> result;
 
-    float durationStep = static_cast<float>(ticksDuration) / static_cast<float>(stepsCount);
+    double durationStep = static_cast<double>(ticksDuration) / static_cast<double>(stepsCount);
 
     for (int i = 0; i <= stepsCount; ++i) {
-        result.emplace(i * durationStep, easingFactor(i / static_cast<float>(stepsCount), method) * amplitude);
+        result.emplace(i * durationStep, easingFactor(static_cast<double>(i) / static_cast<double>(stepsCount), method) * amplitude);
     }
 
     return result;
@@ -2535,17 +2540,21 @@ BarLineType TConv::fromXml(const AsciiStringView& tag, BarLineType def)
     return def;
 }
 
-static const std::array<Item<TremoloType>, 10> TREMOLO_TYPES = { {
+static const std::array<Item<TremoloType>, 14> TREMOLO_TYPES = { {
     { TremoloType::INVALID_TREMOLO, "" },
     { TremoloType::R8,              "r8",       muse::TranslatableString("engraving/tremolotype", "Eighth through stem") },
     { TremoloType::R16,             "r16",      muse::TranslatableString("engraving/tremolotype", "16th through stem") },
     { TremoloType::R32,             "r32",      muse::TranslatableString("engraving/tremolotype", "32nd through stem") },
     { TremoloType::R64,             "r64",      muse::TranslatableString("engraving/tremolotype", "64th through stem") },
+    { TremoloType::R128,            "r128",     muse::TranslatableString("engraving/tremolotype", "128th through stem") },
+    { TremoloType::R256,            "r256",     muse::TranslatableString("engraving/tremolotype", "256th through stem") },
     { TremoloType::BUZZ_ROLL,       "buzzroll", muse::TranslatableString("engraving/tremolotype", "Buzz roll") },
     { TremoloType::C8,              "c8",       muse::TranslatableString("engraving/tremolotype", "Eighth between notes") },
     { TremoloType::C16,             "c16",      muse::TranslatableString("engraving/tremolotype", "16th between notes") },
     { TremoloType::C32,             "c32",      muse::TranslatableString("engraving/tremolotype", "32nd between notes") },
-    { TremoloType::C64,             "c64",      muse::TranslatableString("engraving/tremolotype", "64th between notes") }
+    { TremoloType::C64,             "c64",      muse::TranslatableString("engraving/tremolotype", "64th between notes") },
+    { TremoloType::C128,            "c128",     muse::TranslatableString("engraving/tremolotype", "128th between notes") },
+    { TremoloType::C256,            "c256",     muse::TranslatableString("engraving/tremolotype", "256th between notes") }
 } };
 
 const muse::TranslatableString& TConv::userName(TremoloType v)

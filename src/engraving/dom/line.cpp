@@ -27,6 +27,7 @@
 #include "containers.h"
 
 #include "../editing/mscoreview.h"
+#include "../editing/navigation.h"
 
 #include "anchors.h"
 #include "barline.h"
@@ -298,16 +299,16 @@ bool LineSegment::edit(EditData& ed)
             break;
         case Key_Up:
             if (moveStart) {
-                note1 = toNote(score()->upAlt(note1));
+                note1 = toNote(Navigation::chordNoteAbove(score(), note1));
             } else if (moveEnd) {
-                note2 = toNote(score()->upAlt(note2));
+                note2 = toNote(Navigation::chordNoteAbove(score(), note2));
             }
             break;
         case Key_Down:
             if (moveStart) {
-                note1 = toNote(score()->downAlt(note1));
+                note1 = toNote(Navigation::chordNoteBelow(score(), note1));
             } else if (moveEnd) {
-                note2 = toNote(score()->downAlt(note2));
+                note2 = toNote(Navigation::chordNoteBelow(score(), note2));
             }
             break;
         default:
@@ -332,7 +333,7 @@ bool LineSegment::edit(EditData& ed)
     }
     break;
     case Spanner::Anchor::MEASURE:
-    case Spanner::Anchor::CHORD:
+    case Spanner::Anchor::CHORDREST:
     {
         Measure* m1 = l->startMeasure();
         Measure* m2 = l->endMeasure();
@@ -908,14 +909,14 @@ PointF SLine::linePos(Grip grip, System** system) const
         }
         return note->pagePos() - (*system)->pagePos();
     }
-    case Spanner::Anchor::CHORD:
+    case Spanner::Anchor::CHORDREST:
     case Spanner::Anchor::SEGMENT:
     {
         Segment* segment = start ? startSegment() : endSegment();
         if (!segment) {
             return PointF();
         }
-        if (anchor() == Spanner::Anchor::CHORD && !segment->isChordRestType()) {
+        if (anchor() == Spanner::Anchor::CHORDREST && !segment->isChordRestType()) {
             return PointF();
         }
         if (!start) {

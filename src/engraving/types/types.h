@@ -188,6 +188,7 @@ enum class ElementType : unsigned char {
     TAB_DURATION_SYMBOL,
     FSYMBOL,
     PAGE,
+    PAGE_LOCK_INDICATOR,
     TEXTLINE_BASE,
     BRACKET,
     SEGMENT,
@@ -509,7 +510,9 @@ enum class NoteHeadScheme : signed char {
     HEAD_AUTO = -1,
     HEAD_NORMAL,
     HEAD_PITCHNAME,
+    HEAD_PITCHNAME_NO_ACCIDENTALS,
     HEAD_PITCHNAME_GERMAN,
+    HEAD_PITCHNAME_GERMAN_NO_ACCIDENTALS,
     HEAD_SOLFEGE,
     HEAD_SOLFEGE_FIXED,
     HEAD_SHAPE_NOTE_4,
@@ -1152,8 +1155,8 @@ struct InstrumentTrackId {
 // Tremolo subtypes:
 enum class TremoloType : signed char {
     INVALID_TREMOLO = -1,
-    R8 = 0, R16, R32, R64, BUZZ_ROLL,    // one note tremolo (repeat)
-    C8, C16, C32, C64       // two note tremolo (change)
+    R8 = 0, R16, R32, R64, R128, R256, BUZZ_ROLL,     // one note tremolo (repeat)
+    C8, C16, C32, C64, C128, C256                     // two note tremolo (change)
 };
 
 inline bool isTremoloTwoChord(TremoloType type)
@@ -1401,6 +1404,12 @@ enum class LayoutFlag : unsigned char {
 };
 
 typedef muse::Flags<LayoutFlag> LayoutFlags;
+
+enum class LoopBoundaryType : signed char {
+    Unknown = -1,
+    LoopIn = 0,
+    LoopOut = 1
+};
 } // mu::engraving
 
 template<>

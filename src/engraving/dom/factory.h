@@ -28,7 +28,7 @@
 namespace mu::engraving {
 class Instrument;
 class RootItem;
-class SystemLock;
+class RangeLock;
 class TremoloSingleChord;
 class TremoloTwoChord;
 
@@ -76,7 +76,7 @@ public:
     static Bracket* createBracket(EngravingItem* parent, bool isAccessibleEnabled = true);
     static std::shared_ptr<Bracket> makeBracket(EngravingItem* parent);
     static BracketItem* createBracketItem(EngravingItem* parent);
-    static BracketItem* createBracketItem(EngravingItem* parent, BracketType a, int b);
+    static BracketItem* createBracketItem(EngravingItem* parent, BracketType bracketType, size_t span);
 
     static Breath* createBreath(Segment* parent, bool isAccessibleEnabled = true);
     static std::shared_ptr<Breath> makeBreath(Segment* parent);
@@ -120,7 +120,7 @@ public:
 
     static StaffVisibilityIndicator* createStaffVisibilityIndicator(System* parent, bool isAccessibleEnabled = true);
 
-    static SystemLockIndicator* createSystemLockIndicator(System* parent, const SystemLock* lock, bool isAccessibleEnabled = true);
+    static SystemLockIndicator* createSystemLockIndicator(System* parent, const RangeLock* lock, bool isAccessibleEnabled = true);
     static SystemLockIndicator* copySystemLockIndicator(const SystemLockIndicator& src);
 
     static Lyrics* createLyrics(ChordRest* parent, bool isAccessibleEnabled = true);
@@ -147,6 +147,9 @@ public:
     static std::shared_ptr<NoteLine> makeNoteLine(Note* parent);
 
     static Page* createPage(RootItem* parent, bool isAccessibleEnabled = true);
+
+    static PageLockIndicator* createPageLockIndicator(System* parent, const RangeLock* lock, bool isAccessibleEnabled = true);
+    static PageLockIndicator* copyPageLockIndicator(const PageLockIndicator& src);
 
     static Parenthesis* createParenthesis(EngravingItem* parent, bool isAccessibleEnabled = true);
     static Parenthesis* copyParenthesis(const Parenthesis& src);

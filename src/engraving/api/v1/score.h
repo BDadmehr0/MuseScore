@@ -27,6 +27,9 @@
 #include "modularity/ioc.h"
 #include "context/iglobalcontext.h"
 
+#include "engraving/dom/score.h"
+#include "engraving/dom/segment.h"
+
 // api
 #include "excerpt.h"
 #include "apistructs.h"
@@ -436,6 +439,14 @@ public:
     * @since 4.6
     */
     Q_INVOKABLE void makeIntoSystem(apiv1::MeasureBase* first, apiv1::MeasureBase* last);
+
+    /** APIDOC
+     * List of bracket items for staffIdx
+     * @method
+     * @param {Number} staffIdx Staff index
+     * @since 5.0
+    */
+    Q_INVOKABLE QQmlListProperty<EngravingItem> brackets(int staffIdx);
 
     QQmlListProperty<apiv1::Spanner> spanners();
 

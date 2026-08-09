@@ -31,7 +31,6 @@
 #include "../../dom/ambitus.h"
 #include "../../dom/arpeggio.h"
 #include "../../dom/articulation.h"
-#include "../../dom/audio.h"
 #include "../../dom/bagpembell.h"
 #include "../../dom/barline.h"
 #include "../../dom/beam.h"
@@ -134,6 +133,8 @@
 #include "../../dom/vibrato.h"
 #include "../../dom/volta.h"
 #include "../../dom/whammybar.h"
+
+#include "../../editing/editstaffbrackets.h"
 
 #include "../xmlreader.h"
 #include "../read206/read206.h"
@@ -2007,17 +2008,6 @@ void TRead::read(TappingHalfSlur* t, XmlReader& xml, ReadContext& ctx)
     }
 }
 
-void TRead::read(Audio* a, XmlReader& e, ReadContext&)
-{
-    while (e.readNextStartElement()) {
-        if (e.name() == "path") {
-            a->setPath(e.readText());
-        } else {
-            e.unknown();
-        }
-    }
-}
-
 void TRead::read(BagpipeEmbellishment* b, XmlReader& e, ReadContext&)
 {
     while (e.readNextStartElement()) {
@@ -3716,7 +3706,6 @@ bool TRead::readProperties(SLine* l, XmlReader& e, ReadContext& ctx)
         TRead::read(ls, e, ctx);
         ls->setVisible(l->visible());
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::DIAGONAL)) {
-    } else if (TRead::readProperty(l, tag, e, ctx, Pid::ANCHOR)) {
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::LINE_WIDTH)) {
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::LINE_STYLE)) {
     } else if (TRead::readProperty(l, tag, e, ctx, Pid::DASH_LINE_LEN)) {
@@ -4108,12 +4097,12 @@ bool TRead::readProperties(Staff* s, XmlReader& e, ReadContext& ctx)
         Color color = Color::fromString(e.attribute("color"));
         int col = e.intAttribute("col", -1);
         if (col == -1) {
-            col = static_cast<int>(s->brackets().size());
+            col = static_cast<int>(ctx.score()->brackets(s->idx()).size());
         }
-        s->setBracketType(col, BracketType(e.intAttribute("type", -1)));
-        s->setBracketSpan(col, e.intAttribute("span", 0));
-        s->setBracketVisible(col, static_cast<bool>(e.intAttribute("visible", 1)));
-        BracketItem* bi = s->brackets().at(col);
+        EditStaffBrackets::setBracketType(ctx.score(), s->idx(), col, BracketType(e.intAttribute("type", -1)));
+        EditStaffBrackets::setBracketSpan(ctx.score(), s->idx(), col, e.intAttribute("span", 0));
+        EditStaffBrackets::setBracketVisible(ctx.score(), s->idx(), col, static_cast<bool>(e.intAttribute("visible", 1)));
+        BracketItem* bi = ctx.score()->brackets(s->idx()).at(col);
         if (color.isValid()) {
             bi->setColor(color);
         }
@@ -4634,12 +4623,6 @@ bool TRead::readProperties(Volta* v, XmlReader& e, ReadContext& ctx)
         return false;
     }
 
-    if (v->anchor() != Volta::VOLTA_ANCHOR) {
-        // Volta strictly assumes that its anchor is measure, so don't let old scores override this.
-        LOGW("Correcting volta anchor type from %d to %d", int(v->anchor()), int(Volta::VOLTA_ANCHOR));
-        v->setAnchor(Volta::VOLTA_ANCHOR);
-    }
-
     return true;
 }
 
@@ -4689,7 +4672,7 @@ void TRead::readSystemLock(Score* score, XmlReader& e)
         return;
     }
 
-    score->addSystemLock(new SystemLock(startMeas, endMeas));
+    score->addSystemLock(new RangeLock(startMeas, endMeas));
 }
 
 void TRead::readSystemDividers(Score* score, XmlReader& e, ReadContext& ctx)

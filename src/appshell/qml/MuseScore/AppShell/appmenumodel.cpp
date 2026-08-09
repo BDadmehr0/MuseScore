@@ -21,6 +21,7 @@
  */
 #include "appmenumodel.h"
 
+#include "log.h"
 #include "types/translatablestring.h"
 
 #include "muse_framework_config.h"
@@ -29,7 +30,9 @@
 #include "workspace/qml/Muse/Workspace/workspacesmenumodel.h"
 #endif
 
-#include "log.h"
+#include "notation/inotation.h"
+#include "notation/inotationundostack.h"
+#include "notationscene/notationcommands.h"
 
 using namespace muse;
 using namespace mu::appshell;
@@ -244,17 +247,17 @@ MenuItemList AppMenuModel::makePublishOnlineSubItems()
 MenuItem* AppMenuModel::makeEditMenu()
 {
     MenuItemList editItems {
-        makeMenuItem("action://notation/undo"),
-        makeMenuItem("action://notation/redo"),
+        makeMenuItem("command://notation/undo"),
+        makeMenuItem("command://notation/redo"),
         makeMenuItem(TOGGLE_UNDO_HISTORY_PANEL_CODE),
         makeSeparator(),
-        makeMenuItem("action://notation/cut"),
-        makeMenuItem("action://notation/copy"),
-        makeMenuItem("action://notation/paste"),
+        makeMenuItem("command://notation/cut"),
+        makeMenuItem("command://notation/copy"),
+        makeMenuItem("command://notation/paste"),
         makeMenuItem("notation-paste-half"),
         makeMenuItem("notation-paste-double"),
         makeMenuItem("notation-swap"),
-        makeMenuItem("action://notation/delete"),
+        makeMenuItem("command://notation/delete"),
         makeSeparator(),
         makeMenuItem("notation-select-all"),
         makeMenuItem("notation-select-section"),
@@ -276,13 +279,13 @@ void AppMenuModel::updateUndoRedoItems()
 {
     auto stack = undoStack();
 
-    MenuItem& undoItem = findItem(ActionCode("action://notation/undo"));
+    MenuItem& undoItem = findItem(ActionCode("command://notation/undo"));
     const TranslatableString undoActionName = stack ? stack->topMostUndoActionName() : TranslatableString();
     undoItem.setTitle(undoActionName.isEmpty()
                       ? TranslatableString("action", "Undo")
                       : TranslatableString("action", "Undo ‘%1’").arg(undoActionName));
 
-    MenuItem& redoItem = findItem(ActionCode("action://notation/redo"));
+    MenuItem& redoItem = findItem(ActionCode("command://notation/redo"));
     const TranslatableString redoActionName = stack ? stack->topMostRedoActionName() : TranslatableString();
     redoItem.setTitle(redoActionName.isEmpty()
                       ? TranslatableString("action", "Redo")
@@ -310,7 +313,7 @@ MenuItem* AppMenuModel::makeViewMenu()
         makeMenuItem("toggle-mixer"),
         makeMenuItem("toggle-piano-keyboard"),
         makeMenuItem("toggle-percussion-panel"),
-        makeMenuItem("command://playback/show-playback-setup"),
+        makeMenuItem("command://playback/open-playback-setup"),
         //makeMenuItem("toggle-scorecmp-tool"), // not implemented
         makeSeparator(),
         makeMenu(TranslatableString("appshell/menu/view", "&Toolbars"), makeToolbarsItems(), "menu-toolbars")
@@ -561,8 +564,8 @@ MenuItem* AppMenuModel::makeDiagnosticsMenu()
 #endif
 
         MenuItemList audioItems {
-            makeMenuItem("action://audio/dev/use-drivermode"),
-            makeMenuItem("action://audio/dev/use-hybridmode"),
+            makeMenuItem("command://audio/dev/use-driver-mode"),
+            makeMenuItem("command://audio/dev/use-hybrid-mode"),
         };
 
         items << makeMenu(TranslatableString("appshell/menu/diagnostics", "A&ctions"), actionsItems, "menu-actions")
@@ -629,23 +632,23 @@ MenuItemList AppMenuModel::appendClearRecentSection(const muse::uicomponents::Me
 MenuItemList AppMenuModel::makeNotesItems()
 {
     MenuItemList items {
-        makeMenuItem("note-input"),
+        makeMenuItem("command://notation/toggle-note-input"),
         makeSeparator(),
-        makeMenuItem("note-c"),
-        makeMenuItem("note-d"),
-        makeMenuItem("note-e"),
-        makeMenuItem("note-f"),
-        makeMenuItem("note-g"),
-        makeMenuItem("note-a"),
-        makeMenuItem("note-b"),
+        makeMenuItem("command://notation/enter-note-c"),
+        makeMenuItem("command://notation/enter-note-d"),
+        makeMenuItem("command://notation/enter-note-e"),
+        makeMenuItem("command://notation/enter-note-f"),
+        makeMenuItem("command://notation/enter-note-g"),
+        makeMenuItem("command://notation/enter-note-a"),
+        makeMenuItem("command://notation/enter-note-b"),
         makeSeparator(),
-        makeMenuItem("chord-c"),
-        makeMenuItem("chord-d"),
-        makeMenuItem("chord-e"),
-        makeMenuItem("chord-f"),
-        makeMenuItem("chord-g"),
-        makeMenuItem("chord-a"),
-        makeMenuItem("chord-b")
+        makeMenuItem("command://notation/add-note-c"),
+        makeMenuItem("command://notation/add-note-d"),
+        makeMenuItem("command://notation/add-note-e"),
+        makeMenuItem("command://notation/add-note-f"),
+        makeMenuItem("command://notation/add-note-g"),
+        makeMenuItem("command://notation/add-note-a"),
+        makeMenuItem("command://notation/add-note-b"),
     };
 
     return items;
@@ -682,15 +685,15 @@ MenuItemList AppMenuModel::makeIntervalsItems()
 MenuItemList AppMenuModel::makeTupletsItems()
 {
     MenuItemList items {
-        makeMenuItem("duplet"),
-        makeMenuItem("triplet"),
-        makeMenuItem("quadruplet"),
-        makeMenuItem("quintuplet"),
-        makeMenuItem("sextuplet"),
-        makeMenuItem("septuplet"),
-        makeMenuItem("octuplet"),
-        makeMenuItem("nonuplet"),
-        makeMenuItem("tuplet-dialog")
+        makeMenuItem(notation::ADD_DUPLET_COMMAND),
+        makeMenuItem(notation::ADD_TRIPLET_COMMAND),
+        makeMenuItem(notation::ADD_QUADRUPLET_COMMAND),
+        makeMenuItem(notation::ADD_QUINTUPLET_COMMAND),
+        makeMenuItem(notation::ADD_SEXTUPLET_COMMAND),
+        makeMenuItem(notation::ADD_SEPTUPLET_COMMAND),
+        makeMenuItem(notation::ADD_OCTUPLET_COMMAND),
+        makeMenuItem(notation::ADD_NONUPLET_COMMAND),
+        makeMenuItem(notation::OPEN_TUPLET_CONFIGURE_COMMAND)
     };
 
     return items;

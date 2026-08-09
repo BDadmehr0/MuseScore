@@ -78,6 +78,8 @@ public:
     Glissando(EngravingItem* parent);
     Glissando(const Glissando&);
 
+    Anchor anchor() const override { return Anchor::NOTE; }
+
     static Note* guessInitialNote(Chord* chord);
 
     std::optional<bool> isHarpGliss() const { return m_isHarpGliss; }
@@ -99,6 +101,9 @@ public:
     TranslatableString subtypeUserName() const override;
 
     static bool pitchSteps(const Spanner* spanner, std::vector<int>& pitchOffsets);
+
+protected:
+    bool isInSpannerMap() const override { return false; }
 
 private:
 
