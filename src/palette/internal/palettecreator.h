@@ -62,6 +62,7 @@ public:
     PalettePtr newGraceNotePalette();
     PalettePtr newBagpipeEmbellishmentPalette();
     PalettePtr newKeySigPalette();
+    PalettePtr newPersianKeySigPalette();
     PalettePtr newAccidentalsPalette(bool defaultPalette = false);
     PalettePtr newBarLinePalette(bool defaultPalette = false);
     PalettePtr newLinesPalette(bool defaultPalette = false);
