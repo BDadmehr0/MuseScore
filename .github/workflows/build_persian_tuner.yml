@@ -54,9 +54,6 @@ concurrency:
   group: persian-tuner-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  BUILD_MODE: ${{ inputs.build_mode || 'devel' }}
-
 jobs:
   # ------------------------------------------------------------------
   #   WINDOWS BUILD  (x86_64 7z)
@@ -67,7 +64,7 @@ jobs:
     secrets: inherit
     with:
       platforms: 'windows_x64'
-      build_mode: ${{ env.BUILD_MODE }}
+      build_mode: ${{ inputs.build_mode || 'devel' }}
       publish: 'off'
       sentry_project: ''
       dockwidgets_v2: 'ON'
