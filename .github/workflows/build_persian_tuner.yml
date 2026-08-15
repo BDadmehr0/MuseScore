@@ -1,0 +1,159 @@
+# =============================================================================
+#  MuseScore Studio Persian Tuner - Build & Release Workflow
+# =============================================================================
+#  This workflow:
+#    1. Is triggered automatically when commits are pushed to the
+#       `persian-tuner` branch, OR manually via workflow_dispatch.
+#    2. Reuses the existing Windows‑build CI pipeline to produce a
+#       release‑quality .exe (7z archive) with all Persian‑tuner changes
+#       baked in.
+#    3. On every push to `persian-tuner` it uploads the build as an
+#       *unstable* GitHub Release (pre‑release).  On a manually‑created
+#       git tag (e.g. v1.0.0-persian) it creates a *stable* release.
+#
+#  How to use
+#  ----------
+#  1. Push to the `persian-tuner` branch → the workflow runs automatically.
+#     The built .7z artefact is attached as a pre‑release.
+#  2. To create a proper release, bump the version and push a tag:
+#        git tag v1.0.0-persian
+#        git push origin v1.0.0-persian
+#     The workflow will build and publish a full Release with release notes.
+#
+#  Requirements
+#  ------------
+#  - The underlying Windows build scripts (buildscripts/ci/windows/*.bat)
+#    need access to MuseScore's public S3 dependency bucket.  If the bucket
+#    stops being accessible from forks this workflow will fail — in that case
+#    switch to the DOCKER / MANUAL approach described in the companion
+#    README section below.
+# =============================================================================
+
+name: 'Build: Persian Tuner'
+
+on:
+  push:
+    branches:
+      - persian-tuner
+    tags:
+      - 'v*.*.*-persian'
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      build_mode:
+        description: 'Build mode'
+        default: 'devel'
+        type: choice
+        options:
+          - devel
+          - nightly
+          - testing
+          - stable
+
+concurrency:
+  group: persian-tuner-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_MODE: ${{ inputs.build_mode || 'devel' }}
+
+jobs:
+  # ------------------------------------------------------------------
+  #   WINDOWS BUILD  (x86_64 7z)
+  # ------------------------------------------------------------------
+  windows_build:
+    name: 'Windows x64 (${{ github.ref_type == ''tag'' && ''stable'' || ''devel'' }})'
+    uses: ./.github/workflows/build_windows.yml
+    secrets: inherit
+    with:
+      platforms: 'windows_x64'
+      build_mode: ${{ env.BUILD_MODE }}
+      publish: 'off'
+      sentry_project: ''
+      dockwidgets_v2: 'ON'
+
+  # ------------------------------------------------------------------
+  #   CREATE / UPDATE GITHUB RELEASE
+  # ------------------------------------------------------------------
+  release:
+    name: 'Create GitHub Release'
+    if: ${{ always() && needs.windows_build.result == 'success' }}
+    needs: [windows_build]
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: persian-tuner
+          fetch-depth: 0
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v7
+        with:
+          pattern: MuseScore-Studio-Windows-*
+          path: ./downloaded-artifacts
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Find downloaded artifacts
+        id: find-artifacts
+        run: |
+          ls -laR ./downloaded-artifacts/ 2>/dev/null || echo "No artifacts found yet"
+          # Find any .7z or .exe files
+          ARTIFACT_FILE=$(find ./downloaded-artifacts -name '*.7z' -o -name '*.exe' -o -name '*.msi' 2>/dev/null | head -5)
+          if [ -n "$ARTIFACT_FILE" ]; then
+            echo "Found artifacts:"
+            echo "$ARTIFACT_FILE"
+            # Convert to comma-separated list for action-gh-release
+            FILES_CSV=$(echo "$ARTIFACT_FILE" | tr '\n' ',' | sed 's/,$//')
+            echo "files_csv=$FILES_CSV" >> $GITHUB_OUTPUT
+          else
+            echo "No build artifacts found to attach to release"
+            echo "files_csv=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            SHORT_SHA="${GITHUB_SHA:0:7}"
+            DATE_TAG="$(date -u +'%Y%m%d')"
+            VERSION="persian-tuner-${DATE_TAG}-${SHORT_SHA}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            PREV_TAG=$(git describe --tags --abbrev=0 "${{ github.ref_name }}"^ 2>/dev/null || echo "")
+            if [[ -n "$PREV_TAG" ]]; then
+              NOTES=$(git log --oneline --no-decorate "${PREV_TAG}..${{ github.ref_name }}" 2>/dev/null)
+            else
+              NOTES="Initial release of Persian‑tuner build."
+            fi
+          else
+            NOTES="# ⚠️ Unstable pre‑release build\n\nThis build was automatically produced from the **persian-tuner** branch.\n\n## Changes since last build\n"
+            NOTES+=$(git log --oneline --no-decorate -20 "${{ github.sha }}" 2>/dev/null)
+          fi
+          # Escape for JSON
+          NOTES="${NOTES//'%'/'%25'}"
+          NOTES="${NOTES//$'\n'/'%0A'}"
+          NOTES="${NOTES//$'\r'/'%0D'}"
+          echo "notes=$NOTES" >> $GITHUB_OUTPUT
+
+      - name: Create/Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: 'MuseScore Studio – Persian Tuner ${{ steps.version.outputs.version }}'
+          body: ${{ steps.notes.outputs.notes }}
+          draft: false
+          prerelease: ${{ github.ref_type != 'tag' }}
+          files: ${{ steps.find-artifacts.outputs.files_csv }}
+          fail_on_unmatched_files: false
