@@ -1,32 +1,16 @@
 # =============================================================================
 #  MuseScore Studio Persian Tuner - Build & Release Workflow
 # =============================================================================
-#  This workflow:
-#    1. Is triggered automatically when commits are pushed to the
-#       `persian-tuner` branch, OR manually via workflow_dispatch.
-#    2. Reuses the existing Windows‑build CI pipeline to produce a
-#       release‑quality .exe (7z archive) with all Persian‑tuner changes
-#       baked in.
-#    3. On every push to `persian-tuner` it uploads the build as an
-#       *unstable* GitHub Release (pre‑release).  On a manually‑created
-#       git tag (e.g. v1.0.0-persian) it creates a *stable* release.
+#  This workflow builds the persian-tuner branch on every push and
+#  uploads the result as a GitHub Release (pre-release for branch
+#  pushes, stable for tags).
 #
-#  How to use
-#  ----------
-#  1. Push to the `persian-tuner` branch → the workflow runs automatically.
-#     The built .7z artefact is attached as a pre‑release.
-#  2. To create a proper release, bump the version and push a tag:
-#        git tag v1.0.0-persian
-#        git push origin v1.0.0-persian
-#     The workflow will build and publish a full Release with release notes.
-#
-#  Requirements
-#  ------------
-#  - The underlying Windows build scripts (buildscripts/ci/windows/*.bat)
-#    need access to MuseScore's public S3 dependency bucket.  If the bucket
-#    stops being accessible from forks this workflow will fail — in that case
-#    switch to the DOCKER / MANUAL approach described in the companion
-#    README section below.
+#  Important
+#  ---------
+#  The file  .github/workflows/build_windows.yml  in this repo has also
+#  been patched so that the windows_portable job respects the
+#  "platforms" input under workflow_call.  See the condition in that
+#  file for details.
 # =============================================================================
 
 name: 'Build: Persian Tuner'
@@ -56,13 +40,15 @@ concurrency:
 
 jobs:
   # ------------------------------------------------------------------
-  #   WINDOWS BUILD  (x86_64 7z)
+  #   WINDOWS BUILD  (x86_64 only)
   # ------------------------------------------------------------------
   windows_build:
-    name: 'Windows x64 (${{ github.ref_type == ''tag'' && ''stable'' || ''devel'' }})'
+    name: 'Windows x64'
     uses: ./.github/workflows/build_windows.yml
     secrets: inherit
     with:
+      # Only build the x64 variant — the portable job is skipped
+      # via the patched condition in build_windows.yml
       platforms: 'windows_x64'
       build_mode: ${{ inputs.build_mode || 'devel' }}
       publish: 'off'
@@ -73,12 +59,15 @@ jobs:
   #   CREATE / UPDATE GITHUB RELEASE
   # ------------------------------------------------------------------
   release:
-    name: 'Create GitHub Release'
-    if: ${{ always() && needs.windows_build.result == 'success' }}
+    # Run even if windows_portable (which we skip) would have made
+    # the overall job status "failure".  We check for the actual
+    # x64 artifact existence inside the steps instead.
+    if: ${{ always() }}
     needs: [windows_build]
     runs-on: ubuntu-slim
     permissions:
       contents: write
+      actions: read        # needed to download artifacts from another job
 
     steps:
       - name: Checkout repository
@@ -87,29 +76,43 @@ jobs:
           ref: persian-tuner
           fetch-depth: 0
 
-      - name: Download Windows artifact
+      # The x64 job uploads its artifact with a name like
+      #   MU4_<build-number>_Win_persian-tuner
+      # We download ALL artifacts from this run and pick the right one.
+      - name: Download all artifacts
         uses: actions/download-artifact@v7
         with:
-          pattern: MuseScore-Studio-Windows-*
           path: ./downloaded-artifacts
-          merge-multiple: true
+          merge-multiple: false
         continue-on-error: true
 
-      - name: Find downloaded artifacts
+      - name: Find x64 build artifact
         id: find-artifacts
         run: |
-          ls -laR ./downloaded-artifacts/ 2>/dev/null || echo "No artifacts found yet"
-          # Find any .7z or .exe files
-          ARTIFACT_FILE=$(find ./downloaded-artifacts -name '*.7z' -o -name '*.exe' -o -name '*.msi' 2>/dev/null | head -5)
-          if [ -n "$ARTIFACT_FILE" ]; then
-            echo "Found artifacts:"
-            echo "$ARTIFACT_FILE"
-            # Convert to comma-separated list for action-gh-release
-            FILES_CSV=$(echo "$ARTIFACT_FILE" | tr '\n' ',' | sed 's/,$//')
-            echo "files_csv=$FILES_CSV" >> $GITHUB_OUTPUT
+          echo "=== All downloaded artifacts ==="
+          find ./downloaded-artifacts -type f 2>/dev/null || echo "(empty)"
+          echo ""
+
+          # Look for the x64 .7z or .msi or .paf.exe file.
+          # Prefer .7z (devel mode output).
+          X64_FILE=$(find ./downloaded-artifacts -name '*.7z' -path '*Win*' ! -path '*portable*' 2>/dev/null | head -1)
+
+          if [ -z "$X64_FILE" ]; then
+            # Try .msi (testing/stable mode output)
+            X64_FILE=$(find ./downloaded-artifacts -name '*.msi' ! -path '*portable*' 2>/dev/null | head -1)
+          fi
+
+          if [ -z "$X64_FILE" ]; then
+            # Last resort — any file at all
+            X64_FILE=$(find ./downloaded-artifacts -type f 2>/dev/null | head -1)
+          fi
+
+          if [ -n "$X64_FILE" ]; then
+            echo "Found artifact: $X64_FILE"
+            echo "artifact_path=$X64_FILE" >> $GITHUB_OUTPUT
           else
-            echo "No build artifacts found to attach to release"
-            echo "files_csv=" >> $GITHUB_OUTPUT
+            echo "No build artifact found"
+            echo "artifact_path=" >> $GITHUB_OUTPUT
           fi
 
       - name: Determine version
@@ -135,16 +138,17 @@ jobs:
               NOTES="Initial release of Persian‑tuner build."
             fi
           else
-            NOTES="# ⚠️ Unstable pre‑release build\n\nThis build was automatically produced from the **persian-tuner** branch.\n\n## Changes since last build\n"
+            NOTES="## ⚠️ Unstable pre‑release build\n\nThis build was automatically produced from the **persian-tuner** branch.\n\n### Changes since last build\n"
             NOTES+=$(git log --oneline --no-decorate -20 "${{ github.sha }}" 2>/dev/null)
           fi
-          # Escape for JSON
+          # Escape % and newlines for JSON
           NOTES="${NOTES//'%'/'%25'}"
           NOTES="${NOTES//$'\n'/'%0A'}"
           NOTES="${NOTES//$'\r'/'%0D'}"
           echo "notes=$NOTES" >> $GITHUB_OUTPUT
 
-      - name: Create/Update Release
+      - name: Create / Update Release
+        if: ${{ steps.find-artifacts.outputs.artifact_path != '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.version }}
@@ -152,5 +156,5 @@ jobs:
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: ${{ github.ref_type != 'tag' }}
-          files: ${{ steps.find-artifacts.outputs.files_csv }}
+          files: ${{ steps.find-artifacts.outputs.artifact_path }}
           fail_on_unmatched_files: false
