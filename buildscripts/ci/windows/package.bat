@@ -131,19 +131,42 @@ GOTO END_SUCCESS
 ECHO "Start msi packing..."
 
 :: generate unique GUID
-SET UUIDGEN="C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\uuidgen.exe"
-%UUIDGEN% > uuid.txt
+:: Resolve uuidgen dynamically from any Windows SDK installed on the runner,
+:: instead of hardcoding a single SDK version path that may be missing.
+SET "UUIDGEN="
+FOR /F "delims=" %%U IN ('where uuidgen.exe 2^>nul') DO (
+    IF NOT DEFINED UUIDGEN SET "UUIDGEN=%%U"
+)
+IF "%UUIDGEN%"=="" (
+    ECHO "uuidgen.exe not found on PATH; falling back to powershell"
+    powershell -NoProfile -Command "[guid]::NewGuid().ToString()" > uuid.txt
+) ELSE (
+    ECHO "Using uuidgen at %UUIDGEN%"
+    "%UUIDGEN%" > uuid.txt
+)
 SET /p PACKAGE_UUID=<uuid.txt
 ECHO on
 ECHO "PACKAGE_UUID: %PACKAGE_UUID%"
 ECHO off
 
-cd "%BUILD_DIR%" 
+cd "%BUILD_DIR%"
 cmake -DCPACK_WIX_PRODUCT_GUID=%PACKAGE_UUID% ^
     -DCPACK_WIX_UPGRADE_GUID=%UPGRADE_UUID% ^
     ..
 
-SET PATH=%WIX%;%PATH% 
+:: Resolve WiX bin directory dynamically. %WIX% may be unset on a fresh runner
+:: image (forks, cold caches, etc.), so search common install locations.
+SET "WIX_BIN="
+IF NOT "%WIX%"=="" (
+    SET "WIX_BIN=%WIX%"
+) ELSE (
+    ECHO "WIX env var not set; searching for WiX install"
+    FOR /F "delims=" %%W IN ('dir /b /s /ad "C:\Program Files (x86)\WiX*" "C:\wix*" 2^>nul ^| findstr /I "\\bin"') DO (
+        IF NOT DEFINED WIX_BIN SET "WIX_BIN=%%W"
+    )
+    IF DEFINED WIX_BIN ECHO "Found WiX bin at %WIX_BIN%"
+)
+IF DEFINED WIX_BIN SET "PATH=%WIX_BIN%;%PATH%"
 cmake --build . --target package || SET WIX_ERROR=1
 cd ..
 
@@ -195,13 +218,34 @@ GOTO END_SUCCESS
 ECHO "Start portable packing..."
 
 :: Create launcher
+:: Resolve PortableApps launcher/installer paths dynamically so this works
+:: on any runner image (default install paths are not guaranteed).
+SET "PA_LAUNCHER_DIR=C:\portableappslauncher\Launcher"
+SET "PA_INSTALLER_DIR=C:\portableappsinstaller\Installer"
+IF NOT EXIST "%PA_LAUNCHER_DIR%\PortableApps.comLauncherGenerator.exe" (
+    FOR /F "delims=" %%D IN ('dir /b /s /ad "C:\PortableApps*" 2^>nul') DO (
+        IF NOT DEFINED PA_LAUNCHER_DIR_SET (
+            SET "PA_LAUNCHER_DIR=%%D"
+            SET "PA_LAUNCHER_DIR_SET=1"
+        )
+    )
+)
+IF NOT EXIST "%PA_INSTALLER_DIR%\PortableApps.comInstaller.exe" (
+    FOR /F "delims=" %%D IN ('dir /b /s /ad "C:\PortableApps*" 2^>nul') DO (
+        IF NOT DEFINED PA_INSTALLER_DIR_SET (
+            SET "PA_INSTALLER_DIR=%%D"
+            SET "PA_INSTALLER_DIR_SET=1"
+        )
+    )
+)
+
 ECHO "Start comLauncherGenerator..."
-CALL C:\portableappslauncher\Launcher\PortableApps.comLauncherGenerator.exe %CD%\%INSTALL_DIR%
+CALL "%PA_LAUNCHER_DIR%\PortableApps.comLauncherGenerator.exe" %CD%\%INSTALL_DIR% || ( ECHO "error: PortableApps.comLauncherGenerator not found at %PA_LAUNCHER_DIR%" & GOTO END_ERROR )
 ECHO "Finished comLauncherGenerator"
 
 :: Create Installer
 ECHO "Start comInstaller..."
-CALL C:\portableappsinstaller\Installer\PortableApps.comInstaller.exe %CD%\%INSTALL_DIR%
+CALL "%PA_INSTALLER_DIR%\PortableApps.comInstaller.exe" %CD%\%INSTALL_DIR% || ( ECHO "error: PortableApps.comInstaller not found at %PA_INSTALLER_DIR%" & GOTO END_ERROR )
 ECHO "Finished comInstaller"
 
 :: find the paf.exe file
