@@ -408,7 +408,7 @@ void ScoreOrder::setBracketsAndBarlines(Score* score)
 
         staff_idx_t staffIdx { 0 };
         const bool isMultiStaffInstrument = instrTemplate->staffCount > 1;
-        const int partStaffCount = part->nstaves();
+        const int partStaffCount = static_cast<int>(part->nstaves());
 
         const int templateBracketSpan = std::accumulate(instrTemplate->bracketSpan, instrTemplate->bracketSpan + MAX_STAVES, 0);
         const bool bracketSpansAllStaves = templateBracketSpan == (int)instrTemplate->staffCount;
