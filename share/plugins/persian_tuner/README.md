@@ -34,12 +34,12 @@ A MuseScore plugin that tunes notes in **cents** and applies **Persian dastgah p
 
 If you build MuseScore from source, the plugin is also available in `share/plugins/persian_tuner`.
 
-## Using it with a Persian key signature
+## Notation
 
-The companion C++ change in this branch adds **Persian key signatures** (Homayoun, Chahargah,
-Nava, Shur, Isfahan) to the Key Signatures palette. Drag one onto the start of the staff to show
-koron symbols in the key signature; then use this plugin to apply the matching micro-tuning to
-the notes (and their accidentals).
+This plugin is self-contained: it applies **playback tuning** (cents) and can optionally write
+**koron / sori accidentals** on the notes. It does not add custom Persian key signatures to
+MuseScore's palettes — use the accidentals (or a custom key signature) if you want them shown
+in the staff.
 
 ## Preset values (editable)
 

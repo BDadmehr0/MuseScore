@@ -43,16 +43,8 @@ ECHO "TARGET_PROCESSOR_BITS: %TARGET_PROCESSOR_BITS%"
 ECHO "CRASH_LOG_SERVER_URL: %CRASH_LOG_SERVER_URL%"
 ECHO "BUILD_WIN_PORTABLE: %BUILD_WIN_PORTABLE%"
 
-REM Copy prebuilt dependencies if they are present on the runner image.
-REM On a fresh windows-2025 image (and especially on forks) the folder does not exist,
-REM so we skip the copy instead of failing the build with XCOPY error 4.
-IF EXIST "C:\musescore_dependencies" (
-    ECHO "Copying prebuilt dependencies from C:\musescore_dependencies"
-    XCOPY "C:\musescore_dependencies" %CD% /E /I /Y || ( ECHO "warning: failed to copy C:\musescore_dependencies" & EXIT /b 1 )
-    ECHO "Finished copy dependencies"
-) ELSE (
-    ECHO "C:\musescore_dependencies not found on runner; assuming dependencies are vendored or already in place"
-)
+XCOPY "C:\musescore_dependencies" %CD% /E /I /Y
+ECHO "Finished copy dependencies"
 
 SET "JACK_DIR=C:\Program Files (x86)\Jack"
 SET "PATH=%JACK_DIR%;%PATH%"
