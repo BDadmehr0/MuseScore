@@ -20,8 +20,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-
 #include "palettecreator.h"
 
 #include "translation.h"
@@ -158,7 +156,6 @@ PaletteTreePtr PaletteCreator::newMasterPaletteTree()
 
     tree->append(newClefsPalette());
     tree->append(newKeySigPalette());
-    tree->append(newPersianKeySigPalette());
     tree->append(newTimePalette());
     tree->append(newTempoPalette());
     tree->append(newPitchPalette());
@@ -196,7 +193,6 @@ PaletteTreePtr PaletteCreator::newDefaultPaletteTree()
 
     defaultPalette->append(newClefsPalette(true));
     defaultPalette->append(newKeySigPalette());
-    defaultPalette->append(newPersianKeySigPalette());
     defaultPalette->append(newTimePalette(true));
     defaultPalette->append(newTempoPalette(true));
     defaultPalette->append(newPitchPalette(true));
@@ -326,57 +322,6 @@ PalettePtr PaletteCreator::newKeySigPalette()
     auto nk = Factory::makeKeySig(paletteScore()->dummy()->segment());
     nk->setKeySigEvent(nke);
     sp->appendElement(nk, TConv::userName(Key::C, true));
-
-    return sp;
-}
-
-//---------------------------------------------------------
-//   newPersianKeySigPalette
-///   Persian (quarter-tone) key signatures.
-///
-///   These are custom key signatures that draw koron/sori
-///   symbols on the marked scale degrees. The key signature
-///   is written in C so only the custom symbols are shown.
-///   Note: the symbols are for notation; the micro-tuning of
-///   the notes themselves is applied per note (e.g. with the
-///   "Persian Tuner" plugin, or koron/sori accidentals).
-//---------------------------------------------------------
-
-PalettePtr PaletteCreator::newPersianKeySigPalette()
-{
-    PalettePtr sp = std::make_shared<Palette>(iocContext(), Palette::Type::KeySig);
-    sp->setName(QT_TRANSLATE_NOOP("palette", "Persian key signatures"));
-    sp->setMag(0.8);
-    sp->setGridSize(56, 47);
-    sp->setDrawGrid(true);
-    sp->setYOffset(1.0);
-
-    auto addPersianKey = [this](PalettePtr& palette, const char* name, const std::vector<int>& koronDegrees) {
-        KeySigEvent ks;
-        ks.setConcertKey(Key::C);
-        ks.setCustom(true);
-        ks.setMode(KeyMode::MAJOR); // not NONE, so the custom symbols are rendered
-
-        // koronDegrees are 1-based scale degrees (1=C, 2=D, 3=E, 4=F, 5=G, 6=A, 7=B).
-        // CustDef::degree is 0-based diatonic degree (C=0, D=1, E=2, F=3, G=4, A=5, B=6).
-        std::vector<CustDef>& defs = ks.customKeyDefs();
-        for (int degree : koronDegrees) {
-            CustDef cd;
-            cd.degree = degree - 1;
-            cd.sym = SymId::accidentalKoron;
-            defs.push_back(cd);
-        }
-
-        auto k = Factory::makeKeySig(paletteScore()->dummy()->segment());
-        k->setKeySigEvent(ks);
-        palette->appendElement(k, name);
-    };
-
-    addPersianKey(sp, "Persian Homayoun (D, A koron)", { 2, 6 });
-    addPersianKey(sp, "Persian Chahargah (D, F, A koron)", { 2, 4, 6 });
-    addPersianKey(sp, "Persian Nava (E, B koron)", { 3, 7 });
-    addPersianKey(sp, "Persian Shur (D koron)", { 2 });
-    addPersianKey(sp, "Persian Isfahan (D, A koron)", { 2, 6 });
 
     return sp;
 }
