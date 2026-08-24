@@ -1,0 +1,8 @@
+module Muse.UiComponents
+FlatButton 1.0 FlatButton.qml
+StyledTextLabel 1.0 StyledTextLabel.qml
+StyledGroupBox 1.0 StyledGroupBox.qml
+StyledDropdown 1.0 StyledDropdown.qml
+StyledSlider 1.0 StyledSlider.qml
+CheckBox 1.0 CheckBox.qml
+IncrementalPropertyControl 1.0 IncrementalPropertyControl.qml
