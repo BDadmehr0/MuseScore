@@ -196,6 +196,7 @@ qt_add_qml_module(notationscene_qml
         NotationView.qml
         NoteInputBar.qml
         PartsDialog.qml
+        PersianTunerPanel.qml
         PercussionPanel.qml
         percussionpanel/PercussionPanelPad.qml
         percussionpanel/PercussionPanelPadContent.qml

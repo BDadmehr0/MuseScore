@@ -73,6 +73,7 @@ public:
     Q_INVOKABLE QString timelinePanelName() const;
     Q_INVOKABLE QString drumsetPanelName() const;
     Q_INVOKABLE QString percussionPanelName() const;
+    Q_INVOKABLE QString persianTunerPanelName() const;
 
     Q_INVOKABLE QString statusBarName() const;
 

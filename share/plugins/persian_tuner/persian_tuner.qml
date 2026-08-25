@@ -1,26 +1,7 @@
 /*
- * SPDX-License-Identifier: GPL-3.0-only
- * MuseScore-Studio-CLA-applies
- *
- * MuseScore Studio
- * Music Composition & Notation
- *
- * Persian Tuner - tune notes in cents, remember quarter-tone values and
- *                 mark tuning changes in the score
- *
- * Copyright (C) 2026 BDadmehr0
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Persian Tuner - dock panel like Mixer, dark theme from cent-tuning-panel.html
+ * Sign-oriented: letter + accidental variant, cents relative to natural
+ * Ribbon tab: tuner-ribbon-tab.html
  */
 
 import QtQuick
@@ -37,186 +18,146 @@ import "tunerlogic.js" as Logic
 MuseScore {
     id: root
 
-    version: "2.0.0"
+    version: "4.0.0"
     title: qsTr("Persian Tuner")
-    description: qsTr("Tune notes in cents, apply Persian (dastgah) presets, remember quarter-tone values automatically and mark tuning changes in the score")
-    pluginType: "dialog"
+    description: qsTr("Dockable Persian tuner - mixer-like panel, cent tuning per sign relative to natural")
+    // Dock like mixer, not separate window
+    pluginType: "dock"
+    dockArea: "right"
+    implicitWidth: 480
+    implicitHeight: 800
+    // For dock, width/height are initial, but we also set window size for dialog fallback
+    width: 480
+    height: 900
+
     categoryCode: "playback"
     thumbnailName: "persian_tuner.png"
     requiresScore: false
 
-    width: 620
-    height: 880
-
-    // ------------------------------------------------------------------
     // Data
-    // ------------------------------------------------------------------
-
     property var pcNames: Logic.PITCH_CLASS_NAMES
     property int tonicPc: 0
-
-    // Dastgah presets.
-    // koron / sori: 1-based scale degrees (1=C, 2=D, 3=E, 4=F, 5=G, 6=A, 7=B
-    // relative to the tonic). Every koron degree is tuned -50 cents, every
-    // sori degree +50 cents (24-TET approximation); all values are editable in
-    // the note list below and a custom preset can be saved with "Save preset".
     property var presets: [
-        { name: "Mahur (major)", koron: [], sori: [] },
+        { name: "Mahur", koron: [], sori: [] },
         { name: "Rast", koron: [], sori: [] },
         { name: "Homayoun", koron: [2, 6], sori: [] },
         { name: "Chahargah", koron: [2, 4, 6], sori: [] },
         { name: "Nava", koron: [3, 7], sori: [] },
-        { name: "Shur", koron: [2], sori: [] },
-        { name: "Dashti", koron: [2], sori: [] },
-        { name: "Bayat-e Tork", koron: [2], sori: [] },
-        { name: "Afshari", koron: [2], sori: [] },
-        { name: "Abu'ata", koron: [2], sori: [] },
-        { name: "Isfahan", koron: [2, 6], sori: [] },
-        { name: "Segah", koron: [3], sori: [] }
+        { name: "Shur", koron: [2], sori: [] }
     ]
 
-    // ------------------------------------------------------------------
-    // Tool state
-    // ------------------------------------------------------------------
+    property var noteLetters: Logic.NOTE_LETTERS
+    property var variantIds: ["flat", "koron", "natural", "sori", "sharp"]
+    property string selectedLetter: "A"
+    property string selectedVariant: "sori"
+    property int selectedOctave: 4
+    property var tuningTable: Logic.defaultTuningTable()
 
-    /// Tool 1 - automatic memory. Remembers the last value used for a note
-    /// and re-uses it for every later occurrence of that note.
+    // reference
+    property int refOctave: 4
+    property string refLetter: "A"
+    property double refFreq: 440.0
+
+    // current target cents relative to natural of selected letter
+    property double currentCents: 50
+
+    // Tools
     property bool autoMemory: true
-    /// Write koron/sori signs when a note is tuned by a quarter tone.
-    property bool addAccidentals: true
-    /// Distinguish "F" from "F with a sori sign" when remembering a value.
-    property bool matchAccidental: false
-    /// Keep a separate memory for every staff instead of one for the score.
+    property bool addAccidentals: false
+    property bool matchAccidental: true
     property bool perStaffMemory: false
-
-    /// Tool 2 - the marker tool. Armed by the user, it places a permanent
-    /// visible sign in the score at the next clicked note.
     property bool markerToolArmed: false
-    /// Marker that is waiting for the user to type its value.
     property var pendingMarker: null
 
-    // ------------------------------------------------------------------
-    // Runtime state
-    // ------------------------------------------------------------------
-
-    property var noteObjects: []        // notes of the current selection
-    property var markerEntries: []      // { note, element } of every marker found
+    // Runtime
+    property var noteObjects: []
+    property var markerEntries: []
     property var memoryStore: Logic.newStore()
     property string scoreId: ""
-    /// Kept in sync with the memory so the toolbar badge updates itself.
     property int memoryCounter: 0
-
-    /// Value used in the list model when no memory entry exists.
     readonly property int noMemoryValue: -99999
 
-    // ------------------------------------------------------------------
-    // Persistent settings (saved automatically by the framework)
-    // ------------------------------------------------------------------
-
+    // Settings
     Settings {
         id: options
         category: "Persian Tuner"
-        property var customPreset: ''
         property var autoMemory: '1'
-        property var accidentals: '1'
-        property var matchAccidental: '0'
+        property var accidentals: '0'
+        property var matchAccidental: '1'
         property var perStaffMemory: '0'
         property var memory: '{}'
+        property var tuningTableJson: ''
+        property var refFreq: '440'
     }
 
-    // ------------------------------------------------------------------
-    // Small helpers
-    // ------------------------------------------------------------------
+    // Theme colors from HTML
+    readonly property color bgPage: "#0b0f14"
+    readonly property color bgPanel: "#121821"
+    readonly property color bgCard: "#0f151c"
+    readonly property color bgBtn: "#1a222c"
+    readonly property color bgBtnHover: "#232d39"
+    readonly property color border: "#232b36"
+    readonly property color borderStrong: "#2e3947"
+    readonly property color textPrimary: "#e8ecf1"
+    readonly property color textSecondary: "#9aa6b4"
+    readonly property color textMuted: "#5f6b7a"
+    readonly property color accent: "#2ee6b8"
+    readonly property color accentDim: "#12352e"
 
-    function boolFromSetting(value, fallback)
-    {
-        if (value === undefined || value === null || value === "") {
-            return fallback
-        }
-        if (typeof value === "boolean") {
-            return value
-        }
-        return String(value) !== '0'
+    function boolFromSetting(v, fb) {
+        if (v === undefined || v === null || v === "") return fb
+        if (typeof v === "boolean") return v
+        return String(v) !== '0'
     }
 
-    function loadSettings()
-    {
+    function loadSettings() {
         autoMemory = boolFromSetting(options.autoMemory, true)
-        addAccidentals = boolFromSetting(options.accidentals, true)
-        matchAccidental = boolFromSetting(options.matchAccidental, false)
+        addAccidentals = boolFromSetting(options.accidentals, false)
+        matchAccidental = boolFromSetting(options.matchAccidental, true)
         perStaffMemory = boolFromSetting(options.perStaffMemory, false)
+        tuningTable = Logic.parseTuningTable(options.tuningTableJson)
+        var rf = parseFloat(options.refFreq)
+        if (!isNaN(rf) && rf > 0) refFreq = rf
     }
 
-    function saveSettings()
-    {
+    function saveSettings() {
         options.autoMemory = autoMemory ? '1' : '0'
         options.accidentals = addAccidentals ? '1' : '0'
         options.matchAccidental = matchAccidental ? '1' : '0'
         options.perStaffMemory = perStaffMemory ? '1' : '0'
         options.memory = Logic.serializeStore(memoryStore)
+        options.tuningTableJson = Logic.serializeTuningTable(tuningTable)
+        options.refFreq = String(refFreq)
     }
 
-    function status(message)
-    {
-        statusLabel.text = message
+    function status(msg) {
+        statusLabel.text = msg
         statusTimer.restart()
     }
 
-    function round1(value)
-    {
-        return Math.round(value * 10) / 10
-    }
+    function round1(v) { return Math.round(v * 10) / 10 }
 
-    /// The logic module ships with fallback values for the accidental
-    /// enumeration; take the real ones from the running MuseScore instead.
-    function syncAccidentalConstants()
-    {
+    function syncAccidentalConstants() {
         try {
             Logic.ACC_NONE = 0 + Accidental.NONE
             Logic.ACC_NATURAL = 0 + Accidental.NATURAL
+            Logic.ACC_FLAT = 0 + Accidental.FLAT
+            Logic.ACC_SHARP = 0 + Accidental.SHARP
             Logic.ACC_SORI = 0 + Accidental.SORI
             Logic.ACC_KORON = 0 + Accidental.KORON
-            Logic.REPLACEABLE_ACCIDENTALS = [Logic.ACC_NONE, Logic.ACC_NATURAL,
-                Logic.ACC_SORI, Logic.ACC_KORON]
-        } catch (e) {
-            // keep the built-in values
-        }
+        } catch (e) {}
     }
 
-    /// Accidental of a note as a plain number (the API may hand back the name
-    /// of the enumeration value instead).
-    function accidentalValue(note)
-    {
-        return Logic.normalizeAccidental(note.accidentalType, Accidental)
-    }
-
-    /// The JSON blob the memory is persisted in (also used by the tests).
-    function settingsJson()
-    {
-        return options.memory
-    }
-
-    function currentScoreId()
-    {
-        if (!curScore) {
-            return ""
-        }
+    function accidentalValue(note) { return Logic.normalizeAccidental(note.accidentalType, Accidental) }
+    function settingsJson() { return options.memory }
+    function currentScoreId() {
+        if (!curScore) return ""
         var id = ""
-        try {
-            id = curScore.scoreName
-        } catch (e) {
-            id = ""
-        }
-        if (!id) {
-            id = curScore.title
-        }
+        try { id = curScore.scoreName } catch (e) {}
+        if (!id) id = curScore.title
         return id ? id : "score"
     }
-
-    /// Makes sure the memory store holds an entry for the current score and
-    /// returns its id.
-    function ensureScoreMemory()
-    {
+    function ensureScoreMemory() {
         var id = currentScoreId()
         if (id !== scoreId) {
             scoreId = id
@@ -224,595 +165,394 @@ MuseScore {
         }
         return id
     }
-
-    function noteTick(note)
-    {
-        var fraction = note.fraction
-        return fraction ? fraction.ticks : 0
-    }
-
-    function noteStaffIdx(note)
-    {
-        var idx = note.staffIdx
-        return (idx === undefined || idx === null) ? 0 : idx
-    }
-
-    /// Identity used by the memory for this note.
-    function memoryKeyFor(note)
-    {
-        return Logic.makeKey(note.pitch % 12, accidentalValue(note), noteStaffIdx(note),
-                             { perStaff: perStaffMemory, withAccidental: matchAccidental })
-    }
-
-    function noteLabel(note)
-    {
-        var pc = note.pitch % 12
-        var octave = Math.floor(note.pitch / 12) - 1
-        return pcNames[pc] + " " + octave
-    }
-
-    function measureNumberFor(note)
-    {
-        try {
-            var chord = note.parent
-            var measure = chord ? chord.measure : null
-            if (measure) {
-                return measure.measureNumber
-            }
-        } catch (e) {
-            // fall through
+    function noteTick(note) { var f = note.fraction; return f ? f.ticks : 0 }
+    function noteStaffIdx(note) { var idx = note.staffIdx; return (idx === undefined || idx === null) ? 0 : idx }
+    function noteIdentity(note) { return Logic.noteIdentityFromNote(note, Accidental) }
+    function memoryKeyFor(note) {
+        var ident = noteIdentity(note)
+        var staff = noteStaffIdx(note)
+        if (!matchAccidental) {
+            var k = ident.letter
+            if (perStaffMemory) k += "@s" + staff
+            return k
         }
+        return Logic.makeSignKey(ident.letter, ident.variant, staff, { perStaff: perStaffMemory })
+    }
+    function signKeyFor(letter, variant, staffIdx) {
+        return Logic.makeSignKey(letter, variant, staffIdx || 0, { perStaff: perStaffMemory })
+    }
+    function letterFa(letter) { return Logic.NOTE_LETTER_PERSIAN[letter] || letter }
+    function letterFullFa(letter) { return Logic.NOTE_LETTER_PERSIAN_FULL[letter] || letter }
+    function variantFa(variant) { return Logic.labelFaForVariant(variant) }
+    function variantSymbol(variant) { return Logic.symbolForVariant(variant) }
+    function baseCentsForVariant(variant) { return Logic.baseCentsForVariant(variant) }
+    function getTableCents(letter, variant) { return Logic.getTuning(tuningTable, letter, variant) }
+    function effectiveTargetForNote(note) {
+        var id = ensureScoreMemory()
+        var key = memoryKeyFor(note)
+        var tick = noteTick(note)
+        var mem = Logic.resolveCents(memoryStore, id, key, tick)
+        if (mem !== null) return round1(mem)
+        var ident = noteIdentity(note)
+        return round1(getTableCents(ident.letter, ident.variant))
+    }
+    function noteLabelShort(note) {
+        var ident = noteIdentity(note)
+        var octave = Math.floor(note.pitch / 12) - 1
+        return ident.letter + " " + variantFa(ident.variant) + " " + octave
+    }
+    function measureNumberFor(note) {
+        try { var chord = note.parent; var measure = chord ? chord.measure : null; if (measure) return measure.measureNumber } catch (e) {}
         return 0
     }
-
-    function selectedNotes()
-    {
+    function selectedNotes() {
         var result = []
-        if (!curScore) {
-            return result
-        }
+        if (!curScore) return result
         var elements = curScore.selection.elements
         for (var i = 0; i < elements.length; ++i) {
             var el = elements[i]
-            if (el.type == Element.NOTE && el.parent && el.parent.type == Element.CHORD) {
-                result.push(el)
-            }
+            if (el.type == Element.NOTE && el.parent && el.parent.type == Element.CHORD) result.push(el)
         }
         return result
     }
-
-    function firstSelectedNote()
-    {
-        var notes = selectedNotes()
-        return notes.length > 0 ? notes[0] : null
-    }
-
-    /// Every note of the score, in reading order (grace notes are not visited;
-    /// they can still be tuned through the selection).
-    function collectScoreNotes()
-    {
+    function firstSelectedNote() { var notes = selectedNotes(); return notes.length > 0 ? notes[0] : null }
+    function collectScoreNotes() {
         var result = []
-        if (!curScore) {
-            return result
-        }
+        if (!curScore) return result
         var ntracks = curScore.ntracks
         var measure = curScore.firstMeasure
-        var measureGuard = 0
-        while (measure && measureGuard < 100000) {
+        var guard = 0
+        while (measure && guard < 100000) {
             var segment = measure.firstSegment
-            var segmentGuard = 0
-            while (segment && segmentGuard < 100000) {
+            var sguard = 0
+            while (segment && sguard < 100000) {
                 for (var track = 0; track < ntracks; ++track) {
                     var el = segment.elementAt(track)
                     if (el && el.type == Element.CHORD) {
                         var notes = el.notes
-                        for (var n = 0; n < notes.length; ++n) {
-                            result.push(notes[n])
-                        }
+                        for (var n = 0; n < notes.length; ++n) result.push(notes[n])
                     }
                 }
                 segment = segment.nextInMeasure
-                ++segmentGuard
+                ++sguard
             }
             measure = measure.nextMeasure
-            ++measureGuard
+            ++guard
         }
         return result
     }
 
-    /// Applies a cents value to a list of notes (no undo handling here).
-    function tuneNotes(notes, cents)
-    {
+    function tuneNotes(notes, targetCents) {
         for (var i = 0; i < notes.length; ++i) {
             var note = notes[i]
             var current = accidentalValue(note)
-            var accidental = Logic.intendedAccidental(current, cents, addAccidentals)
-            if (accidental !== current) {
-                note.accidentalType = accidental
+            if (addAccidentals) {
+                var intended = current
+                if (targetCents <= -75) intended = Accidental.FLAT
+                else if (targetCents <= -25) intended = Accidental.KORON
+                else if (targetCents < 25) intended = Accidental.NATURAL
+                else if (targetCents <= 75) intended = Accidental.SORI
+                else intended = Accidental.SHARP
+                try { if (intended !== current) note.accidentalType = intended } catch (e) {}
             }
-            note.tuning = cents
+            var newIdent = noteIdentity(note)
+            var required = targetCents - newIdent.baseCents
+            note.tuning = round1(required)
         }
         return notes.length
     }
 
-    /// Stores the new value in the memory and returns how many notes of the
-    /// score it was applied to.
-    function rememberAndPropagate(notes, cents)
-    {
-        if (notes.length === 0) {
-            return 0
-        }
+    function rememberAndPropagate(notes, targetCents) {
+        if (notes.length === 0) return 0
         var id = ensureScoreMemory()
-
-        // Earliest position per note identity: that is where the new value
-        // starts to be valid.
         var startTicks = {}
         var keyOrder = []
         for (var i = 0; i < notes.length; ++i) {
             var key = memoryKeyFor(notes[i])
             var tick = noteTick(notes[i])
-            if (startTicks[key] === undefined) {
-                startTicks[key] = tick
-                keyOrder.push(key)
-            } else if (tick < startTicks[key]) {
-                startTicks[key] = tick
-            }
+            if (startTicks[key] === undefined) { startTicks[key] = tick; keyOrder.push(key) }
+            else if (tick < startTicks[key]) startTicks[key] = tick
         }
-
         var allNotes = collectScoreNotes()
         var meta = []
-        for (var m = 0; m < allNotes.length; ++m) {
-            meta.push({ key: memoryKeyFor(allNotes[m]), tick: noteTick(allNotes[m]) })
-        }
-
+        for (var m = 0; m < allNotes.length; ++m) meta.push({ key: memoryKeyFor(allNotes[m]), tick: noteTick(allNotes[m]) })
         var applied = 0
         for (var k = 0; k < keyOrder.length; ++k) {
             var memoryKey = keyOrder[k]
-            var range = Logic.setChange(memoryStore, id, memoryKey, startTicks[memoryKey], cents)
+            var range = Logic.setChange(memoryStore, id, memoryKey, startTicks[memoryKey], targetCents)
             var indices = Logic.indicesToTune(meta, memoryKey, range)
-            for (var n = 0; n < indices.length; ++n) {
-                applied += tuneNotes([allNotes[indices[n]]], cents)
-            }
+            for (var n = 0; n < indices.length; ++n) applied += tuneNotes([allNotes[indices[n]]], targetCents)
         }
         return applied
     }
 
-    // ------------------------------------------------------------------
-    // Selection list
-    // ------------------------------------------------------------------
+    // Frequency calc: midi = letter to semitone + octave*12 + accidental base/100
+    function midiFromLetterOctaveVariant(letter, octave, variant) {
+        var baseSemitone = { "C":0, "D":2, "E":4, "F":5, "G":7, "A":9, "B":11 }[letter]
+        if (baseSemitone === undefined) baseSemitone = 0
+        var midi = (octave + 1) * 12 + baseSemitone
+        // variant base cents already relative to natural, but for midi we need semitone offset: flat -1, sharp +1, koron/sori 0 (quarter)
+        var vBase = baseCentsForVariant(variant)
+        // for midi, only full semitone shifts count for pitch class, quarter stays
+        if (variant === "flat") midi -= 1
+        else if (variant === "sharp") midi += 1
+        return midi
+    }
 
-    function refreshNotes()
-    {
+    function calcFreq(letter, octave, variant, centsRelativeToNatural, refFreq) {
+        // centsRelativeToNatural is target, e.g. 50 for sori
+        // base midi for natural of that letter
+        var naturalMidi = midiFromLetterOctaveVariant(letter, octave, "natural")
+        var targetMidiFloat = naturalMidi + centsRelativeToNatural / 100.0
+        // A4 = 69 midi = refFreq
+        var refMidi = 69 // A4
+        var diff = targetMidiFloat - refMidi
+        return refFreq * Math.pow(2, diff / 12.0)
+    }
+
+    function refreshNotes() {
         notesModel.clear()
         noteObjects = []
         if (!curScore) {
-            notesFlick.visible = false
-            emptyLabel.visible = true
-            countLabel.text = qsTr("Open a score to tune notes")
-            selectionSummary.text = qsTr("No note selected")
+            selectionSummary.text = "هیچ نتی انتخاب نشده"
             return
         }
-
-        var id = ensureScoreMemory()
         var notes = selectedNotes()
-        var memoryValue = noMemoryValue
         for (var i = 0; i < notes.length; ++i) {
             var note = notes[i]
             noteObjects.push(note)
-            var remembered = Logic.resolveCents(memoryStore, id, memoryKeyFor(note), noteTick(note))
+            var ident = noteIdentity(note)
+            var target = effectiveTargetForNote(note)
             notesModel.append({
                 idx: i,
-                label: noteLabel(note),
-                cents: round1(note.tuning),
-                remembered: remembered === null ? noMemoryValue : round1(remembered)
+                label: noteLabelShort(note),
+                letter: ident.letter,
+                variant: ident.variant,
+                cents: round1(target)
             })
-            if (i === 0) {
-                memoryValue = remembered === null ? noMemoryValue : round1(remembered)
-            }
         }
-
-        var hasNotes = notes.length > 0
-        notesFlick.visible = hasNotes
-        emptyLabel.visible = !hasNotes
-        countLabel.text = hasNotes ? qsTr("Selected notes: ") + notes.length : qsTr("Select notes in the score")
-
-        if (hasNotes) {
+        if (notes.length > 0) {
             var first = notes[0]
-            selectionSummary.text = qsTr("Note: ") + noteLabel(first)
-                                    + "   " + qsTr("Now: ") + Logic.formatCents(first.tuning)
-            centsControl.currentValue = round1(first.tuning)
-            memoryLabel.text = memoryValue === noMemoryValue
-                               ? qsTr("No remembered value yet")
-                               : qsTr("Remembered: ") + Logic.formatCents(memoryValue)
+            var ident0 = noteIdentity(first)
+            selectedLetter = ident0.letter
+            selectedVariant = ident0.variant
+            selectedOctave = Math.floor(first.pitch / 12) - 1
+            currentCents = effectiveTargetForNote(first)
+            // update UI dropdowns
+            octaveDropdown.currentIndex = Math.max(0, Math.min(octaveModel.count - 1, selectedOctave - 3))
+            noteDropdown.currentIndex = noteLetters.indexOf(selectedLetter)
+            variantDropdown.currentIndex = variantIds.indexOf(selectedVariant)
+            selectionSummary.text = noteLabelShort(first) + " - هدف: " + currentCents + "¢ نسبت به " + letterFa(selectedLetter) + " بکار"
+            refreshTuningTableControls()
         } else {
-            selectionSummary.text = qsTr("No note selected")
-            memoryLabel.text = ""
+            selectionSummary.text = "هیچ نتی انتخاب نشده - یک نت را در پارتیتور انتخاب کنید"
         }
     }
 
-    // ------------------------------------------------------------------
-    // Tool 1 - automatic memory
-    // ------------------------------------------------------------------
-
-    /// Live preview while the user is typing or dragging: tunes the selection
-    /// only and creates no undo entry.
-    function previewCents(cents)
-    {
-        if (!curScore) {
-            return
+    function refreshTuningTableControls() {
+        tableModel.clear()
+        for (var i = 0; i < variantIds.length; ++i) {
+            var vid = variantIds[i]
+            var cents = getTableCents(selectedLetter, vid)
+            tableModel.append({ variant: vid, cents: round1(cents) })
         }
+        // update current display
+        var curTarget = getTableCents(selectedLetter, selectedVariant)
+        currentCents = curTarget
+        centsSlider.value = curTarget
+        centsLabel.text = (curTarget > 0 ? "+" : "") + curTarget
+        refNoteLabel.text = "سنت نسبت به " + letterFa(selectedLetter) + " طبیعی"
+        // hint
+        var hint = ""
+        if (selectedVariant === "sori") hint = "مقدار مرسوم سری معمولاً +50 سنت است — این فقط نقطه شروع است"
+        else if (selectedVariant === "koron") hint = "مقدار مرسوم کرن معمولاً -50 سنت است"
+        else if (selectedVariant === "flat") hint = "بمل معمولاً -100 سنت نسبت به بکار"
+        else if (selectedVariant === "sharp") hint = "دیز معمولاً +100 سنت"
+        else hint = "بکار مبنا است: 0 سنت"
+        hintLabel.text = hint
+        var freq = calcFreq(selectedLetter, selectedOctave, selectedVariant, curTarget, refFreq)
+        hzLabel.text = freq.toFixed(1) + " Hz"
+        currentBadgeLabel.text = letterFa(selectedLetter) + " " + variantFa(selectedVariant)
+    }
+
+    function previewCents(targetCents) {
+        if (!curScore) return
         var notes = selectedNotes()
         for (var i = 0; i < notes.length; ++i) {
-            notes[i].tuning = round1(cents)
+            var ident = noteIdentity(notes[i])
+            notes[i].tuning = round1(targetCents - ident.baseCents)
         }
     }
 
-    /// Sets the tuning of the current selection and (when the automatic memory
-    /// is on) every later occurrence of the same notes.
-    function commitCents(cents)
-    {
-        if (!curScore) {
-            return false
-        }
+    function commitCents(targetCents) {
+        if (!curScore) return false
         var notes = selectedNotes()
         if (notes.length === 0) {
-            status(qsTr("Select at least one note in the score"))
-            return false
+            // if no selection, update table only
+            setTableCents(selectedLetter, selectedVariant, targetCents)
+            return true
         }
-        cents = round1(cents)
-
+        targetCents = round1(targetCents)
         curScore.startCmd(qsTr("Tune notes"))
-        tuneNotes(notes, cents)
+        tuneNotes(notes, targetCents)
         var applied = notes.length
-        if (autoMemory) {
-            applied = rememberAndPropagate(notes, cents)
-        }
-        if (pendingMarker) {
-            pendingMarker.text = Logic.markerText(cents)
-            pendingMarker = null
-        }
+        if (autoMemory) applied = rememberAndPropagate(notes, targetCents)
+        if (pendingMarker) { pendingMarker.text = Logic.markerText(targetCents); pendingMarker = null }
         curScore.endCmd()
-
         saveSettings()
         memoryCounter = memoryCount()
         refreshNotes()
         refreshMarkers()
-        status(autoMemory
-               ? qsTr("Tuned %1 note(s)").arg(applied)
-               : qsTr("Tuned %1 selected note(s)").arg(notes.length))
+        status(autoMemory ? "%1 نت کوک شد".arg(applied) : "%1 نت".arg(notes.length))
         return true
     }
 
-    /// Applies the remembered values to the current selection.
-    function applyMemoryToSelection()
-    {
-        if (!curScore) {
-            return
-        }
+    function setTableCents(letter, variant, cents) {
+        cents = round1(cents)
+        Logic.setTuning(tuningTable, letter, variant, cents)
+        saveSettings()
         var id = ensureScoreMemory()
-        var notes = selectedNotes()
-        if (notes.length === 0) {
-            status(qsTr("Select at least one note in the score"))
-            return
-        }
-        curScore.startCmd(qsTr("Apply remembered tuning"))
-        var applied = 0
-        for (var i = 0; i < notes.length; ++i) {
-            var cents = Logic.resolveCents(memoryStore, id, memoryKeyFor(notes[i]), noteTick(notes[i]))
-            if (cents === null) {
-                continue
-            }
-            tuneNotes([notes[i]], cents)
-            ++applied
-        }
-        curScore.endCmd()
-        refreshNotes()
-        status(applied > 0 ? qsTr("Applied the remembered value to %1 note(s)").arg(applied)
-                           : qsTr("Nothing remembered for the selected notes yet"))
-    }
-
-    /// Re-applies the whole memory to the whole score.
-    function reapplyMemory()
-    {
-        if (!curScore) {
-            return
-        }
-        var id = ensureScoreMemory()
-        if (Logic.countChanges(memoryStore, id) === 0) {
-            status(qsTr("The memory is empty"))
-            return
-        }
-        var notes = collectScoreNotes()
-        curScore.startCmd(qsTr("Re-apply remembered tuning"))
-        var applied = 0
-        for (var i = 0; i < notes.length; ++i) {
-            var cents = Logic.resolveCents(memoryStore, id, memoryKeyFor(notes[i]), noteTick(notes[i]))
-            if (cents === null) {
-                continue
-            }
-            tuneNotes([notes[i]], cents)
-            ++applied
-        }
-        curScore.endCmd()
-        refreshNotes()
-        status(qsTr("Re-applied the memory to %1 note(s)").arg(applied))
-    }
-
-    function clearMemory()
-    {
-        var id = ensureScoreMemory()
-        Logic.removeScore(memoryStore, id)
+        var key = signKeyFor(letter, variant, 0)
+        Logic.setChange(memoryStore, id, key, 0, cents)
         saveSettings()
         memoryCounter = memoryCount()
+        if (curScore) {
+            curScore.startCmd(qsTr("Update tuning table"))
+            var allNotes = collectScoreNotes()
+            var meta = []
+            for (var m = 0; m < allNotes.length; ++m) meta.push({ key: memoryKeyFor(allNotes[m]), tick: noteTick(allNotes[m]) })
+            var changes = Logic.changesFor(memoryStore, id, key)
+            var range = { from: 0, to: changes.length > 1 ? changes[1].t : null }
+            var indices = Logic.indicesToTune(meta, key, range)
+            for (var n = 0; n < indices.length; ++n) tuneNotes([allNotes[indices[n]]], cents)
+            curScore.endCmd()
+        }
         refreshNotes()
-        status(qsTr("Automatic memory cleared"))
+        refreshTuningTableControls()
+        refreshMarkers()
+        status(letter + " " + variantFa(variant) + " = " + cents + "¢")
     }
 
-    /// Number of remembered values, for the toolbar badge.
-    function memoryCount()
-    {
-        return Logic.countChanges(memoryStore, ensureScoreMemory())
-    }
+    function memoryCount() { return Logic.countChanges(memoryStore, ensureScoreMemory()) }
 
-    // ------------------------------------------------------------------
-    // Tool 2 - markers
-    // ------------------------------------------------------------------
-
-    function toggleMarkerTool()
-    {
+    function toggleMarkerTool() {
         markerToolArmed = !markerToolArmed
-        if (markerToolArmed) {
-            status(qsTr("Marker tool: click a note in the score"))
-        } else {
-            pendingMarker = null
-            status(qsTr("Marker tool cancelled"))
-        }
-        markerHint.visible = markerToolArmed
+        if (markerToolArmed) status("ابزار مارکر فعال: روی نت کلیک کنید")
+        else { pendingMarker = null; status("مارکر لغو شد") }
     }
 
-    /// Places a permanent marker above \p note.
-    function placeMarker(note, cents)
-    {
-        if (!curScore || !note) {
-            return null
-        }
+    function placeMarker(note, targetCents) {
+        if (!curScore || !note) return null
         var element = newElement(Element.TEXT)
-        if (!element) {
-            status(qsTr("Could not create the marker"))
-            return null
-        }
-        element.text = Logic.markerText(cents)
+        if (!element) return null
+        element.text = Logic.markerText(targetCents)
         element.subStyle = Tid.STAFF
         element.placement = Placement.ABOVE
         element.align = Align.BASELINE
-
         curScore.startCmd(qsTr("Add tuning marker"))
         note.add(element)
         curScore.endCmd()
-
         refreshMarkers()
         return element
     }
 
-    /// Called when the marker tool is armed and the user clicked in the score.
-    function handleMarkerClick()
-    {
+    function handleMarkerClick() {
         var note = firstSelectedNote()
-        if (!note) {
-            status(qsTr("Click a note (not a rest) in the score"))
-            return false
-        }
-        var cents = round1(note.tuning)
-        var element = placeMarker(note, cents)
-        if (!element) {
-            return false
-        }
+        if (!note) { status("روی نت کلیک کنید"); return false }
+        var target = effectiveTargetForNote(note)
+        var element = placeMarker(note, target)
+        if (!element) return false
         markerToolArmed = false
-        markerHint.visible = false
         pendingMarker = element
-        centsControl.currentValue = cents
-        status(qsTr("Marker added - set the value and press Apply"))
-        // bring the plugin window to the front so the value can be typed in
-        try {
-            var pluginWindow = root.Window.window
-            if (pluginWindow) {
-                pluginWindow.raise()
-                pluginWindow.requestActivate()
-            }
-        } catch (e) {
-            // not available for every plugin window, that is fine
-        }
+        var ident = noteIdentity(note)
+        selectedLetter = ident.letter
+        selectedVariant = ident.variant
+        selectedOctave = Math.floor(note.pitch / 12) - 1
+        currentCents = target
+        refreshTuningTableControls()
+        status("مارکر اضافه شد")
+        try { var win = root.Window.window; if (win) { win.raise(); win.requestActivate() } } catch (e) {}
         return true
     }
 
-    function refreshMarkers()
-    {
+    function refreshMarkers() {
         markersModel.clear()
         markerEntries = []
-        if (!curScore) {
-            markersGroup.visible = false
-            return
-        }
+        if (!curScore) return
         var notes = collectScoreNotes()
         for (var i = 0; i < notes.length; ++i) {
             var note = notes[i]
             var elements = note.elements
             for (var e = 0; e < elements.length; ++e) {
                 var el = elements[e]
-                if (el.type != Element.TEXT) {
-                    continue
-                }
+                if (el.type != Element.TEXT) continue
                 var parsed = Logic.parseMarkerText(el.text)
-                if (!parsed) {
-                    continue
-                }
+                if (!parsed) continue
                 markerEntries.push({ note: note, element: el })
-                markersModel.append({
-                    idx: markerEntries.length - 1,
-                    label: qsTr("Measure ") + measureNumberFor(note) + " - " + noteLabel(note),
-                    cents: round1(parsed.cents)
-                })
+                markersModel.append({ idx: markerEntries.length - 1, label: "میزان " + measureNumberFor(note) + " - " + noteLabelShort(note), cents: round1(parsed.cents) })
             }
         }
-        markersGroup.visible = markerEntries.length > 0
     }
 
-    function gotoMarker(index)
-    {
-        if (index < 0 || index >= markerEntries.length) {
-            return
-        }
+    function gotoMarker(index) {
+        if (index < 0 || index >= markerEntries.length) return
         var entry = markerEntries[index]
-        if (curScore.selection.select(entry.note)) {
-            refreshNotes()
-        }
+        if (curScore.selection.select(entry.note)) refreshNotes()
         curScore.showElementInScore(entry.note)
     }
-
-    function removeMarker(index)
-    {
-        if (index < 0 || index >= markerEntries.length) {
-            return
-        }
+    function removeMarker(index) {
+        if (index < 0 || index >= markerEntries.length) return
         var entry = markerEntries[index]
         curScore.startCmd(qsTr("Remove tuning marker"))
-        try {
-            entry.note.remove(entry.element)
-        } catch (e) {
-            removeElement(entry.element)
-        }
+        try { entry.note.remove(entry.element) } catch (e) { removeElement(entry.element) }
         curScore.endCmd()
-        if (pendingMarker && pendingMarker === entry.element) {
-            pendingMarker = null
-        }
+        if (pendingMarker && pendingMarker === entry.element) pendingMarker = null
         refreshMarkers()
-        status(qsTr("Marker removed"))
     }
-
-    function removeAllMarkers()
-    {
-        if (markerEntries.length === 0) {
-            return
-        }
+    function removeAllMarkers() {
+        if (markerEntries.length === 0) return
         var entries = markerEntries
         curScore.startCmd(qsTr("Remove tuning markers"))
         for (var i = 0; i < entries.length; ++i) {
-            try {
-                entries[i].note.remove(entries[i].element)
-            } catch (e) {
-                removeElement(entries[i].element)
-            }
+            try { entries[i].note.remove(entries[i].element) } catch (e) { removeElement(entries[i].element) }
         }
         curScore.endCmd()
         pendingMarker = null
         refreshMarkers()
-        status(qsTr("All markers removed"))
     }
 
-    // ------------------------------------------------------------------
-    // Presets
-    // ------------------------------------------------------------------
-
-    function applyPreset(wholeScore)
-    {
-        applyPresetAt(presetDropdown.currentIndex, wholeScore)
-    }
-
-    /// Applies preset number \p presetIndex to the selection (or to the whole
-    /// score when \p wholeScore is true or nothing is selected).
-    function applyPresetAt(presetIndex, wholeScore)
-    {
-        if (!curScore) {
-            return
-        }
-        if (presetIndex < 0 || presetIndex >= presets.length) {
-            return
-        }
+    function applyPresetAt(presetIndex, wholeScore) {
+        if (!curScore) return
+        if (presetIndex < 0 || presetIndex >= presets.length) return
         if (wholeScore || curScore.selection.elements.length === 0) {
             curScore.startCmd(qsTr("Apply Persian tuning to score"))
             cmd("select-all")
-        } else {
-            curScore.startCmd(qsTr("Apply Persian tuning to selection"))
-        }
-
+        } else curScore.startCmd(qsTr("Apply Persian tuning to selection"))
         var offsets = Logic.offsetsForPreset(presets[presetIndex])
         var tonic = root.tonicPc
-
         var chords = []
         var elements = curScore.selection.elements
         for (var i = 0; i < elements.length; ++i) {
             var el = elements[i]
             if (el.type == Element.NOTE && el.parent && el.parent.type == Element.CHORD) {
                 var add = true
-                for (var j = 0; j < chords.length; ++j) {
-                    if (chords[j].is(el.parent)) {
-                        add = false
-                        break
-                    }
-                }
-                if (add) {
-                    chords.push(el.parent)
-                }
+                for (var j = 0; j < chords.length; ++j) if (chords[j].is(el.parent)) { add = false; break }
+                if (add) chords.push(el.parent)
             }
         }
-
         for (var c = 0; c < chords.length; ++c) {
             var notes = chords[c].notes
             for (var n = 0; n < notes.length; ++n) {
                 var note = notes[n]
                 var relative = (note.pitch % 12 - tonic + 12) % 12
-                tuneNotes([note], offsets[relative])
+                var ident = noteIdentity(note)
+                var target = offsets[relative] + ident.baseCents
+                tuneNotes([note], target)
             }
         }
-
         curScore.endCmd()
         refreshNotes()
-        status(qsTr("Preset applied to %1 chord(s)").arg(chords.length))
     }
-
-    function resetSelection()
-    {
-        commitCents(0)
-    }
-
-    function saveCustomPreset()
-    {
-        options.customPreset = JSON.stringify({
-            "name": presets[presetDropdown.currentIndex].name,
-            "koron": presets[presetDropdown.currentIndex].koron,
-            "sori": presets[presetDropdown.currentIndex].sori,
-            "tonic": root.tonicPc
-        })
-        status(qsTr("Custom preset saved"))
-    }
-
-    function loadCustomPreset()
-    {
-        if (!options.customPreset || options.customPreset === "") {
-            status(qsTr("No custom preset saved yet"))
-            return
-        }
-        var data = null
-        try {
-            data = JSON.parse(options.customPreset)
-        } catch (e) {
-            status(qsTr("Could not load the custom preset"))
-            return
-        }
-        var index = Logic.indexOfPreset(presets, data.name)
-        if (index < 0) {
-            presets.push({ name: data.name, koron: data.koron, sori: data.sori })
-            index = presets.length - 1
-        }
-        presetDropdown.currentIndex = index
-        root.tonicPc = data.tonic ? data.tonic : 0
-        tonicDropdown.currentIndex = root.tonicPc
-        status(qsTr("Custom preset loaded"))
-    }
-
-    // ------------------------------------------------------------------
-    // Plugin lifecycle
-    // ------------------------------------------------------------------
 
     onRun: {
         syncAccidentalConstants()
@@ -822,479 +562,541 @@ MuseScore {
         ensureScoreMemory()
         refreshNotes()
         refreshMarkers()
+        refreshTuningTableControls()
         memoryCounter = memoryCount()
     }
 
     onScoreStateChanged: function(state) {
-        if (!curScore) {
-            return
-        }
-        if (state.undoRedo) {
-            refreshNotes()
-            refreshMarkers()
-            return
-        }
+        if (!curScore) return
+        if (state.undoRedo) { refreshNotes(); refreshMarkers(); return }
         if (state.selectionChanged) {
-            if (markerToolArmed) {
-                if (handleMarkerClick()) {
-                    centsControl.forceActiveFocus()
-                }
-            } else {
-                // moving away cancels a marker value that was not confirmed
-                pendingMarker = null
-            }
+            if (markerToolArmed) { if (handleMarkerClick()) {} }
+            else pendingMarker = null
             refreshNotes()
         }
     }
 
-    Timer {
-        id: statusTimer
-        interval: 4000
-        onTriggered: statusLabel.text = ""
-    }
+    Timer { id: statusTimer; interval: 4000; onTriggered: statusLabel.text = "" }
 
-    // ------------------------------------------------------------------
-    // Models
-    // ------------------------------------------------------------------
+    ListModel { id: notesModel }
+    ListModel { id: markersModel }
+    ListModel { id: tableModel }
 
     ListModel {
-        id: notesModel
-    }
-
-    ListModel {
-        id: markersModel
+        id: octaveModel
+        ListElement { text: "اکتاو ۳" }
+        ListElement { text: "اکتاو ۴" }
+        ListElement { text: "اکتاو ۵" }
+        ListElement { text: "اکتاو ۶" }
     }
 
     // ------------------------------------------------------------------
-    // UI
+    // UI - dark theme like mixer
     // ------------------------------------------------------------------
 
-    ColumnLayout {
+    Rectangle {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
+        color: bgPage
 
-        // ----- Tuner toolbar -------------------------------------------
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: toolbarColumn.implicitHeight + 16
-            radius: 6
-            color: "#14000000"
-            border.color: "#22000000"
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 0
+            spacing: 0
 
-            ColumnLayout {
-                id: toolbarColumn
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
+            // Ribbon tab bar (tuner-ribbon-tab.html)
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 86
+                color: "#131a22"
+                border.color: border
+                border.width: 1
+                radius: 14
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 0
 
-                    MU.FlatButton {
-                        id: markerToolButton
-                        text: Logic.MARKER_GLYPH + "  " + qsTr("Marker")
-                        onClicked: root.toggleMarkerTool()
-                    }
-
+                    // Tab row
                     Rectangle {
-                        id: markerArmedDot
-                        Layout.preferredWidth: 10
-                        Layout.preferredHeight: 10
-                        radius: 5
-                        color: root.markerToolArmed ? "#e67e22" : "transparent"
-                        border.color: "#66000000"
-                    }
-
-                    MU.CheckBox {
-                        id: autoMemoryCheck
-                        text: qsTr("Automatic memory")
-                        checked: root.autoMemory
-                        onClicked: {
-                            root.autoMemory = !root.autoMemory
-                            root.saveSettings()
-                        }
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Re-apply")
-                        onClicked: root.reapplyMemory()
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Clear memory")
-                        onClicked: root.clearMemory()
-                    }
-
-                    Item {
                         Layout.fillWidth: true
-                    }
+                        Layout.preferredHeight: 36
+                        color: "#0f151c"
+                        border.color: border
+                        border.width: 0
 
-                    MU.StyledTextLabel {
-                        text: qsTr("Remembered values: ")
-                    }
-
-                    MU.StyledTextLabel {
-                        id: memoryCountLabel
-                        text: String(root.memoryCounter)
-                    }
-                }
-
-                MU.StyledTextLabel {
-                    id: markerHint
-                    Layout.fillWidth: true
-                    visible: false
-                    text: qsTr("Marker tool is active: click a note in the score. A permanent sign is placed there and the value can be entered right away.")
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    MU.StyledTextLabel {
-                        text: qsTr("Match notes by:")
-                    }
-
-                    MU.StyledDropdown {
-                        id: matchDropdown
-                        Layout.preferredWidth: 170
-                        model: [qsTr("Pitch class"), qsTr("Pitch class + accidental")]
-                        currentIndex: root.matchAccidental ? 1 : 0
-                        onActivated: function(index, value) {
-                            root.matchAccidental = (index === 1)
-                            root.saveSettings()
-                            root.refreshNotes()
-                        }
-                    }
-
-                    MU.CheckBox {
-                        id: perStaffCheck
-                        text: qsTr("Per staff")
-                        checked: root.perStaffMemory
-                        onClicked: {
-                            root.perStaffMemory = !root.perStaffMemory
-                            root.saveSettings()
-                            root.refreshNotes()
-                        }
-                    }
-
-                    MU.CheckBox {
-                        id: accidentalsCheck
-                        text: qsTr("Write koron/sori signs")
-                        checked: root.addAccidentals
-                        onClicked: {
-                            root.addAccidentals = !root.addAccidentals
-                            root.saveSettings()
-                        }
-                    }
-                }
-            }
-        }
-
-        // ----- Dastgah preset ------------------------------------------
-        MU.StyledGroupBox {
-            Layout.fillWidth: true
-            title: qsTr("Dastgah preset")
-
-            ColumnLayout {
-                width: parent.width
-                spacing: 8
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    MU.StyledTextLabel {
-                        text: qsTr("Tonic:")
-                    }
-
-                    MU.StyledDropdown {
-                        id: tonicDropdown
-                        Layout.preferredWidth: 140
-                        model: root.pcNames
-                        currentIndex: root.tonicPc
-                        onActivated: function(index, value) {
-                            root.tonicPc = index
-                        }
-                    }
-
-                    MU.StyledTextLabel {
-                        text: qsTr("Dastgah:")
-                    }
-
-                    MU.StyledDropdown {
-                        id: presetDropdown
-                        Layout.fillWidth: true
-                        model: Logic.presetNames(root.presets)
-                        currentIndex: 2   // Homayoun
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    MU.FlatButton {
-                        text: qsTr("Apply to selection")
-                        onClicked: root.applyPreset(false)
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Apply to score")
-                        onClicked: root.applyPreset(true)
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Save preset")
-                        onClicked: root.saveCustomPreset()
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Load preset")
-                        onClicked: root.loadCustomPreset()
-                    }
-
-                    MU.FlatButton {
-                        text: "\u25B6  " + qsTr("Play")
-                        onClicked: root.cmd("play")
-                    }
-                }
-            }
-        }
-
-        // ----- Cent tuning panel ---------------------------------------
-        MU.StyledGroupBox {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            title: qsTr("Cent tuning")
-
-            ColumnLayout {
-                width: parent.width
-                height: parent.height
-                spacing: 8
-
-                MU.StyledTextLabel {
-                    id: selectionSummary
-                    Layout.fillWidth: true
-                    text: qsTr("No note selected")
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    MU.IncrementalPropertyControl {
-                        id: centsControl
-                        Layout.preferredWidth: 120
-                        currentValue: 0
-                        decimals: 1
-                        step: 1
-                        minValue: -100
-                        maxValue: 100
-                        measureUnitsSymbol: "\u00A2"
-                        // valueEdited fires while typing: only preview the selection
-                        onValueEdited: function(newValue) {
-                            root.previewCents(newValue)
-                        }
-                        // valueEditingFinished fires on Enter / focus out: commit it
-                        onValueEditingFinished: function(newValue) {
-                            root.commitCents(newValue)
-                        }
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Koron -50")
-                        onClicked: root.commitCents(-50)
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Natural 0")
-                        onClicked: root.commitCents(0)
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Sori +50")
-                        onClicked: root.commitCents(50)
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Apply")
-                        onClicked: root.commitCents(centsControl.currentValue)
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Use remembered")
-                        onClicked: root.applyMemoryToSelection()
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-                }
-
-                MU.StyledTextLabel {
-                    id: memoryLabel
-                    Layout.fillWidth: true
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    MU.StyledTextLabel {
-                        id: countLabel
-                        Layout.fillWidth: true
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Refresh")
-                        onClicked: root.refreshNotes()
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumHeight: 80
-                    color: "transparent"
-                    clip: true
-                    border.color: "#33000000"
-                    radius: 4
-
-                    Flickable {
-                        id: notesFlick
-                        anchors.fill: parent
-                        contentHeight: notesCol.implicitHeight
-                        clip: true
-
-                        ColumnLayout {
-                            id: notesCol
-                            width: notesFlick.width
-                            spacing: 6
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            spacing: 2
 
                             Repeater {
-                                model: notesModel
+                                model: ["خانه", "ورود نت", "چیدمان", "تیونر", "پخش", "نما"]
+                                delegate: Rectangle {
+                                    Layout.preferredHeight: 36
+                                    Layout.preferredWidth: 64
+                                    color: "transparent"
+                                    border.width: 0
 
-                                delegate: RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 6
-
-                                    MU.StyledTextLabel {
-                                        text: model.label
-                                        Layout.preferredWidth: 70
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData
+                                        color: modelData === "تیونر" ? accent : textSecondary
+                                        font.pixelSize: 13
                                     }
+                                    Rectangle {
+                                        anchors.bottom: parent.bottom
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        height: 2
+                                        color: modelData === "تیونر" ? accent : "transparent"
+                                    }
+                                }
+                            }
+                            Item { Layout.fillWidth: true }
+                        }
+                        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: border }
+                    }
 
+                    // Subtoolbar
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.margins: 10
+                        spacing: 8
+
+                        // پنل کلی
+                        ColumnLayout {
+                            spacing: 6
+                            Rectangle {
+                                Layout.preferredWidth: 64
+                                Layout.preferredHeight: 52
+                                radius: 9
+                                color: accentDim
+                                border.color: "#2ee6b833"
+                                border.width: 1
+
+                                ColumnLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    Text { text: "◫"; color: accent; font.pixelSize: 20; Layout.alignment: Qt.AlignHCenter }
+                                    Text { text: "پنل کلی"; color: textPrimary; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                                }
+                                MouseArea { anchors.fill: parent; onClicked: refreshNotes() }
+                            }
+                            Text { text: "تنظیم کوک"; color: textMuted; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                        }
+
+                        Rectangle { Layout.preferredWidth: 1; Layout.fillHeight: true; color: border }
+
+                        // نشانگر
+                        ColumnLayout {
+                            spacing: 6
+                            Rectangle {
+                                id: markerBtn
+                                Layout.preferredWidth: 64
+                                Layout.preferredHeight: 52
+                                radius: 9
+                                color: markerToolArmed ? accentDim : bgBtn
+                                border.color: markerToolArmed ? "#2ee6b833" : border
+                                border.width: 1
+
+                                ColumnLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    Text { text: "⚑"; color: markerToolArmed ? accent : textSecondary; font.pixelSize: 18; Layout.alignment: Qt.AlignHCenter }
+                                    Text { text: "نشانگر"; color: markerToolArmed ? accent : textSecondary; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                                }
+                                MouseArea { anchors.fill: parent; onClicked: toggleMarkerTool() }
+                            }
+                            Text { text: "مرز مدگردی"; color: textMuted; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                        }
+
+                        Rectangle { Layout.preferredWidth: 1; Layout.fillHeight: true; color: border }
+
+                        // حافظه خودکار
+                        ColumnLayout {
+                            spacing: 6
+                            Rectangle {
+                                Layout.preferredWidth: 64
+                                Layout.preferredHeight: 52
+                                radius: 9
+                                color: bgBtn
+                                border.color: border
+                                border.width: 1
+
+                                ColumnLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    Rectangle {
+                                        Layout.preferredWidth: 30
+                                        Layout.preferredHeight: 16
+                                        radius: 8
+                                        color: accentDim
+                                        border.color: "#2ee6b866"
+                                        border.width: 1
+                                        Rectangle {
+                                            x: autoMemory ? parent.width - 13 : 1
+                                            y: 1
+                                            width: 12; height: 12; radius: 6
+                                            color: accent
+                                        }
+                                    }
+                                    Text { text: autoMemory ? "فعال" : "خاموش"; color: autoMemory ? accent : textSecondary; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: { autoMemory = !autoMemory; saveSettings() }
+                                }
+                            }
+                            Text { text: "حافظه خودکار"; color: textMuted; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                        }
+
+                        Rectangle { Layout.preferredWidth: 1; Layout.fillHeight: true; color: border }
+
+                        // مدیریت
+                        ColumnLayout {
+                            spacing: 6
+                            RowLayout {
+                                spacing: 4
+                                Rectangle {
+                                    Layout.preferredWidth: 40; Layout.preferredHeight: 40; radius: 9; color: bgBtn; border.color: border; border.width: 1
+                                    Text { anchors.centerIn: parent; text: "👁"; color: textSecondary; font.pixelSize: 16 }
+                                    MouseArea { anchors.fill: parent; onClicked: {} }
+                                }
+                                Rectangle {
+                                    Layout.preferredWidth: 40; Layout.preferredHeight: 40; radius: 9; color: bgBtn; border.color: border; border.width: 1
+                                    Text { anchors.centerIn: parent; text: "☰"; color: textSecondary; font.pixelSize: 16 }
+                                    MouseArea { anchors.fill: parent; onClicked: {} }
+                                }
+                            }
+                            Text { text: "مدیریت"; color: textMuted; font.pixelSize: 10; Layout.alignment: Qt.AlignHCenter }
+                        }
+
+                        Item { Layout.fillWidth: true }
+                    }
+                }
+            }
+
+            // Main panel - cent-tuning-panel.html
+            Flickable {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentHeight: mainCol.implicitHeight + 20
+                clip: true
+
+                ColumnLayout {
+                    id: mainCol
+                    width: parent.width - 20
+                    x: 10
+                    y: 10
+                    spacing: 16
+
+                    // Header
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text { text: "میزان‌کننده بر پایه سنت"; color: textMuted; font.pixelSize: 13 }
+                        Item { Layout.fillWidth: true }
+                    }
+
+                    // Ref row
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 64
+                            radius: 10
+                            color: bgCard
+                            border.color: border
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 10
+
+                                ColumnLayout {
+                                    spacing: 4
+                                    Text { text: "نت مرجع (دیاپازون)"; color: textMuted; font.pixelSize: 11 }
+                                    Text { text: "لا۴ (A4)"; color: textPrimary; font.pixelSize: 15 }
+                                }
+                                Item { Layout.fillWidth: true }
+                                RowLayout {
+                                    spacing: 6
+                                    Rectangle {
+                                        Layout.preferredWidth: 64
+                                        Layout.preferredHeight: 28
+                                        radius: 6
+                                        color: bgPanel
+                                        border.color: borderStrong
+                                        border.width: 1
+
+                                        TextInput {
+                                            id: refFreqInput
+                                            anchors.centerIn: parent
+                                            text: String(refFreq)
+                                            color: textPrimary
+                                            font.pixelSize: 14
+                                            horizontalAlignment: TextInput.AlignHCenter
+                                            validator: DoubleValidator { bottom: 300; top: 600 }
+                                            onEditingFinished: {
+                                                var v = parseFloat(text)
+                                                if (!isNaN(v)) { refFreq = v; saveSettings(); refreshTuningTableControls() }
+                                            }
+                                        }
+                                    }
+                                    Text { text: "Hz"; color: textMuted; font.pixelSize: 12 }
+                                }
+                            }
+                        }
+                    }
+
+                    Text { text: "انتخاب اکتاو، نت و علامت"; color: textMuted; font.pixelSize: 11 }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        // Octave
+                        MU.StyledDropdown {
+                            id: octaveDropdown
+                            Layout.preferredWidth: 110
+                            model: ["اکتاو ۳", "اکتاو ۴", "اکتاو ۵", "اکتاو ۶"]
+                            currentIndex: 1
+                            onActivated: function(index) {
+                                selectedOctave = 3 + index
+                                refreshTuningTableControls()
+                            }
+                        }
+                        // Note
+                        MU.StyledDropdown {
+                            id: noteDropdown
+                            Layout.preferredWidth: 90
+                            model: ["دو", "رِ", "می", "فا", "سل", "لا", "سی"]
+                            currentIndex: 5
+                            onActivated: function(index) {
+                                var letters = ["C","D","E","F","G","A","B"]
+                                selectedLetter = letters[index]
+                                refreshTuningTableControls()
+                            }
+                        }
+                        // Accidental
+                        MU.StyledDropdown {
+                            id: variantDropdown
+                            Layout.fillWidth: true
+                            model: ["بکار", "بمل", "سری", "کرن", "دیز"]
+                            currentIndex: 2
+                            onActivated: function(index) {
+                                var ids = ["natural","flat","sori","koron","sharp"]
+                                selectedVariant = ids[index]
+                                var tblCents = getTableCents(selectedLetter, selectedVariant)
+                                currentCents = tblCents
+                                centsSlider.value = tblCents
+                                refreshTuningTableControls()
+                            }
+                        }
+                    }
+
+                    // Current badge
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 36
+                        radius: 8
+                        color: accentDim
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 8
+                            Rectangle { width: 8; height: 8; radius: 4; color: accent }
+                            Text { text: "در حال تنظیم:"; color: textSecondary; font.pixelSize: 12 }
+                            Text { id: currentBadgeLabel; text: "فا سری"; color: accent; font.pixelSize: 15 }
+                            Item { Layout.fillWidth: true }
+                            Text { id: selectionSummary; text: ""; color: textSecondary; font.pixelSize: 11 }
+                        }
+                    }
+
+                    // Tuner card
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 220
+                        radius: 12
+                        color: bgCard
+                        border.color: border
+                        border.width: 1
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 16
+                            spacing: 10
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text { id: refNoteLabel; text: "سنت نسبت به فا طبیعی"; color: textSecondary; font.pixelSize: 12 }
+                                Item { Layout.fillWidth: true }
+                                Text { id: centsLabel; text: "+50"; color: textPrimary; font.pixelSize: 16 }
+                            }
+
+                            MU.StyledSlider {
+                                id: centsSlider
+                                Layout.fillWidth: true
+                                from: -100
+                                to: 100
+                                stepSize: 1
+                                value: 50
+                                onMoved: {
+                                    currentCents = value
+                                    centsLabel.text = (value > 0 ? "+" : "") + Math.round(value)
+                                    var freq = calcFreq(selectedLetter, selectedOctave, selectedVariant, value, refFreq)
+                                    hzLabel.text = freq.toFixed(1) + " Hz"
+                                    previewCents(value)
+                                }
+                                onPressedChanged: {
+                                    if (!pressed) commitCents(value)
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text { text: "-100"; color: textMuted; font.pixelSize: 11 }
+                                Item { Layout.fillWidth: true }
+                                Text { text: "0"; color: textMuted; font.pixelSize: 11 }
+                                Item { Layout.fillWidth: true }
+                                Text { text: "+100"; color: textMuted; font.pixelSize: 11 }
+                            }
+
+                            RowLayout {
+                                spacing: 6
+                                Text { text: "ⓘ"; color: textMuted; font.pixelSize: 11 }
+                                Text { id: hintLabel; Layout.fillWidth: true; text: "مقدار مرسوم سری معمولاً 50+ سنت است"; color: textMuted; font.pixelSize: 11; wrapMode: Text.WordWrap }
+                            }
+
+                            Rectangle { Layout.fillWidth: true; height: 1; color: border }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text { text: "فرکانس محاسبه‌شده (فقط‌خواندنی)"; color: textSecondary; font.pixelSize: 12 }
+                                Item { Layout.fillWidth: true }
+                                Text { id: hzLabel; text: "357.3 Hz"; color: accent; font.pixelSize: 20 }
+                            }
+                        }
+                    }
+
+                    // Play button
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 44
+                        radius: 8
+                        color: bgCard
+                        border.color: borderStrong
+                        border.width: 1
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Text { text: "▶"; color: textPrimary; font.pixelSize: 14 }
+                            Text { text: "پخش این نت"; color: textPrimary; font.pixelSize: 14 }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                // play via MuseScore cmd
+                                try { root.cmd("play") } catch (e) {}
+                            }
+                        }
+                    }
+
+                    // Quick table for all variants of selected letter
+                    Text { text: "تنظیمات همه علامت‌های " + letterFa(selectedLetter); color: textMuted; font.pixelSize: 11 }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        Repeater {
+                            model: tableModel
+                            delegate: Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 48
+                                radius: 8
+                                color: bgCard
+                                border.color: border
+                                border.width: 1
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    spacing: 8
+                                    Text { text: variantFa(model.variant); color: textPrimary; font.pixelSize: 12; Layout.preferredWidth: 40 }
+                                    Text { text: model.cents + "¢"; color: textSecondary; font.pixelSize: 11; Layout.preferredWidth: 50 }
                                     MU.StyledSlider {
                                         Layout.fillWidth: true
-                                        from: -100
-                                        to: 100
-                                        stepSize: 5
-                                        value: model.cents
-                                        onMoved: {
-                                            if (model.idx >= 0 && model.idx < root.noteObjects.length) {
-                                                root.noteObjects[model.idx].tuning = value
-                                            }
-                                        }
-                                        onPressedChanged: {
-                                            if (!pressed) {
-                                                root.commitCents(value)
-                                            }
-                                        }
+                                        from: -100; to: 100; value: model.cents; stepSize: 1
+                                        onPressedChanged: { if (!pressed) setTableCents(selectedLetter, model.variant, value) }
                                     }
-
-                                    MU.StyledTextLabel {
-                                        text: model.cents + " \u00A2"
-                                        Layout.preferredWidth: 58
-                                        Layout.alignment: Qt.AlignRight
-                                    }
-
-                                    MU.StyledTextLabel {
-                                        text: model.remembered === root.noMemoryValue
-                                              ? ""
-                                              : qsTr("mem ") + model.remembered
-                                        Layout.preferredWidth: 62
+                                    Rectangle {
+                                        Layout.preferredWidth: 36; Layout.preferredHeight: 28; radius: 6; color: bgPanel; border.color: border; border.width: 1
+                                        Text { anchors.centerIn: parent; text: model.cents; color: textPrimary; font.pixelSize: 11 }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                MU.StyledTextLabel {
-                    id: emptyLabel
-                    Layout.fillWidth: true
-                    text: qsTr("Select notes in the score to tune them here.")
-                }
-            }
-        }
+                    // Selected notes list
+                    Text { id: countLabel; text: ""; color: textMuted; font.pixelSize: 11 }
 
-        // ----- Markers --------------------------------------------------
-        MU.StyledGroupBox {
-            id: markersGroup
-            Layout.fillWidth: true
-            visible: false
-            title: qsTr("Tuning markers")
-
-            ColumnLayout {
-                width: parent.width
-                spacing: 6
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    MU.StyledTextLabel {
-                        Layout.fillWidth: true
-                        text: qsTr("Permanent signs in the score, marking where the tuning changes.")
-                    }
-
-                    MU.FlatButton {
-                        text: qsTr("Remove all")
-                        onClicked: root.removeAllMarkers()
-                    }
-                }
-
-                Repeater {
-                    model: markersModel
-
-                    delegate: RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 6
-
-                        MU.StyledTextLabel {
-                            text: Logic.MARKER_GLYPH
-                            Layout.preferredWidth: 16
-                        }
-
-                        MU.StyledTextLabel {
-                            text: model.label
+                    Repeater {
+                        model: notesModel
+                        delegate: Rectangle {
                             Layout.fillWidth: true
-                        }
-
-                        MU.StyledTextLabel {
-                            text: model.cents + " \u00A2"
-                            Layout.preferredWidth: 58
-                        }
-
-                        MU.FlatButton {
-                            text: qsTr("Go to")
-                            onClicked: root.gotoMarker(model.idx)
-                        }
-
-                        MU.FlatButton {
-                            text: qsTr("Delete")
-                            onClicked: root.removeMarker(model.idx)
+                            Layout.preferredHeight: 36
+                            radius: 6
+                            color: bgCard
+                            border.color: border
+                            border.width: 1
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                Text { text: model.label; color: textPrimary; font.pixelSize: 12; Layout.preferredWidth: 80 }
+                                Text { text: model.cents + "¢ نسبت به بکار"; color: textSecondary; font.pixelSize: 11; Layout.fillWidth: true }
+                            }
                         }
                     }
+
+                    // Markers
+                    Repeater {
+                        model: markersModel
+                        delegate: Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 36
+                            radius: 6
+                            color: bgCard
+                            border.color: border
+                            border.width: 1
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                Text { text: "⚑"; color: accent; font.pixelSize: 12 }
+                                Text { text: model.label; color: textPrimary; font.pixelSize: 11; Layout.fillWidth: true }
+                                Text { text: model.cents + "¢"; color: accent; font.pixelSize: 11 }
+                                Rectangle {
+                                    Layout.preferredWidth: 40; Layout.preferredHeight: 24; radius: 6; color: bgBtn; border.color: border; border.width: 1
+                                    Text { anchors.centerIn: parent; text: "برو"; color: textSecondary; font.pixelSize: 10 }
+                                    MouseArea { anchors.fill: parent; onClicked: gotoMarker(model.idx) }
+                                }
+                                Rectangle {
+                                    Layout.preferredWidth: 40; Layout.preferredHeight: 24; radius: 6; color: bgBtn; border.color: border; border.width: 1
+                                    Text { anchors.centerIn: parent; text: "حذف"; color: textSecondary; font.pixelSize: 10 }
+                                    MouseArea { anchors.fill: parent; onClicked: removeMarker(model.idx) }
+                                }
+                            }
+                        }
+                    }
+
+                    Text { id: statusLabel; Layout.fillWidth: true; color: textSecondary; font.pixelSize: 11 }
                 }
             }
-        }
-
-        // ----- Status ---------------------------------------------------
-        MU.StyledTextLabel {
-            id: statusLabel
-            Layout.fillWidth: true
         }
     }
 }

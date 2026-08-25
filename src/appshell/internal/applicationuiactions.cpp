@@ -207,6 +207,13 @@ const UiActionList ApplicationUiActions::m_actions = {
              TranslatableString("action", "Show/hide percussion panel"),
              Checkable::Yes
              ),
+    UiAction("toggle-persian-tuner",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_ANY,
+             TranslatableString("action", "Persian Tuner"),
+             TranslatableString("action", "Show/hide Persian tuner"),
+             Checkable::Yes
+             ),
     UiAction("toggle-scorecmp-tool",
              mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
@@ -342,6 +349,7 @@ const QMap<ActionCode, DockName>& ApplicationUiActions::toggleDockActions()
         { "toggle-mixer", MIXER_PANEL_NAME },
         { "toggle-piano-keyboard", PIANO_KEYBOARD_PANEL_NAME },
         { TOGGLE_PERCUSSION_PANEL_ACTION_CODE, PERCUSSION_PANEL_NAME },
+        { "toggle-persian-tuner", PERSIAN_TUNER_PANEL_NAME },
 
         { "toggle-statusbar", NOTATION_STATUSBAR_NAME },
     };

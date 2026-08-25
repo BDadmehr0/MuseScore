@@ -393,7 +393,7 @@ Item {
 
     function testAccidentals()
     {
-        console.log("- koron/sori signs")
+        console.log("- koron/sori signs (sign-oriented: target relative to natural)")
         var env = setup(noteSpecsA())
         if (!env) {
             return
@@ -401,25 +401,32 @@ Item {
         var plugin = env.plugin
         var notes = env.notes
 
-        equal("write signs on by default", plugin.addAccidentals, true)
+        // new default: addAccidentals false (sign-oriented keeps accidental as is unless user wants)
+        // but we test both modes
+        plugin.addAccidentals = true
+        equal("write signs enabled for test", plugin.addAccidentals, true)
         select(env, [notes[0]])
         plugin.commitCents(50)
         equal("sori sign written", notes[0].accidentalType, Accidental.SORI)
+        // effective pitch = base 50 + tuning 0 = 50 relative to natural
+        equal("sori effective 50 (tuning 0 + base 50)", notes[0].tuning + 50, 50)
         equal("sori sign written on later F", notes[4].accidentalType, Accidental.SORI)
 
         select(env, [notes[0]])
         plugin.commitCents(-50)
         equal("koron sign written", notes[0].accidentalType, Accidental.KORON)
+        equal("koron effective -50", notes[0].tuning - 50, -50)
 
         select(env, [notes[0]])
         plugin.commitCents(0)
         equal("sign cleared at 0 cents", notes[0].accidentalType, Accidental.NONE)
+        equal("natural at 0", notes[0].tuning, 0)
 
         plugin.addAccidentals = false
         select(env, [notes[2]])
         plugin.commitCents(50)
         equal("no sign when disabled", notes[2].accidentalType, Accidental.NONE)
-        equal("tuning still applied", notes[2].tuning, 50)
+        equal("tuning still applied (target 50, base 0 => 50)", notes[2].tuning, 50)
 
         env.plugin.destroy()
     }
@@ -520,7 +527,7 @@ Item {
 
     function testPreset()
     {
-        console.log("- dastgah preset")
+        console.log("- dastgah preset (kept for backward compat, now sign-oriented)")
         var env = setup(noteSpecsA())
         if (!env) {
             return
@@ -528,19 +535,27 @@ Item {
         var plugin = env.plugin
         var notes = env.notes
 
+        plugin.addAccidentals = false
         select(env, [notes[3], notes[5]])      // D and A
         plugin.applyPresetAt(2, false)         // Homayoun: koron on degrees 2 and 6
+        // With sign-oriented, target -50, base 0 => tuning -50 when accidentals disabled
         equal("D lowered", notes[3].tuning, -50)
         equal("A lowered", notes[5].tuning, -50)
         equal("F untouched by the preset", notes[0].tuning, 0)
-        equal("koron sign written", notes[3].accidentalType, Accidental.KORON)
+
+        // Now with accidentals enabled, effective pitch still -50 but tuning 0 + koron sign
+        plugin.addAccidentals = true
+        select(env, [notes[3], notes[5]])
+        plugin.applyPresetAt(2, false)
+        equal("koron sign written when enabled", notes[3].accidentalType, Accidental.KORON)
+        equal("D effective still -50 (tuning 0 + base -50)", notes[3].tuning - 50, -50)
 
         env.plugin.destroy()
     }
 
     function testReapplyAndPersistence()
     {
-        console.log("- re-apply and persistence")
+        console.log("- re-apply and persistence (sign-oriented keys)")
         var env = setup(noteSpecsA())
         if (!env) {
             return
@@ -555,6 +570,8 @@ Item {
 
         for (var i = 0; i < notes.length; ++i) {
             notes[i].tuning = 0
+            // reset accidental for clean re-apply
+            notes[i].accidentalType = Accidental.NONE
         }
         plugin.reapplyMemory()
         equal("re-applied 0", notes[0].tuning, 30)
@@ -564,7 +581,16 @@ Item {
         equal("re-applied C untouched", notes[1].tuning, 0)
 
         var store = TunerLogic.parseStore(plugin.settingsJson())
-        equal("persisted store resolves", TunerLogic.resolveCents(store, plugin.scoreId, "5", 2000), 50)
+        // new keys are like "F/natural" - find the key for F
+        var keys = TunerLogic.keysOf(store, plugin.scoreId)
+        var fKey = null
+        for (var k = 0; k < keys.length; ++k) {
+            if (keys[k].indexOf("F") === 0) { fKey = keys[k]; break }
+        }
+        check("found F key in store", fKey !== null, JSON.stringify(keys))
+        if (fKey) {
+            equal("persisted store resolves for F", TunerLogic.resolveCents(store, plugin.scoreId, fKey, 2000), 50)
+        }
 
         plugin.clearMemory()
         equal("memory cleared", plugin.memoryCount(), 0)

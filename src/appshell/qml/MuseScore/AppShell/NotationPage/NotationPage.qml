@@ -565,6 +565,42 @@ DockPage {
                     }
                 }
             }
+        },
+
+        DockPanel {
+            id: persianTunerPanel
+
+            objectName: root.pageModel.persianTunerPanelName()
+            title: qsTrc("appshell", "Persian Tuner")
+
+            height: 520
+            minimumHeight: root.horizontalPanelMinHeight
+            maximumHeight: root.horizontalPanelMaxHeight
+
+            minimumWidth: root.panelMinDimension
+            maximumWidth: root.panelMaxDimension
+
+            groupName: root.horizontalPanelsGroup
+
+            //! NOTE: hidden by default
+            visible: false
+
+            location: Location.Bottom
+
+            dropDestinations: root.horizontalPanelDropDestinations
+
+            navigationSection: root.navigationPanelSec(persianTunerPanel.location)
+
+            PersianTunerPanel {
+                id: persianTunerComponent
+
+                navigationSection: persianTunerPanel.navigationSection
+                contentNavigationPanelOrderStart: persianTunerPanel.contentNavigationPanelOrderStart
+
+                onResizeRequested: function(newWidth, newHeight) {
+                    persianTunerPanel.resize(newWidth, newHeight)
+                }
+            }
         }
     ]
 
