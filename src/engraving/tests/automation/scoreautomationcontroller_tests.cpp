@@ -25,6 +25,7 @@
 #include "global/async/asyncable.h"
 
 #include "engraving/automation/internal/scoreautomationcontroller.h"
+#include "engraving/compat/scoreaccess.h"
 #include "engraving/dom/masterscore.h"
 #include "engraving/dom/repeatlist.h"
 #include "engraving/dom/staff.h"
@@ -483,4 +484,23 @@ TEST_F(ScoreAutomationController_Tests, MirrorEdit_MeasureRepeat_CopiesPoint)
     const auto mirroredIt = curve.find(editUTick + 1920);
     ASSERT_TRUE(mirroredIt != curve.cend());
     EXPECT_EQ(mirroredIt->second, expectedMirrored);
+}
+
+TEST_F(ScoreAutomationController_Tests, Init_EmptyScore_CreatesAutomationData)
+{
+    // See setupNewScore()/MasterNotation: a brand-new score has no layout yet, so its repeat
+    // list may still be empty when automation is initialized. The automation data must be
+    // created regardless - consumers (e.g. NotationAutomationController building its overlay
+    // in the notation view) expect MasterScore::automationData() to be valid after init
+    MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
+    ASSERT_TRUE(score->repeatList().empty());
+
+    // [WHEN] Init automation on the empty score
+    score->initAutomation();
+
+    // [THEN] Automation data exists and is empty
+    ASSERT_TRUE(score->automationData());
+    EXPECT_TRUE(score->automationData()->isEmpty());
+
+    delete score;
 }
