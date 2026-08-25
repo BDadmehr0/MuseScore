@@ -286,6 +286,13 @@ void ScoreAutomationController::update(int tickFrom, staff_idx_t staffIdxFrom, s
         return;
     }
 
+    if (!m_automationData) {
+        // Create the data up front, so consumers of MasterScore::automationData() can rely on
+        // it being valid after init(), even when the rebuild below can't run yet (e.g. the
+        // repeat list is still empty for a freshly created score)
+        m_automationData = std::make_shared<AutomationData>();
+    }
+
     const RepeatList& repeatList = m_score->repeatList();
     if (repeatList.empty()) {
         return;
@@ -298,10 +305,6 @@ void ScoreAutomationController::update(int tickFrom, staff_idx_t staffIdxFrom, s
 
     IF_ASSERT_FAILED(repeatFromIt != repeatList.cend()) {
         return;
-    }
-
-    if (!m_automationData) {
-        m_automationData = std::make_shared<AutomationData>();
     }
 
     const StaffRange range(m_score, staffIdxFrom, staffIdxTo);

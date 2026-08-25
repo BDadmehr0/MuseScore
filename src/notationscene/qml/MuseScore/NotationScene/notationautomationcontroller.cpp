@@ -407,7 +407,13 @@ QVector<NotationAutomationController::PointData> NotationAutomationController::p
                                                                                                  int startTick, int endTick) const
 {
     QVector<PointData> points;
-    IF_ASSERT_FAILED(staff && score() && automationData()) {
+    IF_ASSERT_FAILED(staff && score()) {
+        return points;
+    }
+
+    if (!automationData()) {
+        // Automation data is created lazily (see ScoreAutomationController) and may not exist
+        // yet for the current score - nothing to draw in that case
         return points;
     }
 
@@ -794,7 +800,11 @@ bool NotationAutomationController::requestEditPoint(const PointData& oldPointDat
     // STEP 3 - Fetch the point being edited...
     const mu::engraving::AutomationCurveKey curveKey = curveKeyFor(currentAutomationType(), staff);
 
-    const mu::engraving::AutomationCurve& curve = automationData()->curve(curveKey);
+    const mu::engraving::AutomationDataConstPtr data = automationData();
+    IF_ASSERT_FAILED(data) {
+        return false;
+    }
+    const mu::engraving::AutomationCurve& curve = data->curve(curveKey);
     const auto existingIt = curve.find(oldPointData.tick);
     IF_ASSERT_FAILED(existingIt != curve.end()) {
         return false;
@@ -940,12 +950,17 @@ void NotationAutomationController::editAutomationPoints(const mu::engraving::Aut
 const mu::engraving::AutomationPoint* NotationAutomationController::automationPointAt(const SysStaffKey& key, int tick) const
 {
     const Staff* staff = score() ? score()->staff(key.staffIdx) : nullptr;
-    IF_ASSERT_FAILED(staff && automationData()) {
+    IF_ASSERT_FAILED(staff) {
+        return nullptr;
+    }
+
+    const mu::engraving::AutomationDataConstPtr data = automationData();
+    if (!data) {
         return nullptr;
     }
 
     const mu::engraving::AutomationCurveKey curveKey = curveKeyFor(currentAutomationType(), staff);
-    const mu::engraving::AutomationCurve& curve = automationData()->curve(curveKey);
+    const mu::engraving::AutomationCurve& curve = data->curve(curveKey);
     const auto it = curve.find(tick);
     if (it == curve.end()) {
         return nullptr;
