@@ -212,20 +212,13 @@ NotationAutomationController::NotationAutomationController(QQuickItem* linesPare
 
 void NotationAutomationController::init()
 {
-    IF_ASSERT_FAILED(automation() && currentNotation()) {
-        return;
-    }
+    //! NOTE: This controller can be set up while no notation is current yet, and the
+    //! notation/score/automation objects can also be missing transiently while projects
+    //! are switched or closed. Those states are recoverable: the notifications set up
+    //! below catch up as soon as a notation becomes available, so they must not trip an
+    //! assertion (failed assertions abort debug builds)...
 
     onCurrentNotationChanged();
-
-    automation()->automationModeEnabledChanged().onNotify(this, [this]() {
-        if (automation()->isAutomationModeEnabled() && !m_pendingChanges.isEmpty()) {
-            applyAutomationChanges(m_pendingChanges);
-            m_pendingChanges.clear();
-        } else {
-            updatePolylinesGeometry();
-        }
-    }, Asyncable::Mode::SetReplace /* FIXME */);
 
     notationConfiguration()->currentAutomationTypeChanged().onNotify(this, [this]() {
         rebuildAllPolylines();
@@ -256,7 +249,9 @@ void NotationAutomationController::init()
 
 NotationAutomationController::SysStaffToPolylinesMap NotationAutomationController::createPolylinesForSystem(const System* system)
 {
-    IF_ASSERT_FAILED(system && m_linesParent && score()) {
+    // Reached via async notifications, where these may legitimately be missing/stale
+    // (notation being switched or closed) - draw nothing rather than aborting
+    if (!system || !m_linesParent || !score()) {
         return {};
     }
 
@@ -276,7 +271,9 @@ NotationAutomationController::SysStaffToPolylinesMap NotationAutomationControlle
 
 muse::uicomponents::PolylinePlot* NotationAutomationController::createPolylineForStaff(const System* system, staff_idx_t staffIdx)
 {
-    IF_ASSERT_FAILED(system && m_linesParent && score()) {
+    // Reached via async notifications, where these may legitimately be missing/stale
+    // (notation being switched or closed) - draw nothing rather than aborting
+    if (!system || !m_linesParent || !score()) {
         return nullptr;
     }
 
@@ -407,7 +404,14 @@ QVector<NotationAutomationController::PointData> NotationAutomationController::p
                                                                                                  int startTick, int endTick) const
 {
     QVector<PointData> points;
-    IF_ASSERT_FAILED(staff && score()) {
+
+    //! NOTE: This is drawing code reached via asynchronous layout/notation notifications.
+    //! The score, staff or automation data may legitimately be missing for an empty score,
+    //! or while a notation is being switched/closed (e.g. File -> New). Such states are
+    //! recoverable, so they must never trip an assertion (failed assertions abort debug
+    //! builds) - there is simply nothing to draw...
+
+    if (!staff || !score()) {
         return points;
     }
 
@@ -576,8 +580,9 @@ void NotationAutomationController::updatePolylinesGeometry()
             continue;
         }
 
-        const SysStaff* sysStaff = key.system->staff(key.staffIdx);
-        IF_ASSERT_FAILED(sysStaff) {
+        const SysStaff* sysStaff = key.system ? key.system->staff(key.staffIdx) : nullptr;
+        if (!sysStaff) {
+            // Stale key, e.g. for a system of a previous score - skip it
             continue;
         }
 
@@ -625,6 +630,26 @@ void NotationAutomationController::onCurrentNotationChanged()
     m_pendingChanges.clear();
     rebuildAllPolylines();
 
+    if (const INotationAutomationPtr notationAutomation = automation()) {
+        // Subscribe here (not only in init()) so the polyline layer follows the automation
+        // object of the *current* master notation, not the one that happened to be current
+        // when the view was created (e.g. after File -> New)
+        notationAutomation->automationModeEnabledChanged().onNotify(this, [this]() {
+            const INotationAutomationPtr currentAutomation = automation();
+            if (!currentAutomation) {
+                // E.g. the last project was closed - nothing left to update
+                return;
+            }
+
+            if (currentAutomation->isAutomationModeEnabled() && !m_pendingChanges.isEmpty()) {
+                applyAutomationChanges(m_pendingChanges);
+                m_pendingChanges.clear();
+            } else {
+                updatePolylinesGeometry();
+            }
+        }, Asyncable::Mode::SetReplace /* FIXME */);
+    }
+
     if (automationData()) {
         automationData()->changed().onReceive(this, [this](const mu::engraving::AutomationChanges& changes) {
             onAutomationChanged(changes);
@@ -665,7 +690,9 @@ void NotationAutomationController::updateStaffPointsInRange(const SysStaffKey& k
 
     const Staff* staff = score() ? score()->staff(key.staffIdx) : nullptr;
     const SysStaff* sysStaff = key.system ? key.system->staff(key.staffIdx) : nullptr;
-    IF_ASSERT_FAILED(staff && sysStaff) {
+    if (!staff || !sysStaff) {
+        // The key may refer to a score that is no longer current (notation switched between
+        // building the polylines and this update) - skip rather than abort
         return;
     }
 
@@ -787,7 +814,8 @@ bool NotationAutomationController::requestEditPoint(const PointData& oldPointDat
     const System* system = key.system;
     const SysStaff* sysStaff = system ? system->staff(key.staffIdx) : nullptr;
     const Staff* staff = score() ? score()->staff(key.staffIdx) : nullptr;
-    IF_ASSERT_FAILED(sysStaff && staff) {
+    if (!sysStaff || !staff) {
+        // Stale interaction target (notation switched/closed) - reject the edit
         return false;
     }
 
@@ -801,7 +829,8 @@ bool NotationAutomationController::requestEditPoint(const PointData& oldPointDat
     const mu::engraving::AutomationCurveKey curveKey = curveKeyFor(currentAutomationType(), staff);
 
     const mu::engraving::AutomationDataConstPtr data = automationData();
-    IF_ASSERT_FAILED(data) {
+    if (!data) {
+        // Automation data not (yet) available - reject the edit
         return false;
     }
     const mu::engraving::AutomationCurve& curve = data->curve(curveKey);
@@ -882,7 +911,8 @@ bool NotationAutomationController::requestAddPoint(const SysStaffKey& key, qreal
     const System* system = key.system;
     const SysStaff* sysStaff = system ? system->staff(key.staffIdx) : nullptr;
     const Staff* staff = score() ? score()->staff(key.staffIdx) : nullptr;
-    IF_ASSERT_FAILED(sysStaff && staff) {
+    if (!sysStaff || !staff) {
+        // Stale interaction target (notation switched/closed) - reject the edit
         return false;
     }
 
@@ -921,7 +951,8 @@ bool NotationAutomationController::requestRemovePoint(const PointData& pointData
     }
 
     const Staff* staff = score() ? score()->staff(key.staffIdx) : nullptr;
-    IF_ASSERT_FAILED(staff) {
+    if (!staff) {
+        // Stale interaction target (notation switched/closed) - reject the removal
         return false;
     }
 
@@ -940,7 +971,8 @@ void NotationAutomationController::editAutomationPoints(const mu::engraving::Aut
                                                         mu::engraving::AutomationPointEdits& edits)
 {
     const INotationAutomationPtr notationAutomation = automation();
-    IF_ASSERT_FAILED(notationAutomation) {
+    if (!notationAutomation) {
+        // No master notation (e.g. project closed) - nothing to edit
         return;
     }
 
@@ -950,7 +982,8 @@ void NotationAutomationController::editAutomationPoints(const mu::engraving::Aut
 const mu::engraving::AutomationPoint* NotationAutomationController::automationPointAt(const SysStaffKey& key, int tick) const
 {
     const Staff* staff = score() ? score()->staff(key.staffIdx) : nullptr;
-    IF_ASSERT_FAILED(staff) {
+    if (!staff) {
+        // Stale key (notation switched/closed) - no point found
         return nullptr;
     }
 
