@@ -486,6 +486,15 @@ TEST_F(ScoreAutomationController_Tests, MirrorEdit_MeasureRepeat_CopiesPoint)
     EXPECT_EQ(mirroredIt->second, expectedMirrored);
 }
 
+TEST_F(ScoreAutomationController_Tests, Constructor_CreatesEmptyAutomationData)
+{
+    // The notation view can query MasterScore::automationData() as soon as the score
+    // object exists (File -> New opens musescore://notation before initAutomation()).
+    ScoreAutomationController controller;
+    ASSERT_TRUE(controller.automationData());
+    EXPECT_TRUE(controller.automationData()->isEmpty());
+}
+
 TEST_F(ScoreAutomationController_Tests, Init_EmptyScore_CreatesAutomationData)
 {
     // See setupNewScore()/MasterNotation: a brand-new score has no layout yet, so its repeat
@@ -495,10 +504,14 @@ TEST_F(ScoreAutomationController_Tests, Init_EmptyScore_CreatesAutomationData)
     MasterScore* score = compat::ScoreAccess::createMasterScore(nullptr);
     ASSERT_TRUE(score->repeatList().empty());
 
+    // [THEN] Data exists immediately, even before initAutomation()
+    ASSERT_TRUE(score->automationData());
+    EXPECT_TRUE(score->automationData()->isEmpty());
+
     // [WHEN] Init automation on the empty score
     score->initAutomation();
 
-    // [THEN] Automation data exists and is empty
+    // [THEN] Automation data still exists and is empty
     ASSERT_TRUE(score->automationData());
     EXPECT_TRUE(score->automationData()->isEmpty());
 

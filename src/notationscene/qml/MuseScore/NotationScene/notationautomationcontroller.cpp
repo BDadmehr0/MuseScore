@@ -212,20 +212,23 @@ NotationAutomationController::NotationAutomationController(QQuickItem* linesPare
 
 void NotationAutomationController::init()
 {
-    IF_ASSERT_FAILED(automation() && currentNotation()) {
-        return;
+    // File -> New can attach the notation view (musescore://notation) before the
+    // score and its automation data are fully initialised. Subscribe to later
+    // changes either way; only rebuild immediately when a notation is already set.
+    if (currentNotation()) {
+        onCurrentNotationChanged();
     }
 
-    onCurrentNotationChanged();
-
-    automation()->automationModeEnabledChanged().onNotify(this, [this]() {
-        if (automation()->isAutomationModeEnabled() && !m_pendingChanges.isEmpty()) {
-            applyAutomationChanges(m_pendingChanges);
-            m_pendingChanges.clear();
-        } else {
-            updatePolylinesGeometry();
-        }
-    }, Asyncable::Mode::SetReplace /* FIXME */);
+    if (const INotationAutomationPtr notationAutomation = automation()) {
+        notationAutomation->automationModeEnabledChanged().onNotify(this, [this]() {
+            if (automation() && automation()->isAutomationModeEnabled() && !m_pendingChanges.isEmpty()) {
+                applyAutomationChanges(m_pendingChanges);
+                m_pendingChanges.clear();
+            } else {
+                updatePolylinesGeometry();
+            }
+        }, Asyncable::Mode::SetReplace /* FIXME */);
+    }
 
     notationConfiguration()->currentAutomationTypeChanged().onNotify(this, [this]() {
         rebuildAllPolylines();
@@ -260,6 +263,11 @@ NotationAutomationController::SysStaffToPolylinesMap NotationAutomationControlle
         return {};
     }
 
+    if (system->measures().empty()) {
+        // Empty score / not yet laid out: nothing to draw
+        return {};
+    }
+
     SysStaffToPolylinesMap map;
 
     staff_idx_t staffIdx = system->firstVisibleStaff();
@@ -286,14 +294,24 @@ muse::uicomponents::PolylinePlot* NotationAutomationController::createPolylineFo
         return nullptr;
     }
 
+    if (system->measures().empty()) {
+        return nullptr;
+    }
+
+    const MeasureBase* first = system->first();
+    const MeasureBase* last = system->last();
+    if (!first || !last) {
+        return nullptr;
+    }
+
     const AutomationCurveKey curveKey = curveKeyFor(currentAutomationType(), staff);
     if (curveKey.trackId().has_value() && !staff->isTop()) {
         // Instrument-scoped automation is only drawn on the instrument's first staff
         return nullptr;
     }
 
-    const int systemStartTick = system->first()->tick().ticks();
-    const int systemEndTick = system->last()->endTick().ticks();
+    const int systemStartTick = first->tick().ticks();
+    const int systemEndTick = last->endTick().ticks();
 
     const Measure* firstMeasure = system->firstMeasure();
     const Segment* firstSeg = firstMeasure ? firstMeasure->first(mu::engraving::SegmentType::Duration) : nullptr;
@@ -412,8 +430,8 @@ QVector<NotationAutomationController::PointData> NotationAutomationController::p
     }
 
     if (!automationData()) {
-        // Automation data is created lazily (see ScoreAutomationController) and may not exist
-        // yet for the current score - nothing to draw in that case
+        // Should not happen once ScoreAutomationController constructs empty data, but
+        // keep this as a release-build safety net so an empty score never aborts.
         return points;
     }
 

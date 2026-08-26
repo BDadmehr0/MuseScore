@@ -44,6 +44,12 @@ struct ScoreChanges;
 class ScoreAutomationController
 {
 public:
+    // Always construct with empty automation data so MasterScore::automationData() is
+    // valid as soon as the score exists. File -> New can open the notation view (and
+    // build automation overlays) before init() has a chance to run.
+    ScoreAutomationController()
+        : m_automationData(std::make_shared<AutomationData>()) {}
+
     void init(Score* score);
 
     void insertTime(const Fraction& tick, const Fraction& len);

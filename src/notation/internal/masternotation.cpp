@@ -271,18 +271,24 @@ Ret MasterNotation::setupNewScore(mu::engraving::MasterScore* score, const Score
 
     undoStack()->lock();
 
-    parts()->setParts(scoreOptions.parts, scoreOptions.order);
+    {
+        // Parts/measures are created via Score::undo() with the stack locked. Mark this
+        // as a load so those calls do not warn "called outside of transaction".
+        mu::engraving::ScoreLoad sl;
 
-    score->checkChordList();
-    score->updateSwing();
-    score->updateCapo();
+        parts()->setParts(scoreOptions.parts, scoreOptions.order);
 
-    applyOptions(score, scoreOptions);
+        score->checkChordList();
+        score->updateSwing();
+        score->updateCapo();
 
-    score->initAutomation();
+        applyOptions(score, scoreOptions);
 
-    initAfterSettingScore(score);
-    addExcerptsToMasterScore(score->excerpts());
+        score->initAutomation();
+
+        initAfterSettingScore(score);
+        addExcerptsToMasterScore(score->excerpts());
+    }
 
     undoStack()->unlock();
 
@@ -292,6 +298,11 @@ Ret MasterNotation::setupNewScore(mu::engraving::MasterScore* score, const Score
 void MasterNotation::applyOptions(mu::engraving::MasterScore* score, const ScoreCreateOptions& scoreOptions, bool createdFromTemplate)
 {
     TRACEFUNC;
+
+    // insertMeasure()/keysig/timesig go through Score::undo(). There is no user-visible
+    // command to record (the undo stack is locked by the caller), so treat construction
+    // as a load and suppress "called outside of transaction" warnings.
+    mu::engraving::ScoreLoad scoreLoad;
 
     mu::engraving::VBox* nvb = nullptr;
 

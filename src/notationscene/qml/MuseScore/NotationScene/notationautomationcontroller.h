@@ -71,7 +71,10 @@ private:
 
         bool isValid() const
         {
-            return system && system->first() && staffIdx != muse::nidx;
+            // Do not call system->first() when the measure list is empty: that is
+            // undefined (std::vector::front on an empty vector). Empty systems appear
+            // while a brand-new score is still being laid out.
+            return system && !system->measures().empty() && staffIdx != muse::nidx;
         }
 
         bool operator==(const SysStaffKey& k) const
