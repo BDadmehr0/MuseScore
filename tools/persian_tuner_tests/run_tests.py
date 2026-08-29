@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Runs the Persian Tuner plugin (share/plugins/persian_tuner) inside a real QML
-# engine, against stub modules for MuseScore / Muse.Ui / Muse.UiComponents and a
-# mock of the plugin API. See qml/TestRunner.qml for the test cases.
+# Runs the Persian Tuner logic tests (tools/persian_tuner_tests/plugin) inside a
+# real QML engine, against stub modules for MuseScore / Muse.Ui / Muse.UiComponents
+# and a mock of the plugin API. See qml/TestRunner.qml for the test cases.
+# The user-facing UI is now the built-in View > Persian Tuner dock panel.
 #
 # Usage: run_tests.sh  (bootstraps a venv with PySide6) or
 #        python3 run_tests.py
@@ -14,8 +15,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 QML_DIR = os.path.join(HERE, "qml")
 STUBS_DIR = os.path.join(QML_DIR, "stubs")
-PLUGIN_QML = os.path.abspath(os.path.join(
-    HERE, "..", "..", "share", "plugins", "persian_tuner", "persian_tuner.qml"))
+PLUGIN_QML = os.path.abspath(os.path.join(HERE, "plugin", "persian_tuner.qml"))
 
 # Enumeration values as exposed by the plugin API (src/engraving/api/v1).
 # ElementType and AccidentalType are copied from the engraving sources; the

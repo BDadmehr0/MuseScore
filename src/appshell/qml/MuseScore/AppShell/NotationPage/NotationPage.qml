@@ -573,7 +573,7 @@ DockPage {
             objectName: root.pageModel.persianTunerPanelName()
             title: qsTrc("appshell", "Persian Tuner")
 
-            height: 520
+            height: 400
             minimumHeight: root.horizontalPanelMinHeight
             maximumHeight: root.horizontalPanelMaxHeight
 
@@ -582,7 +582,7 @@ DockPage {
 
             groupName: root.horizontalPanelsGroup
 
-            //! NOTE: hidden by default
+            //! NOTE: hidden by default, opened from View > Persian Tuner (like Mixer)
             visible: false
 
             location: Location.Bottom

@@ -145,7 +145,7 @@ const UiActionList ApplicationUiActions::m_actions = {
     UiAction("toggle-persian-tuner",
              mu::context::UiCtxProjectOpened,
              mu::context::CTX_ANY,
-             TranslatableString("action", "Persian Tuner"),
+             TranslatableString("action", "Persian &Tuner"),
              TranslatableString("action", "Show/hide Persian tuner"),
              Checkable::Yes
              ),

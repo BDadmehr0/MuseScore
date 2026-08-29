@@ -98,6 +98,8 @@ qt_add_qml_module(notationscene_qml
         percussionpanel/percussionpanelpadlistmodel.h
         percussionpanel/percussionpanelpadmodel.cpp
         percussionpanel/percussionpanelpadmodel.h
+        persiantuner/persiantunerpanelmodel.cpp
+        persiantuner/persiantunerpanelmodel.h
         pianokeyboard/pianokeyboardcontroller.cpp
         pianokeyboard/pianokeyboardcontroller.h
         pianokeyboard/pianokeyboardpanelcontextmenumodel.cpp
@@ -316,6 +318,7 @@ target_include_directories(notationscene_qml PRIVATE
     elementpopups
     internal
     percussionpanel
+    persiantuner
     pianokeyboard
     selectionfilter
     styledialog
