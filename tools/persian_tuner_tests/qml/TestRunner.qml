@@ -1,9 +1,9 @@
 /*
- * Test runner for the Persian Tuner plugin.
+ * Test runner for the Persian Tuner logic.
  *
- * It loads the *real* share/plugins/persian_tuner/persian_tuner.qml with stub
+ * It loads tools/persian_tuner_tests/plugin/persian_tuner.qml with stub
  * modules for MuseScore/Muse.Ui/Muse.UiComponents and a mock of the plugin
- * API, then drives the plugin the same way MuseScore would.
+ * API, then drives the logic the same way MuseScore would.
  *
  * Run it with tools/persian_tuner_tests/run_tests.sh
  */
@@ -11,7 +11,7 @@
 import QtQuick
 
 import "MockScore.js" as Mock
-import "../../../share/plugins/persian_tuner/tunerlogic.js" as TunerLogic
+import "../plugin/tunerlogic.js" as TunerLogic
 
 Item {
     id: runner

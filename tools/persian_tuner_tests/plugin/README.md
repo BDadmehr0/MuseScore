@@ -1,6 +1,10 @@
 # Persian Tuner - علامت‌محور (Sign-Oriented)
 
-A MuseScore plugin that tunes notes in **cents relative to natural of the same letter**.  
+**Persian Tuner is a built-in dock panel**, opened from **View ▸ Persian Tuner**,
+the same way as Mixer. It docks inside the main window and can be attached to
+other panels. This folder is kept only for logic tests.
+
+A sign-oriented tuner: notes in **cents relative to natural of the same letter**.  
 هر نت با **حرف + علامت** (مثلاً لا کرن، می سری) شناخته می‌شود و سنت آن **نسبت به بکار همان حرف** سنجیده می‌شود.
 
 > **منطق جدید طبق نظر کارفرما:**  
@@ -78,11 +82,11 @@ requiredTuning (note.tuning) = targetCentsRelativeToNatural - baseCentsOfVariant
 
 ---
 
-## نصب
+## استفاده
 
-1. پوشه `persian_tuner` را در پوشه Plugins MuseScore کپی کنید.
-2. در MuseScore: Extensions → Manage extensions… → Persian Tuner را فعال کنید.
-3. از Extensions → Persian Tuner اجرا کنید.
+1. یک پارتیتور باز کنید.
+2. از منوی **View ▸ Persian Tuner** پنل را باز کنید (مثل Mixer).
+3. پنل پایین پنجره می‌چسبد و می‌توان آن را مثل بقیه پنل‌ها جابه‌جا یا به Mixer/Timeline تب کرد.
 
 ---
 

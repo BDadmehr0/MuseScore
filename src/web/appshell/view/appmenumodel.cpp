@@ -183,6 +183,7 @@ MenuItem* AppMenuModel::makeViewMenu()
         makeMenuItem("toggle-navigator"),
         makeMenuItem("toggle-braille-panel"),
         makeMenuItem("toggle-timeline"),
+        makeMenuItem("toggle-persian-tuner"),
         makeMenuItem("toggle-piano-keyboard"),
         makeMenuItem("toggle-percussion-panel"),
         makeSeparator(),

@@ -1,5 +1,6 @@
 /*
- * Persian Tuner - dock panel like Mixer, dark theme from cent-tuning-panel.html
+ * Persian Tuner - logic copy used by tools/persian_tuner_tests.
+ * The user-facing UI is the built-in View > Persian Tuner dock panel.
  * Sign-oriented: letter + accidental variant, cents relative to natural
  * Ribbon tab: tuner-ribbon-tab.html
  */

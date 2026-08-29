@@ -1,9 +1,12 @@
 # Persian Tuner tests
 
-These tests run the **real** plugin
-(`share/plugins/persian_tuner/persian_tuner.qml` and its `tunerlogic.js`)
+These tests run the Persian Tuner logic
+(`plugin/persian_tuner.qml` and its `tunerlogic.js`)
 inside a QML engine, against a mock of the MuseScore v1 plugin API. Nothing in
 this directory is installed with MuseScore.
+
+The user-facing UI is the built-in **View ▸ Persian Tuner** dock panel
+(same docking as Mixer), not a plugin window.
 
 ```sh
 ./run_tests.sh          # bootstraps a venv with PySide6 the first time
@@ -54,7 +57,7 @@ not toggle itself (the real `MU.CheckBox` only emits `clicked`), and
 `qmllint` can be run over the plugin (the stubs are on the import path):
 
 ```sh
-pyside6-qmllint -I qml/stubs ../../../share/plugins/persian_tuner/persian_tuner.qml
+pyside6-qmllint -I qml/stubs plugin/persian_tuner.qml
 ```
 
 It reports "unqualified access" warnings for `Element`, `Accidental`,
