@@ -32,6 +32,7 @@
 #include "engraving/automation/automationdata.h"
 #include "engraving/automation/dynamicvalues.h"
 #include "engraving/dom/masterscore.h"
+#include "engraving/dom/measurebase.h"
 #include "engraving/dom/part.h"
 #include "engraving/dom/staff.h"
 
@@ -188,12 +189,21 @@ static std::optional<int> tickFromCanvasX(const System* system, const muse::Rect
     return prevSeg->tick().ticks() + static_cast<int>(ratio * (nextTick - prevSeg->tick().ticks()));
 }
 
+// Returns an invalid key if the staff can't be mapped onto a curve (e.g. it lost its part
+// while the score was being torn down); callers must check AutomationCurveKey::isValid()
 static AutomationCurveKey curveKeyFor(AutomationType type, const Staff* staff)
 {
+    if (!staff) {
+        return {};
+    }
+
     switch (type) {
     case AutomationType::Volume:
     case AutomationType::Pan: {
         const Part* part = staff->part();
+        if (!part) {
+            return {};
+        }
         const InstrumentTrackId trackId { part->id(), part->instrumentId() };
         return AutomationCurveKey::instrument(type, trackId);
     }
@@ -203,6 +213,28 @@ static AutomationCurveKey curveKeyFor(AutomationType type, const Staff* staff)
     }
 
     return AutomationCurveKey::staff(type, staff->id());
+}
+
+bool NotationAutomationController::SysStaffKey::operator<(const SysStaffKey& k) const
+{
+    if (system == k.system) {
+        return staffIdx < k.staffIdx;
+    }
+
+    const auto systemIndex = [](const System* sys) {
+        const MeasureBase* firstMeasureBase = sys ? sys->first() : nullptr;
+        return firstMeasureBase ? firstMeasureBase->index() : -1;
+    };
+
+    const int index = systemIndex(system);
+    const int otherIndex = systemIndex(k.system);
+    if (index != otherIndex) {
+        return index < otherIndex;
+    }
+
+    // Equal index (or no index at all) but different systems, e.g. systems belonging to two
+    // different scores - fall back to a stable ordering on the pointers themselves
+    return system < k.system;
 }
 
 NotationAutomationController::NotationAutomationController(QQuickItem* linesParent, const muse::modularity::ContextPtr& iocCtx)
@@ -283,14 +315,26 @@ muse::uicomponents::PolylinePlot* NotationAutomationController::createPolylineFo
         return nullptr;
     }
 
+    // A system without measures has no tick range to draw over (transient while the layout is
+    // being rebuilt) - and System::first()/last() must not be dereferenced in that state
+    const MeasureBase* firstMeasureBase = system->first();
+    const MeasureBase* lastMeasureBase = system->last();
+    if (!firstMeasureBase || !lastMeasureBase) {
+        return nullptr;
+    }
+
     const AutomationCurveKey curveKey = curveKeyFor(currentAutomationType(), staff);
+    if (!curveKey.isValid()) {
+        return nullptr;
+    }
+
     if (curveKey.trackId().has_value() && !staff->isTop()) {
         // Instrument-scoped automation is only drawn on the instrument's first staff
         return nullptr;
     }
 
-    const int systemStartTick = system->first()->tick().ticks();
-    const int systemEndTick = system->last()->endTick().ticks();
+    const int systemStartTick = firstMeasureBase->tick().ticks();
+    const int systemEndTick = lastMeasureBase->endTick().ticks();
 
     const Measure* firstMeasure = system->firstMeasure();
     const Segment* firstSeg = firstMeasure ? firstMeasure->first(mu::engraving::SegmentType::Duration) : nullptr;
@@ -425,6 +469,11 @@ QVector<NotationAutomationController::PointData> NotationAutomationController::p
 
     int currentPointIndex = 0;
     const mu::engraving::AutomationCurveKey key = curveKeyFor(type, staff);
+    if (!key.isValid()) {
+        // The staff can't be mapped onto a curve right now (e.g. it lost its part)
+        return points;
+    }
+
     const mu::engraving::AutomationCurve& curve = automationData()->curve(key);
 
     // Start at the first point >= startTick rather than curve.begin() - resolvedInValue() only ever
@@ -568,7 +617,9 @@ void NotationAutomationController::updatePolylinesGeometry()
     const bool visible = automation() && automation()->isAutomationModeEnabled();
 
     for (const auto& [key, polylines] : m_stavesToLinesMap) {
-        IF_ASSERT_FAILED(key.isValid() && !polylines.empty()) {
+        // A key can go stale while this runs (the system of a score being closed, or a system
+        // whose measures were just removed by a re-layout) - skip it rather than assert
+        if (!key.isValid() || polylines.empty()) {
             continue;
         }
 
@@ -603,7 +654,8 @@ void NotationAutomationController::updatePolylinesGeometry()
 void NotationAutomationController::updatePolylinesColors()
 {
     for (const auto& [key, polylines] : m_stavesToLinesMap) {
-        IF_ASSERT_FAILED(key.isValid() && !polylines.empty()) {
+        // Stale keys are skipped, see updatePolylinesGeometry()
+        if (!key.isValid() || polylines.empty()) {
             continue;
         }
         // TODO: Staves can have multiple polylines due to horizontal frames, at the moment we're
@@ -683,7 +735,9 @@ void NotationAutomationController::rebuildAllPolylines()
 void NotationAutomationController::updateStaffPointsInRange(const SysStaffKey& key, int tickFrom, int tickTo)
 {
     auto mapIt = m_stavesToLinesMap.find(key);
-    IF_ASSERT_FAILED(key.isValid() && mapIt != m_stavesToLinesMap.end() && !mapIt->second.empty()) {
+    // The key can be stale (notation switched/closed, or the system was re-laid out) - there is
+    // simply nothing to update, so skip instead of tripping an assertion
+    if (mapIt == m_stavesToLinesMap.end() || mapIt->second.empty()) {
         return;
     }
     PolylinePlot* polyline = *mapIt->second.begin();
@@ -780,7 +834,8 @@ void NotationAutomationController::applyAutomationChanges(const mu::engraving::A
     // range, and only recompute points within that range, rather than the whole score or even the
     // whole staff
     for (const auto& [key, polylines] : m_stavesToLinesMap) {
-        IF_ASSERT_FAILED(key.isValid()) {
+        // Stale keys are skipped, see updatePolylinesGeometry()
+        if (!key.isValid()) {
             continue;
         }
         const Staff* staff = score()->staff(key.staffIdx);
@@ -788,14 +843,23 @@ void NotationAutomationController::applyAutomationChanges(const mu::engraving::A
             continue;
         }
         const bool staffAffected = affectedStaffIds.find(staff->id()) != affectedStaffIds.end();
-        const mu::engraving::InstrumentTrackId staffTrackId { staff->part()->id(), staff->part()->instrumentId() };
-        const bool trackAffected = affectedTrackIds.find(staffTrackId) != affectedTrackIds.end();
+        bool trackAffected = false;
+        if (const Part* part = staff->part()) {
+            const mu::engraving::InstrumentTrackId staffTrackId { part->id(), part->instrumentId() };
+            trackAffected = affectedTrackIds.find(staffTrackId) != affectedTrackIds.end();
+        }
         if (!staffAffected && !trackAffected) {
             continue;
         }
         const System* system = key.system;
-        const int systemStartTick = system->first()->tick().ticks();
-        const int systemEndTick = system->last()->endTick().ticks();
+        const MeasureBase* firstMeasureBase = system ? system->first() : nullptr;
+        const MeasureBase* lastMeasureBase = system ? system->last() : nullptr;
+        if (!firstMeasureBase || !lastMeasureBase) {
+            // The system has no measures (yet/anymore) - no tick range to match against
+            continue;
+        }
+        const int systemStartTick = firstMeasureBase->tick().ticks();
+        const int systemEndTick = lastMeasureBase->endTick().ticks();
         if (systemEndTick >= changes.tickFrom && systemStartTick <= changes.tickTo) {
             updateStaffPointsInRange(key, changes.tickFrom, changes.tickTo);
         }

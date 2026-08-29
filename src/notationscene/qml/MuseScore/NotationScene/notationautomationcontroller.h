@@ -76,22 +76,14 @@ private:
 
         bool operator==(const SysStaffKey& k) const
         {
-            IF_ASSERT_FAILED(isValid() && k.isValid()) {
-                return false;
-            }
             return system == k.system && staffIdx == k.staffIdx;
         }
 
-        bool operator<(const SysStaffKey& k) const
-        {
-            IF_ASSERT_FAILED(isValid() && k.isValid()) {
-                return false;
-            }
-            if (system == k.system) {
-                return staffIdx < k.staffIdx;
-            }
-            return system->first()->index() < k.system->first()->index();
-        }
+        // NOTE: defined in the .cpp. It deliberately does not assert: it runs inside std::map
+        // lookups over keys that may have gone stale (a system of a score being closed, or a
+        // system whose measures were just dropped by a re-layout), and a failed assertion
+        // aborts debug builds. It is a strict weak ordering for every key, valid or not...
+        bool operator<(const SysStaffKey& k) const;
     };
 
     using PolylinesSet = std::unordered_set<muse::uicomponents::PolylinePlot*>;
