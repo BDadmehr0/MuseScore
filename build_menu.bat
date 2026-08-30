@@ -21,13 +21,15 @@ set "ROOT=%~dp0"
 set "ROOT=%ROOT:~0,-1%"
 
 REM --- defaults ----------------------------------------------------------------
-set "BUILD_TYPE=Debug"          REM Debug | Release | RelWithDebInfo
+REM BUILD_TYPE: Debug, Release, or RelWithDebInfo
+set "BUILD_TYPE=Debug"
 set "DO_CONFIGURE=1"
 set "DO_BUILD=1"
 set "DO_INSTALL=1"
 set "DO_RUN=0"
 set "DO_CLEAN=0"
-set "AUTO=0"                    REM 0 = interactive menu, 1 = run args once
+REM AUTO: 0 = interactive menu, 1 = run args once
+set "AUTO=0"
 set "JOBS="
 
 REM --- find the top-level source dir (this folder) -----------------------------
