@@ -10846,6 +10846,14 @@ followed by dashes</translation>
         <source>Clear online sounds cache for this score</source>
         <translation type="unfinished">Clear online sounds cache for this score</translation>
     </message>
+    <message>
+        <source>Persian &amp;Tuner</source>
+        <translation type="unfinished">Persian &amp;Tuner</translation>
+    </message>
+    <message>
+        <source>Show/hide Persian tuner</source>
+        <translation type="unfinished">Show/hide Persian tuner</translation>
+    </message>
 </context>
 <context>
     <name>appshell</name>
@@ -11104,6 +11112,10 @@ This action cannot be undone.</translation>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/preferencesmodel.cpp" line="226"/>
         <source>Reset preferences</source>
         <translation type="unfinished">Reset preferences</translation>
+    </message>
+    <message>
+        <source>Persian Tuner</source>
+        <translation type="unfinished">Persian Tuner</translation>
     </message>
 </context>
 <context>
@@ -27563,6 +27575,181 @@ pickup measure</translation>
     </message>
 </context>
 <context>
+    <name>notation/persiantuner</name>
+    <message>
+        <source>Persian Tuner</source>
+        <translation type="unfinished">Persian Tuner</translation>
+    </message>
+    <message>
+        <source>View ▸ Persian Tuner — dock like Mixer</source>
+        <translation type="unfinished">View ▸ Persian Tuner — dock like Mixer</translation>
+    </message>
+    <message>
+        <source>Memory on</source>
+        <translation type="unfinished">Memory on</translation>
+    </message>
+    <message>
+        <source>Memory off</source>
+        <translation type="unfinished">Memory off</translation>
+    </message>
+    <message>
+        <source>Cent tuner</source>
+        <translation type="unfinished">Cent tuner</translation>
+    </message>
+    <message>
+        <source>Reference (A4)</source>
+        <translation type="unfinished">Reference (A4)</translation>
+    </message>
+    <message>
+        <source>La4 (A4)</source>
+        <translation type="unfinished">La4 (A4)</translation>
+    </message>
+    <message>
+        <source>Octave, note and accidental</source>
+        <translation type="unfinished">Octave, note and accidental</translation>
+    </message>
+    <message>
+        <source>Octave 3</source>
+        <translation type="unfinished">Octave 3</translation>
+    </message>
+    <message>
+        <source>Octave 4</source>
+        <translation type="unfinished">Octave 4</translation>
+    </message>
+    <message>
+        <source>Octave 5</source>
+        <translation type="unfinished">Octave 5</translation>
+    </message>
+    <message>
+        <source>Octave 6</source>
+        <translation type="unfinished">Octave 6</translation>
+    </message>
+    <message>
+        <source>Do</source>
+        <translation type="unfinished">Do</translation>
+    </message>
+    <message>
+        <source>Re</source>
+        <translation type="unfinished">Re</translation>
+    </message>
+    <message>
+        <source>Mi</source>
+        <translation type="unfinished">Mi</translation>
+    </message>
+    <message>
+        <source>Fa</source>
+        <translation type="unfinished">Fa</translation>
+    </message>
+    <message>
+        <source>Sol</source>
+        <translation type="unfinished">Sol</translation>
+    </message>
+    <message>
+        <source>La</source>
+        <translation type="unfinished">La</translation>
+    </message>
+    <message>
+        <source>Si</source>
+        <translation type="unfinished">Si</translation>
+    </message>
+    <message>
+        <source>Natural</source>
+        <translation type="unfinished">Natural</translation>
+    </message>
+    <message>
+        <source>Flat</source>
+        <translation type="unfinished">Flat</translation>
+    </message>
+    <message>
+        <source>Sori</source>
+        <translation type="unfinished">Sori</translation>
+    </message>
+    <message>
+        <source>Koron</source>
+        <translation type="unfinished">Koron</translation>
+    </message>
+    <message>
+        <source>Sharp</source>
+        <translation type="unfinished">Sharp</translation>
+    </message>
+    <message>
+        <source>Editing:</source>
+        <translation type="unfinished">Editing:</translation>
+    </message>
+    <message>
+        <source>Calculated frequency</source>
+        <translation type="unfinished">Calculated frequency</translation>
+    </message>
+    <message>
+        <source>Apply tuning</source>
+        <translation type="unfinished">Apply tuning</translation>
+    </message>
+    <message>
+        <source>Play</source>
+        <translation type="unfinished">Play</translation>
+    </message>
+    <message>
+        <source>Re-apply memory</source>
+        <translation type="unfinished">Re-apply memory</translation>
+    </message>
+    <message>
+        <source>Clear memory</source>
+        <translation type="unfinished">Clear memory</translation>
+    </message>
+    <message>
+        <source>All accidentals of %1</source>
+        <translation type="unfinished">All accidentals of %1</translation>
+    </message>
+    <message>
+        <source>¢ relative to natural</source>
+        <translation type="unfinished">¢ relative to natural</translation>
+    </message>
+    <message>
+        <source>Select a note in the score</source>
+        <translation type="unfinished">Select a note in the score</translation>
+    </message>
+    <message>
+        <source>Typical sori is about +50 cents — this is only a starting point</source>
+        <translation type="unfinished">Typical sori is about +50 cents — this is only a starting point</translation>
+    </message>
+    <message>
+        <source>Typical koron is about -50 cents</source>
+        <translation type="unfinished">Typical koron is about -50 cents</translation>
+    </message>
+    <message>
+        <source>Flat is usually -100 cents relative to natural</source>
+        <translation type="unfinished">Flat is usually -100 cents relative to natural</translation>
+    </message>
+    <message>
+        <source>Sharp is usually +100 cents</source>
+        <translation type="unfinished">Sharp is usually +100 cents</translation>
+    </message>
+    <message>
+        <source>Natural is the reference: 0 cents</source>
+        <translation type="unfinished">Natural is the reference: 0 cents</translation>
+    </message>
+    <message>
+        <source>Cents relative to %1 natural</source>
+        <translation type="unfinished">Cents relative to %1 natural</translation>
+    </message>
+    <message>
+        <source>%1 notes tuned</source>
+        <translation type="unfinished">%1 notes tuned</translation>
+    </message>
+    <message>
+        <source>Select a note to play</source>
+        <translation type="unfinished">Select a note to play</translation>
+    </message>
+    <message>
+        <source>Re-applied %1 notes</source>
+        <translation type="unfinished">Re-applied %1 notes</translation>
+    </message>
+    <message>
+        <source>Memory cleared</source>
+        <translation type="unfinished">Memory cleared</translation>
+    </message>
+</context>
+<context>
     <name>notation/staffpartproperties</name>
     <message>
         <location filename="../../src/notationscene/widgets/editstaff.cpp" line="646"/>
@@ -38788,6 +38975,18 @@ failed.</translation>
         <location filename="../../src/engraving/dom/harmony.cpp" line="859"/>
         <source>Transpose harmony</source>
         <translation type="unfinished">Transpose harmony</translation>
+    </message>
+    <message>
+        <source>Tune notes</source>
+        <translation type="unfinished">Tune notes</translation>
+    </message>
+    <message>
+        <source>Update tuning table</source>
+        <translation type="unfinished">Update tuning table</translation>
+    </message>
+    <message>
+        <source>Re-apply Persian tuning</source>
+        <translation type="unfinished">Re-apply Persian tuning</translation>
     </message>
 </context>
 <context>

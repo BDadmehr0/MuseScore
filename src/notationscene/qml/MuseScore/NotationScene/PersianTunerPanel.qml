@@ -225,13 +225,27 @@ Item {
                         }
                         StyledDropdown {
                             Layout.preferredWidth: 90
-                            model: ["دو", "رِ", "می", "فا", "سل", "لا", "سی"]
+                            model: [
+                                qsTrc("notation/persiantuner", "Do"),
+                                qsTrc("notation/persiantuner", "Re"),
+                                qsTrc("notation/persiantuner", "Mi"),
+                                qsTrc("notation/persiantuner", "Fa"),
+                                qsTrc("notation/persiantuner", "Sol"),
+                                qsTrc("notation/persiantuner", "La"),
+                                qsTrc("notation/persiantuner", "Si")
+                            ]
                             currentIndex: tunerModel.letterIndex
                             onActivated: function(index) { tunerModel.letterIndex = index }
                         }
                         StyledDropdown {
                             Layout.fillWidth: true
-                            model: ["بکار", "بمل", "سری", "کرن", "دیز"]
+                            model: [
+                                qsTrc("notation/persiantuner", "Natural"),
+                                qsTrc("notation/persiantuner", "Flat"),
+                                qsTrc("notation/persiantuner", "Sori"),
+                                qsTrc("notation/persiantuner", "Koron"),
+                                qsTrc("notation/persiantuner", "Sharp")
+                            ]
                             currentIndex: tunerModel.variantIndex
                             onActivated: function(index) { tunerModel.variantIndex = index }
                         }

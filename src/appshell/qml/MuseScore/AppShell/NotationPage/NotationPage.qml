@@ -111,6 +111,15 @@ DockPage {
         root.panelBottomDropDestination
     ]
 
+    //! NOTE: Persian Tuner is allowed to dock on all four sides (top/bottom like
+    //! other horizontal panels, and left/right like the vertical panels)
+    readonly property var persianTunerPanelDropDestinations: [
+        root.panelTopDropDestination,
+        root.panelBottomDropDestination,
+        { "dock": root.centralDock, "dropLocation": Location.Left, "dropDistance": root.verticalPanelDefaultWidth },
+        { "dock": root.centralDock, "dropLocation": Location.Right, "dropDistance": root.verticalPanelDefaultWidth }
+    ]
+
     property var notationView: null
 
     mainToolBars: [
@@ -587,7 +596,7 @@ DockPage {
 
             location: Location.Bottom
 
-            dropDestinations: root.horizontalPanelDropDestinations
+            dropDestinations: root.persianTunerPanelDropDestinations
 
             navigationSection: root.navigationPanelSec(persianTunerPanel.location)
 
