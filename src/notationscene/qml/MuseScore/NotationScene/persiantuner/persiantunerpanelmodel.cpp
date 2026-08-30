@@ -508,7 +508,6 @@ PersianTunerPanelModel::NoteIdentity PersianTunerPanelModel::identityOf(const No
         return ident;
     }
 
-    ident.tpc = 0;
     ident.letter = letterFromTpc(note->tpc());
     ident.octave = note->octave();
     ident.tick = note->tick().ticks();
