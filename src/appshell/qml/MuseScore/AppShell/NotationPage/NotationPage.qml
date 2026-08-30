@@ -582,21 +582,26 @@ DockPage {
             objectName: root.pageModel.persianTunerPanelName()
             title: qsTrc("appshell", "Persian Tuner")
 
-            height: 400
-            minimumHeight: root.horizontalPanelMinHeight
-            maximumHeight: root.horizontalPanelMaxHeight
+            // Keep the tuner in the same vertical dock group as Palettes,
+            // Layout, and Properties.  Apart from matching the other tools,
+            // this is important because the dock then owns one shared width:
+            // resizing the dock resizes the active panel instead of leaving
+            // the notation/QML panel behind at its old size.
+            width: root.verticalPanelDefaultWidth
+            minimumWidth: root.verticalPanelDefaultWidth
+            maximumWidth: root.verticalPanelDefaultWidth
 
-            minimumWidth: root.panelMinDimension
-            maximumWidth: root.panelMaxDimension
+            minimumHeight: root.panelMinDimension
+            maximumHeight: root.panelMaxDimension
 
-            groupName: root.horizontalPanelsGroup
+            groupName: root.verticalPanelsGroup
 
-            //! NOTE: hidden by default, opened from View > Persian Tuner (like Mixer)
+            //! NOTE: hidden by default, opened from View > Persian Tuner
             visible: false
 
-            location: Location.Bottom
+            location: Location.Left
 
-            dropDestinations: root.persianTunerPanelDropDestinations
+            dropDestinations: root.verticalPanelDropDestinations
 
             navigationSection: root.navigationPanelSec(persianTunerPanel.location)
 
@@ -606,9 +611,6 @@ DockPage {
                 navigationSection: persianTunerPanel.navigationSection
                 contentNavigationPanelOrderStart: persianTunerPanel.contentNavigationPanelOrderStart
 
-                onResizeRequested: function(newWidth, newHeight) {
-                    persianTunerPanel.resize(newWidth, newHeight)
-                }
             }
         }
     ]
