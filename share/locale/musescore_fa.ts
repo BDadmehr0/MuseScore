@@ -9742,6 +9742,14 @@ followed by dashes</source>
         <source>Se&amp;lection filter</source>
         <translation type="unfinished"/>
     </message>
+    <message>
+        <source>Persian &amp;Tuner</source>
+        <translation>تیونر فارسی</translation>
+    </message>
+    <message>
+        <source>Show/hide Persian tuner</source>
+        <translation>نمایش/پنهان‌کردن تیونر فارسی</translation>
+    </message>
 </context>
 <context>
     <name>appshell</name>
@@ -10007,6 +10015,10 @@ This action cannot be undone.</source>
         <location filename="../../src/preferences/qml/MuseScore/Preferences/preferencesmodel.cpp" line="225"/>
         <source>Reset preferences</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Persian Tuner</source>
+        <translation>تیونر فارسی</translation>
     </message>
 </context>
 <context>
@@ -30320,6 +30332,181 @@ In addition, Mastering MuseScore features a supportive community of musicians, w
     </message>
 </context>
 <context>
+    <name>notation/persiantuner</name>
+    <message>
+        <source>Persian Tuner</source>
+        <translation>تیونر فارسی</translation>
+    </message>
+    <message>
+        <source>View ▸ Persian Tuner — dock like Mixer</source>
+        <translation>نمایش ▸ تیونر فارسی — پنل شناور همانند میکسر</translation>
+    </message>
+    <message>
+        <source>Memory on</source>
+        <translation>حافظه روشن</translation>
+    </message>
+    <message>
+        <source>Memory off</source>
+        <translation>حافظه خاموش</translation>
+    </message>
+    <message>
+        <source>Cent tuner</source>
+        <translation>تیونر سنت</translation>
+    </message>
+    <message>
+        <source>Reference (A4)</source>
+        <translation>مرجع (A4)</translation>
+    </message>
+    <message>
+        <source>La4 (A4)</source>
+        <translation>لا۴ (A4)</translation>
+    </message>
+    <message>
+        <source>Octave, note and accidental</source>
+        <translation>اکتاو، نت و علامت</translation>
+    </message>
+    <message>
+        <source>Octave 3</source>
+        <translation>اکتاو ۳</translation>
+    </message>
+    <message>
+        <source>Octave 4</source>
+        <translation>اکتاو ۴</translation>
+    </message>
+    <message>
+        <source>Octave 5</source>
+        <translation>اکتاو ۵</translation>
+    </message>
+    <message>
+        <source>Octave 6</source>
+        <translation>اکتاو ۶</translation>
+    </message>
+    <message>
+        <source>Do</source>
+        <translation>دو</translation>
+    </message>
+    <message>
+        <source>Re</source>
+        <translation>رِ</translation>
+    </message>
+    <message>
+        <source>Mi</source>
+        <translation>می</translation>
+    </message>
+    <message>
+        <source>Fa</source>
+        <translation>فا</translation>
+    </message>
+    <message>
+        <source>Sol</source>
+        <translation>سل</translation>
+    </message>
+    <message>
+        <source>La</source>
+        <translation>لا</translation>
+    </message>
+    <message>
+        <source>Si</source>
+        <translation>سی</translation>
+    </message>
+    <message>
+        <source>Natural</source>
+        <translation>بکار</translation>
+    </message>
+    <message>
+        <source>Flat</source>
+        <translation>بمل</translation>
+    </message>
+    <message>
+        <source>Sori</source>
+        <translation>سُری</translation>
+    </message>
+    <message>
+        <source>Koron</source>
+        <translation>کُرُن</translation>
+    </message>
+    <message>
+        <source>Sharp</source>
+        <translation>دیز</translation>
+    </message>
+    <message>
+        <source>Editing:</source>
+        <translation>در حال ویرایش:</translation>
+    </message>
+    <message>
+        <source>Calculated frequency</source>
+        <translation>فرکانس محاسبه‌شده</translation>
+    </message>
+    <message>
+        <source>Apply tuning</source>
+        <translation>اعمال کوک</translation>
+    </message>
+    <message>
+        <source>Play</source>
+        <translation>پخش</translation>
+    </message>
+    <message>
+        <source>Re-apply memory</source>
+        <translation>اعمال دوبارهٔ حافظه</translation>
+    </message>
+    <message>
+        <source>Clear memory</source>
+        <translation>پاک‌کردن حافظه</translation>
+    </message>
+    <message>
+        <source>All accidentals of %1</source>
+        <translation>همهٔ علامت‌های %1</translation>
+    </message>
+    <message>
+        <source>¢ relative to natural</source>
+        <translation>سنت نسبت به بکار</translation>
+    </message>
+    <message>
+        <source>Select a note in the score</source>
+        <translation>یک نت در پارتیتور انتخاب کنید</translation>
+    </message>
+    <message>
+        <source>Typical sori is about +50 cents — this is only a starting point</source>
+        <translation>سُری معمولاً حدود ۵۰+ سنت است — این فقط یک نقطهٔ شروع است</translation>
+    </message>
+    <message>
+        <source>Typical koron is about -50 cents</source>
+        <translation>کُرُن معمولاً حدود ۵۰- سنت است</translation>
+    </message>
+    <message>
+        <source>Flat is usually -100 cents relative to natural</source>
+        <translation>بمل معمولاً ۱۰۰- سنت نسبت به بکار است</translation>
+    </message>
+    <message>
+        <source>Sharp is usually +100 cents</source>
+        <translation>دیز معمولاً ۱۰۰+ سنت است</translation>
+    </message>
+    <message>
+        <source>Natural is the reference: 0 cents</source>
+        <translation>بکار مرجع است: ۰ سنت</translation>
+    </message>
+    <message>
+        <source>Cents relative to %1 natural</source>
+        <translation>سنت نسبت به %1 بکار</translation>
+    </message>
+    <message>
+        <source>%1 notes tuned</source>
+        <translation>%1 نت کوک شد</translation>
+    </message>
+    <message>
+        <source>Select a note to play</source>
+        <translation>برای پخش، یک نت انتخاب کنید</translation>
+    </message>
+    <message>
+        <source>Re-applied %1 notes</source>
+        <translation>%1 نت دوباره اعمال شد</translation>
+    </message>
+    <message>
+        <source>Memory cleared</source>
+        <translation>حافظه پاک شد</translation>
+    </message>
+</context>
+<context>
     <name>notation/staffpartproperties</name>
     <message>
         <location filename="../../src/notationscene/widgets/editstaff.cpp" line="517"/>
@@ -38428,6 +38615,18 @@ failed: %2</source>
         <location filename="../../src/project/internal/projectmigrator.cpp" line="174"/>
         <source>Migrate project</source>
         <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>Tune notes</source>
+        <translation>کوک‌کردن نُت‌ها</translation>
+    </message>
+    <message>
+        <source>Update tuning table</source>
+        <translation>به‌روزرسانی جدول کوک</translation>
+    </message>
+    <message>
+        <source>Re-apply Persian tuning</source>
+        <translation>اعمال دوبارهٔ کوک فارسی</translation>
     </message>
 </context>
 <context>

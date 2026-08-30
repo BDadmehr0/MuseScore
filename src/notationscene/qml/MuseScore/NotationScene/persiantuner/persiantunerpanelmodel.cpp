@@ -418,28 +418,32 @@ void PersianTunerPanelModel::clearMemory()
 
 QString PersianTunerPanelModel::letterFa(const QString& letter) const
 {
+    // Solfège names used as translatable source (English). The Persian names
+    // ("دو", "رِ", ...) are provided as translations in the locale files.
     static const QMap<QString, QString> map {
-        { QStringLiteral("C"), QStringLiteral("دو") },
-        { QStringLiteral("D"), QStringLiteral("رِ") },
-        { QStringLiteral("E"), QStringLiteral("می") },
-        { QStringLiteral("F"), QStringLiteral("فا") },
-        { QStringLiteral("G"), QStringLiteral("سل") },
-        { QStringLiteral("A"), QStringLiteral("لا") },
-        { QStringLiteral("B"), QStringLiteral("سی") },
+        { QStringLiteral("C"), QStringLiteral("Do") },
+        { QStringLiteral("D"), QStringLiteral("Re") },
+        { QStringLiteral("E"), QStringLiteral("Mi") },
+        { QStringLiteral("F"), QStringLiteral("Fa") },
+        { QStringLiteral("G"), QStringLiteral("Sol") },
+        { QStringLiteral("A"), QStringLiteral("La") },
+        { QStringLiteral("B"), QStringLiteral("Si") },
     };
-    return map.value(letter, letter);
+    const QString source = map.value(letter, letter);
+    return muse::qtrc("notation/persiantuner", muse::String(source));
 }
 
 QString PersianTunerPanelModel::variantFa(const QString& variant) const
 {
     static const QMap<QString, QString> map {
-        { QStringLiteral("flat"), QStringLiteral("بمل") },
-        { QStringLiteral("koron"), QStringLiteral("کُرُن") },
-        { QStringLiteral("natural"), QStringLiteral("بکار") },
-        { QStringLiteral("sori"), QStringLiteral("سُری") },
-        { QStringLiteral("sharp"), QStringLiteral("دیز") },
+        { QStringLiteral("flat"), QStringLiteral("Flat") },
+        { QStringLiteral("koron"), QStringLiteral("Koron") },
+        { QStringLiteral("natural"), QStringLiteral("Natural") },
+        { QStringLiteral("sori"), QStringLiteral("Sori") },
+        { QStringLiteral("sharp"), QStringLiteral("Sharp") },
     };
-    return map.value(variant, variant);
+    const QString source = map.value(variant, variant);
+    return muse::qtrc("notation/persiantuner", muse::String(source));
 }
 
 INotationPtr PersianTunerPanelModel::notation() const
