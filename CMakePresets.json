@@ -141,6 +141,24 @@
       }
     },
     {
+      "name": "Qt-Msvc-Release",
+      "displayName": "Qt Msvc Release",
+      "description": "Use current Qt with Msvc compiler (Release)",
+      "inherits": "msvc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "Qt-Msvc-RelWithDebInfo",
+      "displayName": "Qt Msvc RelWithDebInfo",
+      "description": "Use current Qt with Msvc compiler (RelWithDebInfo)",
+      "inherits": "msvc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
       "hidden": true,
       "name": "Qt",
       "cacheVariables": {
