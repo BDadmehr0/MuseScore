@@ -39,7 +39,7 @@
 
 #include "log.h"
 
-using namespace mu::engraving;
+namespace mu::engraving {
 
 namespace {
 
@@ -125,7 +125,7 @@ bool noteNeedsNaturalSign(const Note* note)
     if (tpc2alter(note->tpc()) != AccidentalVal::NATURAL) {
         return true;
     }
-    if (Measure* m = note->findMeasure()) {
+    if (const Measure* m = note->findMeasure()) {
         return m->findAccidental(note) != AccidentalVal::NATURAL;
     }
     return false;
@@ -344,3 +344,5 @@ int EditPersianKeySig::applyScoreKeySig(Score* score, const std::vector<PersianK
 
     return changed;
 }
+
+} // namespace mu::engraving
