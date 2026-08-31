@@ -85,10 +85,6 @@ Column {
         spacing: 8
         visible: root.model != null
 
-        navigation.name: "PersianKeySignature"
-        navigation.panel: root.navigationPanel
-        navigation.row: root.navigationRowStart + 3
-
         StyledTextLabel {
             text: qsTrc("propertiespanel", "Persian key signature (Charghah)")
         }
@@ -103,6 +99,11 @@ Column {
         StyledDropdown {
             id: persianKeyDropdown
             width: parent ? parent.width : 300
+
+            navigation.name: "PersianKeySignature"
+            navigation.panel: root.navigationPanel
+            navigation.row: root.navigationRowStart + 4
+
             model: (function() {
                         var rows = root.model ? root.model.persianKeyPatterns : []
                         var labels = [qsTrc("propertiespanel", "None")]
