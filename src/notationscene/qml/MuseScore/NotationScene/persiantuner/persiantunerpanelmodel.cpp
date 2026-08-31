@@ -544,7 +544,7 @@ void PersianTunerPanelModel::onCurrentNotationChanged()
     // Keep the panel in sync with changes made in MuseScore itself
     // (top symbols row, keyboard, properties panel, ...): any score
     // change re-reads the selected note's accidental and cents.
-    n->notationChanged().onNotify(this, [this](const muse::RectF&) {
+    n->notationChanged().onReceive(this, [this](const muse::RectF&) {
         refreshFromSelection();
     }, Asyncable::Mode::SetReplace);
 
