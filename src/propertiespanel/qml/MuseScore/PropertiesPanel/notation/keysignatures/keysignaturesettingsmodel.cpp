@@ -228,9 +228,9 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
     };
 
     n->undoStack()->prepareChanges(
-        pattern ? mu::TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
-                      mu::String(QString::fromStdString(pattern->nameEn)))
-                : mu::TranslatableString("undoableAction", "Clear Persian key signature"));
+        pattern ? muse::TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
+                      muse::String::fromStdString(pattern->nameEn))
+                : muse::TranslatableString("undoableAction", "Clear Persian key signature"));
     engraving::EditPersianKeySig::applyScoreKeySig(sc, mapping, centsFor);
     n->undoStack()->commitChanges();
     n->notationChanged().send(muse::RectF());

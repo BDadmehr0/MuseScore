@@ -74,7 +74,6 @@ double defaultPersianVariantCents(const std::string& variant);
 class EditPersianKeySig
 {
 public:
-
     /// Assign \a variant to a single note:
     ///  - ensures the note carries the matching accidental element
     ///    (FLAT / SHARP / SORI / KORON; an explicit NATURAL only when the
