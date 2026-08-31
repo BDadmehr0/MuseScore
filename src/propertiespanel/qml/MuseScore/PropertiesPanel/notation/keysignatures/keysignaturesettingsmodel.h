@@ -1,4 +1,4 @@
-﻿/*
+/*
  * SPDX-License-Identifier: GPL-3.0-only
  * MuseScore-Studio-CLA-applies
  *
@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#include <QVariantList>
+
 #include <qqmlintegration.h>
 
 #include "propertiespanelabstractmodel.h"
@@ -34,6 +36,12 @@ class KeySignatureSettingsModel : public PropertiesPanelAbstractModel
 
     Q_PROPERTY(mu::propertiespanel::PropertyItem * hasToShowCourtesy READ hasToShowCourtesy CONSTANT)
     Q_PROPERTY(mu::propertiespanel::PropertyItem * mode READ mode CONSTANT)
+
+    // Persian key signature (charghah), applied on top of the Western key
+    Q_PROPERTY(QVariantList persianKeyPatterns READ persianKeyPatterns CONSTANT)
+    Q_PROPERTY(int persianKeyPatternIndex READ persianKeyPatternIndex NOTIFY persianKeyPatternIndexChanged)
+    Q_PROPERTY(QString persianKeyPatternDescription READ persianKeyPatternDescription NOTIFY persianKeyPatternIndexChanged)
+    Q_PROPERTY(bool hasPersianKey READ hasPersianKey NOTIFY persianKeyPatternIndexChanged)
 public:
     explicit KeySignatureSettingsModel(QObject* parent, const muse::modularity::ContextPtr& iocCtx, IElementRepositoryService* repository);
 
@@ -44,8 +52,24 @@ public:
     PropertyItem* hasToShowCourtesy() const;
     PropertyItem* mode() const;
 
+    QVariantList persianKeyPatterns() const;
+    int persianKeyPatternIndex() const;
+    QString persianKeyPatternDescription() const;
+    bool hasPersianKey() const;
+
+    Q_INVOKABLE void setPersianKeyPatternIndex(int index);
+    Q_INVOKABLE void applyPersianKey();
+    Q_INVOKABLE void clearPersianKey();
+
+signals:
+    void persianKeyPatternIndexChanged();
+
 private:
+    void refreshPersianKey();
+    QString persianKeyPatternId() const;
+
     PropertyItem* m_hasToShowCourtesy = nullptr;
     PropertyItem* m_mode = nullptr;
+    QString m_persianKeyPatternId;
 };
 }

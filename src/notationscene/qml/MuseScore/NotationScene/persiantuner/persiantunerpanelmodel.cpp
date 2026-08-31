@@ -9,16 +9,19 @@
 
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "engraving/dom/accidental.h"
 #include "engraving/dom/chord.h"
 #include "engraving/dom/note.h"
 #include "engraving/dom/property.h"
 #include "engraving/dom/score.h"
 #include "engraving/dom/segment.h"
+#include "engraving/editing/persiankeysig.h"
 #include "engraving/types/types.h"
 
 #include "notation/inotation.h"
@@ -50,6 +53,7 @@ static const Settings::Key kAutoMemory(kModule, "autoMemory");
 static const Settings::Key kRefFreq(kModule, "refFreq");
 static const Settings::Key kTuningTable(kModule, "tuningTable");
 static const Settings::Key kMemory(kModule, "memory");
+static const Settings::Key kKeySigByScore(kModule, "keySigByScore");
 
 PersianTunerPanelModel::PersianTunerPanelModel(QObject* parent)
     : QObject(parent), muse::Contextable(muse::iocCtxForQmlObject(this))
@@ -68,8 +72,11 @@ void PersianTunerPanelModel::init()
     settings()->setDefaultValue(kRefFreq, Val(440.0));
     settings()->setDefaultValue(kTuningTable, Val(QString()));
     settings()->setDefaultValue(kMemory, Val(QString()));
+    settings()->setDefaultValue(kKeySigByScore, Val(QString()));
 
     loadSettings();
+
+    emit keySigPatternsChanged();
 
     onCurrentNotationChanged();
     globalContext()->currentNotationChanged().onNotify(this, [this]() {
@@ -184,6 +191,61 @@ QVariantList PersianTunerPanelModel::selectedNotesInfo() const
     return rows;
 }
 
+QVariantList PersianTunerPanelModel::keySigPatterns() const
+{
+    QVariantList rows;
+    for (const PersianKeySig& keySig : predefinedPersianKeySigs()) {
+        QVariantMap row;
+        row.insert(QStringLiteral("id"), QString::fromStdString(keySig.id));
+        row.insert(QStringLiteral("nameFa"), QString::fromStdString(keySig.nameFa));
+        row.insert(QStringLiteral("nameEn"), QString::fromStdString(keySig.nameEn));
+
+        QStringList parts;
+        for (const PersianKeySigNote& n : keySig.notes) {
+            parts << letterFa(QString::fromStdString(n.letter)) + " " + variantFa(QString::fromStdString(n.variant));
+        }
+        const QString description = parts.isEmpty()
+                                    ? muse::qtrc("notation/persiantuner", "All notes natural")
+                                    : parts.join(QStringLiteral(", "));
+        row.insert(QStringLiteral("description"), description);
+        rows << row;
+    }
+    return rows;
+}
+
+int PersianTunerPanelModel::keySigPatternIndex() const
+{
+    if (m_currentKeySigPattern.isEmpty()) {
+        return -1;
+    }
+    const int idx = std::find_if(predefinedPersianKeySigs().begin(), predefinedPersianKeySigs().end(),
+                                 [id = m_currentKeySigPattern.toStdString()] (const PersianKeySig& keySig) {
+                                     return keySig.id == id;
+                                 }) - predefinedPersianKeySigs().begin();
+    return idx >= 0 && idx < (int)predefinedPersianKeySigs().size() ? idx : -1;
+}
+
+QString PersianTunerPanelModel::keySigPattern() const
+{
+    return m_currentKeySigPattern;
+}
+
+QString PersianTunerPanelModel::keySigPatternDescription() const
+{
+    const PersianKeySig* pattern = m_currentKeySigPattern.isEmpty()
+                                   ? nullptr : persianKeySigById(m_currentKeySigPattern.toStdString());
+    if (!pattern) {
+        return QString();
+    }
+    QStringList parts;
+    for (const PersianKeySigNote& n : pattern->notes) {
+        parts << letterFa(QString::fromStdString(n.letter)) + " " + variantFa(QString::fromStdString(n.variant));
+    }
+    return parts.isEmpty()
+           ? muse::qtrc("notation/persiantuner", "All notes natural")
+           : parts.join(QStringLiteral(", "));
+}
+
 void PersianTunerPanelModel::setSelectedLetter(const QString& letter)
 {
     if (!kLetters.contains(letter) || m_selectedLetter == letter) {
@@ -244,7 +306,7 @@ void PersianTunerPanelModel::setOctaveIndex(int index)
 void PersianTunerPanelModel::setCurrentCents(double cents)
 {
     cents = std::clamp(round1(cents), -100.0, 100.0);
-    if (qFuzzyCompare(m_currentCents, cents)) {
+    if (qFuzzyCompare(m_currentCents, cents) || (m_currentCents == 0.0 && cents == 0.0)) {
         return;
     }
     m_currentCents = cents;
@@ -302,7 +364,7 @@ void PersianTunerPanelModel::applyCents(double cents)
         saveSettings();
     } else {
         for (Note* note : notes) {
-            tuneNote(note, cents);
+            tuneNote(note, m_selectedVariant, cents);
             ++applied;
         }
         if (m_autoMemory) {
@@ -355,7 +417,7 @@ void PersianTunerPanelModel::setTableCents(const QString& letter, const QString&
             if (toTick && ident.tick >= *toTick) {
                 continue;
             }
-            tuneNote(note, cents);
+            tuneNote(note, variant, cents);
         }
         n->undoStack()->commitChanges();
         n->notationChanged().send(muse::RectF());
@@ -400,7 +462,7 @@ void PersianTunerPanelModel::reapplyMemory()
         if (!mem) {
             continue;
         }
-        tuneNote(note, *mem);
+        tuneNote(note, ident.variant, *mem);
         ++applied;
     }
     n->undoStack()->commitChanges();
@@ -471,13 +533,23 @@ void PersianTunerPanelModel::onCurrentNotationChanged()
 {
     INotationPtr n = notation();
     if (!n) {
+        m_currentKeySigPattern.clear();
         emit selectionChanged();
+        emit keySigPatternIndexChanged();
         return;
     }
     n->interaction()->selectionChanged().onNotify(this, [this]() {
         refreshFromSelection();
     }, Asyncable::Mode::SetReplace);
+    // Keep the panel in sync with changes made in MuseScore itself
+    // (top symbols row, keyboard, properties panel, ...): any score
+    // change re-reads the selected note's accidental and cents.
+    n->notationChanged().onNotify(this, [this](const muse::RectF&) {
+        refreshFromSelection();
+    }, Asyncable::Mode::SetReplace);
+
     refreshFromSelection();
+    refreshKeySigPattern();
 }
 
 void PersianTunerPanelModel::refreshFromSelection()
@@ -485,18 +557,37 @@ void PersianTunerPanelModel::refreshFromSelection()
     const auto notes = selectedNotes();
     if (!notes.empty()) {
         const NoteIdentity ident = identityOf(notes.front());
-        m_selectedLetter = ident.letter;
-        m_selectedVariant = ident.variant;
-        m_selectedOctave = ident.octave;
-        m_currentCents = effectiveTarget(notes.front());
-        emit selectedLetterChanged();
-        emit selectedVariantChanged();
-        emit selectedOctaveChanged();
-        emit currentCentsChanged();
-        emit computedFreqChanged();
+        if (m_selectedLetter != ident.letter) {
+            m_selectedLetter = ident.letter;
+            emit selectedLetterChanged();
+        }
+        if (m_selectedVariant != ident.variant) {
+            m_selectedVariant = ident.variant;
+            emit selectedVariantChanged();
+        }
+        if (m_selectedOctave != ident.octave) {
+            m_selectedOctave = ident.octave;
+            emit selectedOctaveChanged();
+        }
+        const double cents = round1(effectiveTarget(notes.front()));
+        if (!(m_currentCents == 0.0 && cents == 0.0) && !qFuzzyCompare(m_currentCents, cents)) {
+            m_currentCents = cents;
+            emit currentCentsChanged();
+            emit computedFreqChanged();
+        }
         emit variantRowsChanged();
     }
     emit selectionChanged();
+}
+
+void PersianTunerPanelModel::refreshKeySigPattern()
+{
+    const QString id = m_keySigByScore.value(scoreId());
+    if (m_currentKeySigPattern == id) {
+        return;
+    }
+    m_currentKeySigPattern = id;
+    emit keySigPatternIndexChanged();
 }
 
 void PersianTunerPanelModel::setStatus(const QString& msg)
@@ -517,7 +608,7 @@ PersianTunerPanelModel::NoteIdentity PersianTunerPanelModel::identityOf(const No
     ident.tick = note->tick().ticks();
     ident.staffIdx = static_cast<int>(note->staffIdx());
 
-    const AccidentalType acc = note->accidentalType();
+    const AccidentalType acc = note->accidental() ? note->accidental()->accidentalType() : AccidentalType::NONE;
     switch (acc) {
     case AccidentalType::FLAT:
     case AccidentalType::FLAT2:
@@ -532,6 +623,9 @@ PersianTunerPanelModel::NoteIdentity PersianTunerPanelModel::identityOf(const No
     case AccidentalType::SHARP:
     case AccidentalType::SHARP2:
         ident.variant = QStringLiteral("sharp");
+        break;
+    case AccidentalType::NATURAL:
+        ident.variant = QStringLiteral("natural");
         break;
     default: {
         const int fifths = fifthsFromTpc(note->tpc());
@@ -565,12 +659,26 @@ double PersianTunerPanelModel::tableCents(const QString& letter, const QString& 
 
 double PersianTunerPanelModel::effectiveTarget(const Note* note) const
 {
-    const NoteIdentity ident = identityOf(note);
-    const std::optional<double> mem = resolveMemory(scoreId(), memoryKey(ident), ident.tick);
-    if (mem) {
-        return *mem;
+    if (!note) {
+        return 0.0;
     }
-    return tableCents(ident.letter, ident.variant);
+    // The actual cents of the note relative to the natural of its letter:
+    // the semitone + microtonal contribution of the accidental the note
+    // carries (set in MuseScore itself, e.g. from the top symbols row)
+    // plus the fine tuning stored on the note.
+    const NoteIdentity ident = identityOf(note);
+    double contribution = 0.0;
+    if (const Accidental* acc = note->accidental()) {
+        contribution = double(Accidental::subtype2value(acc->accidentalType())) * 100.0
+                       + Accidental::subtype2centOffset(acc->accidentalType());
+    } else {
+        if (ident.variant == QLatin1String("flat")) {
+            contribution = -100.0;
+        } else if (ident.variant == QLatin1String("sharp")) {
+            contribution = 100.0;
+        }
+    }
+    return round1(contribution + note->tuning());
 }
 
 std::vector<Note*> PersianTunerPanelModel::selectedNotes() const
@@ -591,7 +699,7 @@ std::vector<Note*> PersianTunerPanelModel::collectScoreNotes() const
         return result;
     }
     for (Segment* seg = sc->firstSegment(SegmentType::ChordRest); seg; seg = seg->next1(SegmentType::ChordRest)) {
-        for (EngravingItem* e : seg->elist()) {
+        for (EngravingObject* e : seg->elist()) {
             if (!e || !e->isChord()) {
                 continue;
             }
@@ -603,14 +711,12 @@ std::vector<Note*> PersianTunerPanelModel::collectScoreNotes() const
     return result;
 }
 
-void PersianTunerPanelModel::tuneNote(Note* note, double targetCents)
+void PersianTunerPanelModel::tuneNote(Note* note, const QString& variant, double targetCents)
 {
-    if (!note) {
+    if (!note || !score()) {
         return;
     }
-    const NoteIdentity ident = identityOf(note);
-    const double required = round1(targetCents - ident.baseCents);
-    note->undoChangeProperty(Pid::TUNING, required);
+    EditPersianKeySig::applyNoteVariant(note, variant.toStdString(), targetCents);
 }
 
 int PersianTunerPanelModel::rememberAndPropagate(const std::vector<Note*>& notes, double targetCents)
@@ -638,6 +744,9 @@ int PersianTunerPanelModel::rememberAndPropagate(const std::vector<Note*>& notes
         const int from = startTicks[key];
         setMemoryChange(id, key, from, targetCents);
         const std::optional<int> to = nextChangeTick(id, key, from);
+        const QStringList keyParts = key.split(QLatin1Char('/'));
+        const QString letter = keyParts.value(0);
+        const QString variant = keyParts.value(1);
         for (Note* note : allNotes) {
             const NoteIdentity ident = identityOf(note);
             if (memoryKey(ident) != key) {
@@ -649,7 +758,7 @@ int PersianTunerPanelModel::rememberAndPropagate(const std::vector<Note*>& notes
             if (to && ident.tick >= *to) {
                 continue;
             }
-            tuneNote(note, targetCents);
+            tuneNote(note, variant, targetCents);
             ++applied;
         }
     }
@@ -714,6 +823,151 @@ std::optional<int> PersianTunerPanelModel::nextChangeTick(const QString& id, con
     return std::nullopt;
 }
 
+void PersianTunerPanelModel::setKeySigPatternIndex(int index)
+{
+    const auto& keySigs = predefinedPersianKeySigs();
+    if (index < 0 || index >= (int)keySigs.size()) {
+        return;
+    }
+    const QString id = QString::fromStdString(keySigs[index].id);
+    if (m_currentKeySigPattern == id) {
+        return;
+    }
+    m_currentKeySigPattern = id;
+    emit keySigPatternIndexChanged();
+}
+
+void PersianTunerPanelModel::applyKeySigPattern()
+{
+    applyPersianKeySig(m_currentKeySigPattern);
+}
+
+void PersianTunerPanelModel::clearKeySigPattern()
+{
+    applyPersianKeySig(QString());
+}
+
+void PersianTunerPanelModel::playKeySigPattern()
+{
+    INotationPtr n = notation();
+    if (!n || !n->interaction() || !playbackController()) {
+        return;
+    }
+    const std::string id = m_currentKeySigPattern.toStdString();
+    const PersianKeySig* pattern = id.empty() ? nullptr : persianKeySigById(id);
+
+    // Collect the notes that carry the key's character (the letters of
+    // the pattern; all notes when no pattern is active), earliest first
+    std::set<std::string> letters;
+    if (pattern) {
+        for (const PersianKeySigNote& n2 : pattern->notes) {
+            letters.insert(n2.letter);
+        }
+    }
+    std::vector<Note*> notes;
+    for (Note* note : collectScoreNotes()) {
+        if (!letters.empty() && !letters.count(letterFromTpc(note->tpc()).toStdString())) {
+            continue;
+        }
+        notes.push_back(note);
+    }
+    if (notes.empty()) {
+        notes = collectScoreNotes();
+    }
+    if (notes.empty()) {
+        setStatus(muse::qtrc("notation/persiantuner", "Add notes to the score to play the key"));
+        return;
+    }
+    std::sort(notes.begin(), notes.end(), [](const Note* a, const Note* b) {
+        return a->tick() < b->tick();
+    });
+    if (notes.size() > 32) {
+        notes.resize(32);
+    }
+
+    std::vector<EngravingItem*> elems;
+    elems.reserve(notes.size());
+    std::vector<const EngravingItem*> playElems;
+    playElems.reserve(notes.size());
+    for (Note* note : notes) {
+        elems.push_back(note);
+        playElems.push_back(note);
+    }
+    n->interaction()->select(elems);
+    playbackController()->playElements(playElems);
+    setStatus(muse::qtrc("notation/persiantuner", "Playing %1 notes of the key").arg(playElems.size()));
+}
+
+void PersianTunerPanelModel::applyPersianKeySig(const QString& patternId)
+{
+    INotationPtr n = notation();
+    Score* sc = score();
+    if (!n || !sc || !n->undoStack()) {
+        return;
+    }
+
+    const PersianKeySig* pattern = patternId.isEmpty() ? nullptr : persianKeySigById(patternId.toStdString());
+
+    std::vector<PersianKeySigNote> mapping;
+    if (pattern) {
+        mapping = pattern->notes;
+    }
+
+    n->undoStack()->prepareChanges(
+        pattern ? TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
+                      muse::String(QString::fromStdString(pattern->nameEn)))
+                : TranslatableString("undoableAction", "Clear Persian key signature"));
+
+    auto centsFor = [this](const std::string& letter, const std::string& variant) -> double {
+        return tableCents(QString::fromStdString(letter), QString::fromStdString(variant));
+    };
+    const int changed = EditPersianKeySig::applyScoreKeySig(sc, mapping, centsFor);
+
+    // Remember the key in the tuning memory so "Re-apply memory"
+    // reproduces it
+    const QString id = scoreId();
+    if (pattern) {
+        for (const PersianKeySigNote& n2 : pattern->notes) {
+            setMemoryChange(id, QString::fromStdString(n2.letter) + QLatin1Char('/') + QString::fromStdString(n2.variant),
+                            0, centsFor(n2.letter, n2.variant));
+        }
+    }
+    for (const QString& letter : kLetters) {
+        const bool inPattern = pattern && std::any_of(pattern->notes.begin(), pattern->notes.end(),
+                                                      [letter](const PersianKeySigNote& n2) {
+                                                          return n2.letter == letter.toStdString();
+                                                      });
+        if (!inPattern) {
+            setMemoryChange(id, letter + QLatin1Char('/') + QStringLiteral("natural"), 0, 0.0);
+        }
+    }
+
+    saveCurrentKeySigPattern(patternId);
+
+    n->undoStack()->commitChanges();
+    n->notationChanged().send(muse::RectF());
+
+    emit keySigPatternIndexChanged();
+    emit selectionChanged();
+    if (pattern) {
+        setStatus(muse::qtrc("notation/persiantuner", "Key %1 applied (%2 notes changed)")
+                  .arg(QString::fromStdString(pattern->nameEn), QString::number(changed)));
+    } else {
+        setStatus(muse::qtrc("notation/persiantuner", "Persian key cleared (%1 notes changed)").arg(changed));
+    }
+}
+
+void PersianTunerPanelModel::saveCurrentKeySigPattern(const QString& patternId)
+{
+    m_currentKeySigPattern = patternId;
+    if (patternId.isEmpty()) {
+        m_keySigByScore.remove(scoreId());
+    } else {
+        m_keySigByScore[scoreId()] = patternId;
+    }
+    saveSettings();
+}
+
 void PersianTunerPanelModel::loadSettings()
 {
     m_autoMemory = settings()->value(kAutoMemory).toBool();
@@ -745,6 +999,12 @@ void PersianTunerPanelModel::loadSettings()
             }
             m_memory[sit.key()][kit.key()] = list;
         }
+    }
+
+    const QString keySigJson = settings()->value(kKeySigByScore).toQString();
+    const QJsonObject keySigObj = QJsonDocument::fromJson(keySigJson.toUtf8()).object();
+    for (auto it = keySigObj.begin(); it != keySigObj.end(); ++it) {
+        m_keySigByScore[it.key()] = it.value().toString();
     }
 
     m_currentCents = tableCents(m_selectedLetter, m_selectedVariant);
@@ -785,23 +1045,17 @@ void PersianTunerPanelModel::saveSettings()
     QJsonObject root;
     root.insert(QStringLiteral("scores"), scores);
     settings()->setSharedValue(kMemory, Val(QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact))));
+
+    QJsonObject keySigObj;
+    for (auto it = m_keySigByScore.begin(); it != m_keySigByScore.end(); ++it) {
+        keySigObj.insert(it.key(), it.value());
+    }
+    settings()->setSharedValue(kKeySigByScore, Val(QString::fromUtf8(QJsonDocument(keySigObj).toJson(QJsonDocument::Compact))));
 }
 
 double PersianTunerPanelModel::baseCentsForVariant(const QString& variant)
 {
-    if (variant == QLatin1String("flat")) {
-        return -100.0;
-    }
-    if (variant == QLatin1String("koron")) {
-        return -50.0;
-    }
-    if (variant == QLatin1String("sori")) {
-        return 50.0;
-    }
-    if (variant == QLatin1String("sharp")) {
-        return 100.0;
-    }
-    return 0.0;
+    return defaultPersianVariantCents(variant.toStdString());
 }
 
 QString PersianTunerPanelModel::letterFromTpc(int tpc)

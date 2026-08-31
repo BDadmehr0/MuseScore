@@ -148,6 +148,8 @@ target_sources(engraving PRIVATE
     editing/editmeasures.h
     editing/editnote.cpp
     editing/editnote.h
+    editing/persiankeysig.cpp
+    editing/persiankeysig.h
     editing/editpagelocks.cpp
     editing/editpagelocks.h
     editing/editparentheses.cpp

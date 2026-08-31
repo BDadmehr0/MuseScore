@@ -157,6 +157,10 @@ inline static const muse::rcommand::Command ADD_NAT_COMMAND("command://notation/
 inline static const muse::rcommand::Command ADD_FLAT_COMMAND("command://notation/add-flat");
 inline static const muse::rcommand::Command ADD_FLAT2_COMMAND("command://notation/add-flat2");
 
+// Persian quarter-tone accidentals
+inline static const muse::rcommand::Command ADD_KORON_COMMAND("command://notation/add-koron");
+inline static const muse::rcommand::Command ADD_SORI_COMMAND("command://notation/add-sori");
+
 inline static const muse::rcommand::Command TOGGLE_TIE_COMMAND("command://notation/toggle-tie");
 inline static const muse::rcommand::Command ADD_SLUR_COMMAND("command://notation/add-slur");
 inline static const muse::rcommand::Command TOGGLE_LV_COMMAND("command://notation/toggle-laissez-vibrer");

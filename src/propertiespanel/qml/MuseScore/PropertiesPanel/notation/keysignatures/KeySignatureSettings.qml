@@ -78,4 +78,56 @@ Column {
             { text: qsTrc("propertiespanel", "Locrian", "key signature mode"), value: KeySignatureTypes.MODE_LOCRIAN }
         ]
     }
+
+    // Persian key signature (charghah): quarter-tone key applied to the whole score
+    Column {
+        width: parent ? parent.width : 300
+        spacing: 8
+        visible: root.model != null
+
+        navigation.name: "PersianKeySignature"
+        navigation.panel: root.navigationPanel
+        navigation.row: root.navigationRowStart + 3
+
+        Text {
+            text: qsTrc("propertiespanel", "Persian key signature (Charghah)")
+            font: Muse.Ui.Style.fontLabelMedium
+            color: Muse.Ui.Style.colorTextPrimary
+        }
+
+        Text {
+            width: parent ? parent.width : 300
+            text: qsTrc("propertiespanel",
+                        "Persian quarter-tone key applied to the whole score (linked with the Persian tuner).")
+            font: Muse.Ui.Style.fontLabelSmall
+            color: Muse.Ui.Style.colorTextSecondary
+            wrapMode: Text.WordWrap
+        }
+
+        StyledDropdown {
+            id: persianKeyDropdown
+            width: parent ? parent.width : 300
+            model: (function() {
+                        var rows = root.model ? root.model.persianKeyPatterns : []
+                        var labels = [qsTrc("propertiespanel", "None")]
+                        for (var i = 0; i < rows.length; ++i) {
+                            labels.push(rows[i].nameEn + " — " + rows[i].description)
+                        }
+                        return labels
+                    })()
+            currentIndex: root.model ? root.model.persianKeyPatternIndex + 1 : 0
+            onActivated: function(index) {
+                if (root.model) {
+                    root.model.setPersianKeyPatternIndex(index - 1)
+                }
+            }
+        }
+
+        Text {
+            visible: root.model && root.model.hasPersianKey
+            text: root.model ? root.model.persianKeyPatternDescription : ""
+            font: Muse.Ui.Style.fontLabelSmall
+            color: Muse.Ui.Style.colorTextSecondary
+        }
+    }
 }

@@ -242,6 +242,8 @@ void NotationActionController::init()
     registerCommand(ADD_NAT_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::NATURAL, PlayMode::PlayNote);
     registerCommand(ADD_FLAT_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::FLAT, PlayMode::PlayNote);
     registerCommand(ADD_FLAT2_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::FLAT2, PlayMode::PlayNote);
+    registerCommand(ADD_KORON_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::KORON, PlayMode::PlayNote);
+    registerCommand(ADD_SORI_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::SORI, PlayMode::PlayNote);
 
     registerCommand(TOGGLE_TIE_COMMAND, &Controller::addTie);
     registerCommand(ADD_SLUR_COMMAND, &Controller::addSlur);
@@ -675,6 +677,11 @@ void NotationActionController::init()
             { "notation-move-left", MOVE_LEFT_COMMAND, {} },
             { "notation-move-right-quickly", MOVE_RIGHT_QUICKLY_COMMAND, {} },
             { "notation-move-left-quickly", MOVE_LEFT_QUICKLY_COMMAND, {} },
+            { "notation/add-flat", ADD_FLAT_COMMAND, {} },
+            { "notation/add-natural", ADD_NAT_COMMAND, {} },
+            { "notation/add-sharp", ADD_SHARP_COMMAND, {} },
+            { "notation/add-koron", ADD_KORON_COMMAND, {} },
+            { "notation/add-sori", ADD_SORI_COMMAND, {} },
             { "pitch-up", PITCH_UP_COMMAND, {} },
             { "pitch-down", PITCH_DOWN_COMMAND, {} },
             { "pitch-up-octave", PITCH_UP_OCTAVE_COMMAND, {} },

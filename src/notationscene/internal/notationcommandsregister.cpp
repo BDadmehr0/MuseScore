@@ -554,6 +554,20 @@ static const std::vector<CommandInfo> s_commandInfos = {
         Decoration()
     },
     CommandInfo{
+        ADD_KORON_COMMAND,
+        TranslatableString("action", "Add koron"),
+        TranslatableString("action", "Add accidental: koron (Persian, quarter tone down)"),
+        InputSchema(),
+        Decoration()
+    },
+    CommandInfo{
+        ADD_SORI_COMMAND,
+        TranslatableString("action", "Add sori"),
+        TranslatableString("action", "Add accidental: sori (Persian, quarter tone up)"),
+        InputSchema(),
+        Decoration()
+    },
+    CommandInfo{
         TOGGLE_TIE_COMMAND,
         TranslatableString("action", "Tie"),
         TranslatableString("action", "Add tied note"),

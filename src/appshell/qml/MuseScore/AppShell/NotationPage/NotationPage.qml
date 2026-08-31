@@ -147,6 +147,15 @@ DockPage {
                 navigationPanel.section: notationToolBar.navigationSection
                 navigationPanel.order: 2
             }
+
+            // The "symbols" row: flat / koron / natural / sori / sharp
+            // (the two Persian quarter-tone signs next to the Western ones)
+            AccidentalSymbolsBar {
+                Layout.alignment: Qt.AlignVCenter
+
+                navigationPanel.section: notationToolBar.navigationSection
+                navigationPanel.order: 3
+            }
         },
 
         DockToolBar {

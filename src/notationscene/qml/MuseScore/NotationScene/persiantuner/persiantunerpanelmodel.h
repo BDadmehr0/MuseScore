@@ -3,10 +3,23 @@
  * MuseScore-Studio-CLA-applies
  *
  * Built-in Persian Tuner dock panel (Mixer-like), sign-oriented cents.
+ *
+ * Sync model:
+ *  - the score accidentals (notes) are the source of truth for the panel:
+ *    whatever accidental type a note carries in MuseScore itself (flat,
+ *    natural, sharp, koron, sori - set from the top symbols row, the
+ *    keyboard or the properties panel) is recognized and displayed here;
+ *  - tuning a note in the panel assigns the matching accidental type to
+ *    the note (so the koron / sori / flat ... sign shows up on the note)
+ *    and sets the note tuning so the note plays at the chosen cents.
+ *  - a Persian key signature (charghah) can be applied from predefined
+ *    patterns; it is stored per score and drives both the score accidentals
+ *    and the playback tuning.
  */
 
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -57,6 +70,12 @@ class PersianTunerPanelModel : public QObject, public muse::Contextable, public 
     Q_PROPERTY(QVariantList variantRows READ variantRows NOTIFY variantRowsChanged)
     Q_PROPERTY(QVariantList selectedNotesInfo READ selectedNotesInfo NOTIFY selectionChanged)
 
+    // Persian key signatures (charghah)
+    Q_PROPERTY(QVariantList keySigPatterns READ keySigPatterns NOTIFY keySigPatternsChanged)
+    Q_PROPERTY(int keySigPatternIndex READ keySigPatternIndex WRITE setKeySigPatternIndex NOTIFY keySigPatternIndexChanged)
+    Q_PROPERTY(QString keySigPattern READ keySigPattern NOTIFY keySigPatternIndexChanged)
+    Q_PROPERTY(QString keySigPatternDescription READ keySigPatternDescription NOTIFY keySigPatternIndexChanged)
+
     QML_ELEMENT
 
     muse::ContextInject<mu::context::IGlobalContext> globalContext = { this };
@@ -88,6 +107,12 @@ public:
     QVariantList variantRows() const;
     QVariantList selectedNotesInfo() const;
 
+    // Persian key signatures (charghah)
+    QVariantList keySigPatterns() const;
+    int keySigPatternIndex() const;
+    QString keySigPattern() const;
+    QString keySigPatternDescription() const;
+
     Q_INVOKABLE void init();
     Q_INVOKABLE void setSelectedLetter(const QString& letter);
     Q_INVOKABLE void setSelectedVariant(const QString& variant);
@@ -105,6 +130,11 @@ public:
     Q_INVOKABLE void reapplyMemory();
     Q_INVOKABLE void clearMemory();
 
+    Q_INVOKABLE void setKeySigPatternIndex(int index);
+    Q_INVOKABLE void applyKeySigPattern();
+    Q_INVOKABLE void clearKeySigPattern();
+    Q_INVOKABLE void playKeySigPattern();
+
     Q_INVOKABLE QString letterFa(const QString& letter) const;
     Q_INVOKABLE QString variantFa(const QString& variant) const;
 
@@ -119,6 +149,8 @@ signals:
     void selectionChanged();
     void statusMessageChanged();
     void variantRowsChanged();
+    void keySigPatternsChanged();
+    void keySigPatternIndexChanged();
 
 private:
     struct NoteIdentity {
@@ -141,6 +173,7 @@ private:
 
     void onCurrentNotationChanged();
     void refreshFromSelection();
+    void refreshKeySigPattern();
     void setStatus(const QString& msg);
 
     NoteIdentity identityOf(const engraving::Note* note) const;
@@ -148,14 +181,20 @@ private:
     double tableCents(const QString& letter, const QString& variant) const;
     double effectiveTarget(const engraving::Note* note) const;
 
+    /// Assign \a variant to \a note (accidental element + cent tuning).
+    /// The target is \a targetCents relative to the natural of the letter.
+    void tuneNote(engraving::Note* note, const QString& variant, double targetCents);
+
     std::vector<engraving::Note*> selectedNotes() const;
     std::vector<engraving::Note*> collectScoreNotes() const;
 
-    void tuneNote(engraving::Note* note, double targetCents);
     int rememberAndPropagate(const std::vector<engraving::Note*>& notes, double targetCents);
     void setMemoryChange(const QString& id, const QString& key, int tick, double cents);
     std::optional<double> resolveMemory(const QString& id, const QString& key, int tick) const;
     std::optional<int> nextChangeTick(const QString& id, const QString& key, int fromTick) const;
+
+    void applyPersianKeySig(const QString& patternId);
+    void saveCurrentKeySigPattern(const QString& patternId);
 
     void loadSettings();
     void saveSettings();
@@ -172,8 +211,10 @@ private:
     double m_refFreq = 440.0;
     bool m_autoMemory = true;
     QString m_statusMessage;
+    QString m_currentKeySigPattern; //! id of the pattern applied to the current score
 
     QMap<QString, QMap<QString, double> > m_tuningTable;
     QMap<QString, QMap<QString, QList<MemoryChange> > > m_memory;
+    QMap<QString, QString> m_keySigByScore; //! scoreId -> pattern id
 };
 }
