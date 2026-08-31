@@ -47,6 +47,17 @@ Item {
         Component.onCompleted: tunerModel.init()
     }
 
+    // Labels for the "Key signature (Charghah)" dropdown:
+    // "Do Koron — La koron, Re koron"
+    function keySigPatternLabels() {
+        var rows = tunerModel.keySigPatterns || []
+        var labels = []
+        for (var i = 0; i < rows.length; ++i) {
+            labels.push(rows[i].nameEn + " — " + rows[i].description)
+        }
+        return labels
+    }
+
     Rectangle {
         anchors.fill: parent
         color: root.bgPage
@@ -402,6 +413,102 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: tunerModel.playCurrent()
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: qsTrc("notation/persiantuner", "Key signature (Charghah)")
+                        color: root.textMuted
+                        font.pixelSize: 13
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 118
+                        radius: 12
+                        color: root.bgCard
+                        border.color: root.borderColor
+                        border.width: 1
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 8
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+                                StyledDropdown {
+                                    Layout.fillWidth: true
+                                    model: [
+                                        qsTrc("notation/persiantuner", "None (no key)"),
+                                    ] + keySigPatternLabels()
+                                    currentIndex: tunerModel.keySigPatternIndex + 1
+                                    onActivated: function(index) { tunerModel.setKeySigPatternIndex(index - 1) }
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                visible: tunerModel.keySigPatternIndex >= 0
+                                text: tunerModel.keySigPatternDescription
+                                color: root.textSecondary
+                                font.pixelSize: 11
+                                wrapMode: Text.WordWrap
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 34
+                                    radius: 8
+                                    color: root.accentDim
+                                    border.color: "#2ee6b833"
+                                    border.width: 1
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: qsTrc("notation/persiantuner", "Apply key")
+                                        color: root.accent
+                                        font.pixelSize: 12
+                                    }
+                                    MouseArea { anchors.fill: parent; onClicked: tunerModel.applyKeySigPattern() }
+                                }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 34
+                                    radius: 8
+                                    color: root.bgPanel
+                                    border.color: root.borderStrong
+                                    border.width: 1
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        spacing: 4
+                                        Text { text: "▶"; color: root.textPrimary; font.pixelSize: 11 }
+                                        Text {
+                                            text: qsTrc("notation/persiantuner", "Play")
+                                            color: root.textPrimary
+                                            font.pixelSize: 12
+                                        }
+                                    }
+                                    MouseArea { anchors.fill: parent; onClicked: tunerModel.playKeySigPattern() }
+                                }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 34
+                                    radius: 8
+                                    color: root.bgPanel
+                                    border.color: root.borderStrong
+                                    border.width: 1
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: qsTrc("notation/persiantuner", "Clear")
+                                        color: root.textSecondary
+                                        font.pixelSize: 12
+                                    }
+                                    MouseArea { anchors.fill: parent; onClicked: tunerModel.clearKeySigPattern() }
+                                }
                             }
                         }
                     }
