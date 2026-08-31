@@ -51,19 +51,26 @@ RowLayout {
     Repeater {
         model: [
             { variant: "flat",    glyph: "\uE260", en: "Flat",    fa: "بم" },
-            { variant: "koron",   glyph: "\uE4F0", en: "Koron",   fa: "کورُن" },
+            { variant: "koron",   glyph: "\uE460", en: "Koron",   fa: "کورُن" },
             { variant: "natural", glyph: "\uE261", en: "Natural", fa: "بکار" },
-            { variant: "sori",    glyph: "\uE4F1", en: "Sori",    fa: "سُری" },
+            { variant: "sori",    glyph: "\uE461", en: "Sori",    fa: "سُری" },
             { variant: "sharp",   glyph: "\uE262", en: "Sharp",   fa: "دیز" }
         ]
 
         delegate: Rectangle {
+            id: item
+
             required property var modelData
+            required property int index
 
             Layout.preferredWidth: 30
             Layout.preferredHeight: 30
             radius: 6
-            color: ma.pressed ? root.pressedColor : (ma.containsMouse ? root.hoverColor : "transparent")
+            color: ma.pressed ? root.pressedColor : (ma.containsMouse || navCtrl.active ? root.hoverColor : "transparent")
+            opacity: controller.hasNoteSelection ? 1.0 : 0.4
+
+            border.width: navCtrl.active ? 2 : 0
+            border.color: root.glyphActiveColor
 
             Text {
                 anchors.centerIn: parent
@@ -89,8 +96,23 @@ RowLayout {
                 text: qsTrc("notation/accidentalsymbols", "%1 (%2)").arg(modelData.en).arg(modelData.fa)
             }
 
-            navigation.panel: root.navigationPanel
-            navigation.name: "AccidentalSymbols_" + modelData.variant
+            NavigationControl {
+                id: navCtrl
+
+                name: "AccidentalSymbols_" + item.modelData.variant
+                panel: root.navigationPanel
+                order: item.index
+                enabled: item.enabled && item.visible && controller.hasNoteSelection
+
+                accessible.role: MUAccessible.Button
+                accessible.name: item.modelData.en
+                accessible.visualItem: item
+                accessible.enabled: navCtrl.enabled
+
+                onTriggered: {
+                    controller.applyAccidental(item.modelData.variant)
+                }
+            }
         }
     }
 }
