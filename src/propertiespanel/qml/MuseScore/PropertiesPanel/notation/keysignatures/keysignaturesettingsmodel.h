@@ -67,6 +67,7 @@ signals:
 private:
     void refreshPersianKey();
     QString persianKeyPatternId() const;
+    void applyPersianKeyPattern(const QString& patternId);
 
     PropertyItem* m_hasToShowCourtesy = nullptr;
     PropertyItem* m_mode = nullptr;

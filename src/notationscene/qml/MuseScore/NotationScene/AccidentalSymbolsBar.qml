@@ -20,7 +20,13 @@ import Muse.Ui
 RowLayout {
     id: root
 
-    property NavigationPanel navigationPanel: null
+    property alias navigationPanel: navPanel
+
+    NavigationPanel {
+        id: navPanel
+        name: "AccidentalSymbolsBar"
+        direction: NavigationPanel.Horizontal
+    }
 
     readonly property color glyphColor: "#3c4043"
     readonly property color glyphActiveColor: "#1a73e8"

@@ -89,18 +89,14 @@ Column {
         navigation.panel: root.navigationPanel
         navigation.row: root.navigationRowStart + 3
 
-        Text {
+        StyledTextLabel {
             text: qsTrc("propertiespanel", "Persian key signature (Charghah)")
-            font: Muse.Ui.Style.fontLabelMedium
-            color: Muse.Ui.Style.colorTextPrimary
         }
 
-        Text {
+        StyledTextLabel {
             width: parent ? parent.width : 300
             text: qsTrc("propertiespanel",
                         "Persian quarter-tone key applied to the whole score (linked with the Persian tuner).")
-            font: Muse.Ui.Style.fontLabelSmall
-            color: Muse.Ui.Style.colorTextSecondary
             wrapMode: Text.WordWrap
         }
 
@@ -123,11 +119,9 @@ Column {
             }
         }
 
-        Text {
+        StyledTextLabel {
             visible: root.model && root.model.hasPersianKey
             text: root.model ? root.model.persianKeyPatternDescription : ""
-            font: Muse.Ui.Style.fontLabelSmall
-            color: Muse.Ui.Style.colorTextSecondary
         }
     }
 }

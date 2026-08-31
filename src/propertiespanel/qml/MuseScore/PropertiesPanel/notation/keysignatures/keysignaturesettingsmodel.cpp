@@ -247,7 +247,7 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
             obj.insert(scoreId, patternId);
         }
         muse::settings()->setSharedValue(kPersianKeyByScore,
-                                                                    muse::Val(QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact))));
+                                         muse::Val(QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact))));
     }
 
     refreshPersianKey();

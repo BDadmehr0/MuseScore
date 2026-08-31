@@ -25,17 +25,17 @@
 #include <algorithm>
 #include <cmath>
 
-#include "accidental.h"
-#include "chord.h"
-#include "factory.h"
-#include "measure.h"
-#include "note.h"
-#include "score.h"
-#include "segment.h"
-#include "staff.h"
+#include "dom/accidental.h"
+#include "dom/chord.h"
+#include "dom/factory.h"
+#include "dom/measure.h"
+#include "dom/note.h"
+#include "dom/pitchspelling.h"
+#include "dom/score.h"
+#include "dom/segment.h"
+#include "dom/staff.h"
 
 #include "editnote.h"
-#include "pitchspelling.h"
 
 #include "log.h"
 
@@ -189,27 +189,27 @@ const std::vector<PersianKeySig>& predefinedPersianKeySigs()
     static const std::vector<PersianKeySig> kKeySigs = {
         // Rast: no accidentals (all notes natural)
         {
-            "rast", u"راست", "Rast",
+            "rast", "راست", "Rast",
             {}
         },
         // Do Koron: La koron + Re koron
         {
-            "do-koron", u"چارگاه دو کرن", "Do Koron",
+            "do-koron", "چارگاه دو کرن", "Do Koron",
             { { "A", "koron" }, { "D", "koron" } }
         },
         // Fa: Si flat, Re koron, Sol koron
         {
-            "fa", u"چارگاه فا", "Fa",
+            "fa", "چارگاه فا", "Fa",
             { { "B", "flat" }, { "D", "koron" }, { "G", "koron" } }
         },
         // Segah: Re koron + Sol koron
         {
-            "segah", u"چارگاه سگاه", "Segah",
+            "segah", "چارگاه سگاه", "Segah",
             { { "D", "koron" }, { "G", "koron" } }
         },
         // Homayun: La koron, Re koron, Sol koron
         {
-            "homayun", u"چارگاه همایون", "Homayun",
+            "homayun", "چارگاه همایون", "Homayun",
             { { "A", "koron" }, { "D", "koron" }, { "G", "koron" } }
         },
     };
