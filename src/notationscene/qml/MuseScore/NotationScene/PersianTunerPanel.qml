@@ -271,7 +271,12 @@ Item {
                             anchors.fill: parent
                             anchors.margins: 10
                             spacing: 8
-                            Rectangle { width: 8; height: 8; radius: 4; color: root.accent }
+                            Rectangle {
+                                Layout.preferredWidth: 8
+                                Layout.preferredHeight: 8
+                                radius: 4
+                                color: root.accent
+                            }
                             Text {
                                 text: qsTrc("notation/persiantuner", "Editing:")
                                 color: root.textSecondary
@@ -351,7 +356,11 @@ Item {
                                     Layout.fillWidth: true
                                 }
                             }
-                            Rectangle { Layout.fillWidth: true; height: 1; color: root.borderColor }
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 1
+                                color: root.borderColor
+                            }
                             RowLayout {
                                 Layout.fillWidth: true
                                 Text {

@@ -147,13 +147,32 @@ DockPage {
                 navigationPanel.section: notationToolBar.navigationSection
                 navigationPanel.order: 2
             }
+        },
 
-            // The "symbols" row: flat / koron / natural / sori / sharp
-            // (the two Persian quarter-tone signs next to the Western ones)
+        // The "symbols" row: flat / koron / natural / sori / sharp
+        // (the two Persian quarter-tone signs next to the Western ones).
+        //
+        //! NOTE: DockToolBar's default property (contentComponent) accepts a
+        //! single child, so this row must live in its own toolbar instead of
+        //! being added as a second child of the notation toolbar above.
+        DockToolBar {
+            id: accidentalSymbolsToolBar
+
+            objectName: "accidentalSymbolsToolBar"
+            title: qsTrc("appshell", "Accidentals")
+
+            floatable: false
+            closable: false
+            resizable: false
+            separatorsVisible: false
+
+            alignment: DockToolBarAlignment.Center
+            contentBottomPadding: 2
+
+            navigationSection: root.topToolbarKeyNavSec
+
             AccidentalSymbolsBar {
-                Layout.alignment: Qt.AlignVCenter
-
-                navigationPanel.section: notationToolBar.navigationSection
+                navigationPanel.section: accidentalSymbolsToolBar.navigationSection
                 navigationPanel.order: 3
             }
         },
