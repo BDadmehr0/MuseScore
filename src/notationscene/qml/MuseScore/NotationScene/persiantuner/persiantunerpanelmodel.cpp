@@ -220,8 +220,8 @@ int PersianTunerPanelModel::keySigPatternIndex() const
     }
     const int idx = std::find_if(predefinedPersianKeySigs().begin(), predefinedPersianKeySigs().end(),
                                  [id = m_currentKeySigPattern.toStdString()] (const PersianKeySig& keySig) {
-                                     return keySig.id == id;
-                                 }) - predefinedPersianKeySigs().begin();
+        return keySig.id == id;
+    }) - predefinedPersianKeySigs().begin();
     return idx >= 0 && idx < (int)predefinedPersianKeySigs().size() ? idx : -1;
 }
 
@@ -915,8 +915,8 @@ void PersianTunerPanelModel::applyPersianKeySig(const QString& patternId)
 
     n->undoStack()->prepareChanges(
         pattern ? TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
-                      muse::String(QString::fromStdString(pattern->nameEn)))
-                : TranslatableString("undoableAction", "Clear Persian key signature"));
+            muse::String(QString::fromStdString(pattern->nameEn)))
+        : TranslatableString("undoableAction", "Clear Persian key signature"));
 
     auto centsFor = [this](const std::string& letter, const std::string& variant) -> double {
         return tableCents(QString::fromStdString(letter), QString::fromStdString(variant));
@@ -935,8 +935,8 @@ void PersianTunerPanelModel::applyPersianKeySig(const QString& patternId)
     for (const QString& letter : kLetters) {
         const bool inPattern = pattern && std::any_of(pattern->notes.begin(), pattern->notes.end(),
                                                       [letter](const PersianKeySigNote& n2) {
-                                                          return n2.letter == letter.toStdString();
-                                                      });
+            return n2.letter == letter.toStdString();
+        });
         if (!inPattern) {
             setMemoryChange(id, letter + QLatin1Char('/') + QStringLiteral("natural"), 0, 0.0);
         }

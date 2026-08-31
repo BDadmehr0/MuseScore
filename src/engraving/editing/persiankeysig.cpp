@@ -40,9 +40,7 @@
 #include "log.h"
 
 namespace mu::engraving {
-
 namespace {
-
 //---------------------------------------------------------
 //   variantAccidentalType
 //---------------------------------------------------------
@@ -181,7 +179,6 @@ std::string noteVariant(const Note* note)
     }
     return "natural";
 }
-
 } // namespace
 
 const std::vector<PersianKeySig>& predefinedPersianKeySigs()
@@ -344,5 +341,4 @@ int EditPersianKeySig::applyScoreKeySig(Score* score, const std::vector<PersianK
 
     return changed;
 }
-
 } // namespace mu::engraving
