@@ -1,0 +1,240 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# MuseScore-Studio-CLA-applies
+#
+# Persian Tuner fork: automatic version bump + installer releases.
+#
+# Every push to the 'persian-tuner' branch (i.e. every PR merged into it):
+#   1. bumps the app version in version.cmake (1.0.1 -> 1.0.2 -> ... -> 1.0.10 -> 1.1.0 -> ...),
+#   2. builds installers for all supported desktop platforms,
+#   3. publishes them as a GitHub Release tagged with the new version.
+#
+# The version-bump commit itself contains "[skip release]" and is pushed with the
+# GITHUB_TOKEN, so it never re-triggers this workflow (no infinite loop).
+
+name: "Release: Persian Tuner"
+
+on:
+  push:
+    branches:
+      - persian-tuner
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Optional exact version to release (e.g. 1.0.0). Leave empty to auto-bump from the latest tag.'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-persian-tuner
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  version:
+    name: Compute & bump version
+    runs-on: ubuntu-slim
+    outputs:
+      changed: ${{ steps.bump.outputs.changed }}
+      version: ${{ steps.bump.outputs.version }}
+      tag_name: ${{ steps.bump.outputs.tag_name }}
+      release_name: ${{ steps.bump.outputs.release_name }}
+      prev_tag: ${{ steps.bump.outputs.prev_tag }}
+      release_sha: ${{ steps.bump.outputs.release_sha }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # history + tags
+          submodules: false
+
+      - name: Bump version
+        id: bump
+        env:
+          EXACT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          # ---- Skip commits that only bump the version (loop protection) ----
+          SKIP=false
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            COMMIT_MSG="$(git log -1 --pretty=%B)"
+            if [[ "${COMMIT_MSG}" == *"[skip release]"* ]]; then
+              SKIP=true
+            fi
+          fi
+          if [[ "${SKIP}" == "true" ]]; then
+            echo "::notice::Commit contains '[skip release]' - no new release."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # ---- Find the latest pure X.Y.Z tag (with optional 'v' prefix) ----
+          LATEST_TAG="$(git tag --list | sed -nE 's/^v?([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' | sort -V | tail -n 1 || true)"
+          if [[ -z "${LATEST_TAG}" ]]; then
+            # No release tags yet: fall back to the version in version.cmake
+            LATEST_TAG="$(sed -n 's/^set(MUSE_APP_VERSION_MAJOR "\([0-9]*\)")/\1/p' version.cmake).$(sed -n 's/^set(MUSE_APP_VERSION_MINOR "\([0-9]*\)")/\1/p' version.cmake).$(sed -n 's/^set(MUSE_APP_VERSION_PATCH "\([0-9]*\)")/\1/p' version.cmake)"
+          fi
+          if [[ ! "${LATEST_TAG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Could not determine the current version (got: '${LATEST_TAG}')."
+            exit 1
+          fi
+
+          MAJOR="${LATEST_TAG%%.*}"
+          REST="${LATEST_TAG#*.}"
+          MINOR="${REST%%.*}"
+          PATCH="${REST#*.}"
+
+          # ---- Decide the new version ----
+          if [[ -n "${EXACT_VERSION}" ]]; then
+            # Manual release with an exact version (workflow_dispatch only)
+            if [[ ! "${EXACT_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Input 'version' must look like X.Y.Z (e.g. 1.0.0)."
+              exit 1
+            fi
+            NEW_VERSION="${EXACT_VERSION}"
+            MAJOR="${NEW_VERSION%%.*}"
+            REST="${NEW_VERSION#*.}"
+            MINOR="${REST%%.*}"
+            PATCH="${REST#*.}"
+          else
+            # 1.0.1 -> 1.0.2 -> ... -> 1.0.10 -> 1.1.0 -> 1.1.1 -> ...
+            if (( PATCH < 10 )); then
+              PATCH=$((PATCH + 1))
+            elif (( MINOR < 9 )); then
+              MINOR=$((MINOR + 1))
+              PATCH=0
+            else
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+            fi
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          echo "Releasing version: ${NEW_VERSION} (previous: ${LATEST_TAG})"
+
+          # ---- Update version.cmake ----
+          sed -i -E \
+            -e "s|^set\(MUSE_APP_VERSION_MAJOR \".*\"\)|set(MUSE_APP_VERSION_MAJOR \"${MAJOR}\")|" \
+            -e "s|^set\(MUSE_APP_VERSION_MINOR \".*\"\)|set(MUSE_APP_VERSION_MINOR \"${MINOR}\")|" \
+            -e "s|^set\(MUSE_APP_VERSION_PATCH \".*\"\)|set(MUSE_APP_VERSION_PATCH \"${PATCH}\")|" \
+            version.cmake
+          grep -E "^set\(MUSE_APP_VERSION_(MAJOR|MINOR|PATCH)" version.cmake
+          git diff --stat -- version.cmake
+
+          # ---- Commit & push the bump ----
+          # (pushes made with GITHUB_TOKEN do not re-trigger GitHub workflows)
+          if git diff --quiet -- version.cmake; then
+            echo "version.cmake already at ${NEW_VERSION}; nothing to commit."
+            RELEASE_SHA="$(git rev-parse HEAD)"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add version.cmake
+            git commit -m "Bump version to ${NEW_VERSION} [skip release]"
+            git push origin "HEAD:${GITHUB_REF_NAME}" || {
+              git pull --rebase origin "${GITHUB_REF_NAME}"
+              git push origin "HEAD:${GITHUB_REF_NAME}"
+            }
+            RELEASE_SHA="$(git rev-parse HEAD)"
+          fi
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "release_name=MuseScore Studio ${NEW_VERSION} Release" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "release_sha=${RELEASE_SHA}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build installers ${{ needs.version.outputs.version }}
+    needs: version
+    if: needs.version.outputs.changed == 'true'
+    uses: ./.github/workflows/build_all.yml
+    secrets: inherit
+    with:
+      platforms: 'linux_arm64 linux_x64 macos windows_x64 windows_portable'
+      build_mode: 'stable'
+      publish: 'off'
+      deploy_backend: 'off'
+      sentry_project: ''
+      dockwidgets_v2: 'ON'
+
+  release:
+    name: Create release ${{ needs.version.outputs.tag_name }}
+    needs:
+      - version
+      - build
+    if: ${{ always() && needs.version.outputs.changed == 'true' && needs.build.result == 'success' }}
+    runs-on: ubuntu-slim
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # history + tags
+
+      - name: Download and extract artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: build.artifacts
+
+      - name: Collate release binaries
+        run: |
+          buildscripts/ci/release/collate_release_binaries.sh
+
+      - name: Generate release notes
+        id: notes
+        env:
+          TAG_NAME: ${{ needs.version.outputs.tag_name }}
+          RELEASE_SHA: ${{ needs.version.outputs.release_sha }}
+          PREV_TAG: ${{ needs.version.outputs.prev_tag }}
+        run: |
+          if [[ -n "${PREV_TAG}" ]] && git rev-parse -q --verify "${PREV_TAG}" >/dev/null 2>&1; then
+            RANGE="${PREV_TAG}..${RELEASE_SHA}"
+          else
+            RANGE="${RELEASE_SHA}"
+          fi
+          {
+            echo "## What's Changed"
+            git log --no-merges --format='* %s (%h)' "${RANGE}" -- . ':(exclude)version.cmake' \
+              | grep -v '\[skip release\]' || true
+            echo
+            echo "Installers for Windows (MSI + PortableApps), macOS (DMG) and Linux (AppImage x86_64/arm64) are attached below."
+            echo
+            echo "**Full Changelog**: ${{ github.server_url }}/${{ github.repository }}/commits/${TAG_NAME}"
+          } > release_notes.md
+          cat release_notes.md
+
+      - name: Create tag
+        env:
+          TAG_NAME: ${{ needs.version.outputs.tag_name }}
+          RELEASE_SHA: ${{ needs.version.outputs.release_sha }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${TAG_NAME}" >/dev/null 2>&1; then
+            echo "::notice::Tag ${TAG_NAME} already exists; keeping it."
+          else
+            git tag "${TAG_NAME}" "${RELEASE_SHA}"
+            git push origin "${TAG_NAME}"
+          fi
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ needs.version.outputs.tag_name }}
+          RELEASE_NAME: ${{ needs.version.outputs.release_name }}
+        run: |
+          if gh release view "${TAG_NAME}" >/dev/null 2>&1; then
+            echo "::notice::Release ${TAG_NAME} already exists; uploading assets."
+            gh release upload "${TAG_NAME}" release/* --clobber
+          else
+            gh release create "${TAG_NAME}" release/* \
+              --title "${RELEASE_NAME}" \
+              --notes-file release_notes.md
+          fi
