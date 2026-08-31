@@ -74,7 +74,6 @@ double defaultPersianVariantCents(const std::string& variant);
 class EditPersianKeySig
 {
 public:
-
     /// Assign \a variant to a single note:
     ///  - ensures the note carries the matching accidental element
     ///    (FLAT / SHARP / SORI / KORON; an explicit NATURAL only when the
@@ -93,7 +92,7 @@ public:
     /// (may be null; then the default variant cents are used).
     /// Requires an open transaction.
     /// Returns the number of notes that were changed.
-    static int applyScoreKeySig(Score* score, const std::vector<PersianKeySigNote>& mapping,
-                                const std::function<double(const std::string&, const std::string&)>& centsFor = nullptr);
+    static int applyScoreKeySig(Score* score, const std::vector<PersianKeySigNote>& mapping, const std::function<double(const std::string&,
+                                                                                                                        const std::string&)>& centsFor = nullptr);
 };
 } // namespace mu::engraving

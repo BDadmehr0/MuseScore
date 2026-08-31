@@ -132,8 +132,8 @@ int KeySignatureSettingsModel::persianKeyPatternIndex() const
     }
     const int idx = std::find_if(engraving::predefinedPersianKeySigs().begin(), engraving::predefinedPersianKeySigs().end(),
                                  [id = m_persianKeyPatternId.toStdString()] (const engraving::PersianKeySig& keySig) {
-                                     return keySig.id == id;
-                                 }) - engraving::predefinedPersianKeySigs().begin();
+        return keySig.id == id;
+    }) - engraving::predefinedPersianKeySigs().begin();
     return idx >= 0 && idx < (int)engraving::predefinedPersianKeySigs().size() ? idx : -1;
 }
 
@@ -208,7 +208,7 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
     }
 
     const engraving::PersianKeySig* pattern = patternId.isEmpty() ? nullptr
-                                                                  : engraving::persianKeySigById(patternId.toStdString());
+                                              : engraving::persianKeySigById(patternId.toStdString());
 
     std::vector<engraving::PersianKeySigNote> mapping;
     if (pattern) {
@@ -228,9 +228,9 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
     };
 
     n->undoStack()->prepareChanges(
-        pattern ? mu::TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
-                      mu::String(QString::fromStdString(pattern->nameEn)))
-                : mu::TranslatableString("undoableAction", "Clear Persian key signature"));
+        pattern ? muse::TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
+            muse::String::fromStdString(pattern->nameEn))
+        : muse::TranslatableString("undoableAction", "Clear Persian key signature"));
     engraving::EditPersianKeySig::applyScoreKeySig(sc, mapping, centsFor);
     n->undoStack()->commitChanges();
     n->notationChanged().send(muse::RectF());
@@ -247,7 +247,7 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
             obj.insert(scoreId, patternId);
         }
         muse::settings()->setSharedValue(kPersianKeyByScore,
-                                                                    muse::Val(QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact))));
+                                         muse::Val(QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact))));
     }
 
     refreshPersianKey();
