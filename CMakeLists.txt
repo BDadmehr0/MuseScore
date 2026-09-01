@@ -64,18 +64,12 @@ check_compile_version("MSVC" 19.40 "https://github.com/musescore/MuseScore/wiki/
 ###########################################
 # Setup option and build settings
 ###########################################
+# NOTE: buildscripts/cmake/GetPaths.cmake shadows the muse_framework module of the same
+# name (our buildscripts/cmake comes first in CMAKE_MODULE_PATH). It makes INSTALL_BIN_DIR
+# a relative destination so that CPack/WIX does not fail with
+# "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): .../bin/crashpad_handler.exe".
+# Use INSTALL_BIN_DIR_ABS when an absolute filesystem path is needed.
 include(GetPaths)
-
-# WORKAROUND: the pinned muse_framework submodule (34210b4) installs the crashpad handler
-# to INSTALL_BIN_DIR, which GetPaths defines as ${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR} —
-# an ABSOLUTE path. CPack (WIX) rejects absolute install destinations at MSI packaging time:
-#   "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): .../build.install/bin/crashpad_handler.exe"
-# Upstream muse_framework fixed this in commit 2fe3dd8 ("fixed dir for crashpad") by installing
-# to INSTALL_SUBDIR instead. Replicate that fix here (Windows only, where WIX packaging runs)
-# until the submodule can be bumped to a version containing the fix.
-if (OS_IS_WIN)
-    set(INSTALL_BIN_DIR ${INSTALL_SUBDIR})
-endif()
 
 set(MUSESCORE_BUILD_CONFIGURATION "app" CACHE STRING "Build configuration")
 # Possible MUSESCORE_BUILD_CONFIGURATION values:
