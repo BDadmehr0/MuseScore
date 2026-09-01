@@ -21,7 +21,10 @@
 set(MUSE_APP_NAME_HUMAN_READABLE "MuseScore Studio")
 set(MUSE_APP_NAME_MACHINE_READABLE "MuseScoreStudio")
 
-set(MUSE_APP_VERSION_MAJOR "5")
+# Persian-Tuner fork uses its own "staircase" release numbering
+# (1.0.1, 1.0.2, ... 1.0.10, 1.1.0, ...). This baseline is bumped
+# automatically by .github/workflows/auto_release.yml on every merged PR.
+set(MUSE_APP_VERSION_MAJOR "1")
 set(MUSE_APP_VERSION_MINOR "0")
 set(MUSE_APP_VERSION_PATCH "0")
 set(MUSE_APP_VERSION_MAJ_MIN "${MUSE_APP_VERSION_MAJOR}.${MUSE_APP_VERSION_MINOR}")

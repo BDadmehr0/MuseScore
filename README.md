@@ -27,6 +27,12 @@ MuseScore Studio is an open source and free music notation software. For support
 - [MuseScore Studio Git workflow instructions](https://musescore.org/en/developers-handbook/git-workflow)
 - [How to compile MuseScore Studio?](https://github.com/musescore/MuseScore/wiki/Set-up-developer-environment)
 
+## Releases
+
+This fork publishes installer releases automatically after every PR merged into the
+`persian-tuner` branch (versions step up like `1.0.1 → 1.0.2 → … → 1.0.10 → 1.1.0`).
+See [RELEASES.md](RELEASES.md) for details.
+
 ## License
 
 MuseScore Studio is licensed under GPL version 3.0. See [license file](https://github.com/musescore/MuseScore/blob/master/LICENSE.txt) in the same directory.
