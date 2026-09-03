@@ -79,14 +79,17 @@ Column {
         ]
     }
 
-    // Persian key signature (charghah): quarter-tone key applied to the whole score
+    // Persian key signature (charghah / dastgah): quarter-tone key applied
+    // to the whole score. Predefined dastgah patterns plus a custom builder
+    // (one accidental per note letter) - every flat/koron/sori/sharp
+    // combination is possible, and the key also plays in playback.
     Column {
         width: parent ? parent.width : 300
         spacing: 8
         visible: root.model != null
 
         StyledTextLabel {
-            text: qsTrc("propertiespanel", "Persian key signature (Charghah)")
+            text: qsTrc("propertiespanel", "Persian key signature (Dastgah)")
         }
 
         StyledTextLabel {
@@ -110,11 +113,13 @@ Column {
                         for (var i = 0; i < rows.length; ++i) {
                             labels.push(rows[i].nameEn + " — " + rows[i].description)
                         }
+                        labels.push(qsTrc("propertiespanel", "Custom…"))
                         return labels
                     })()
             currentIndex: root.model ? root.model.persianKeyPatternIndex + 1 : 0
             onActivated: function(index) {
                 if (root.model) {
+                    // index == patterns.length + 1 -> the "Custom" entry
                     root.model.setPersianKeyPatternIndex(index - 1)
                 }
             }
@@ -122,7 +127,56 @@ Column {
 
         StyledTextLabel {
             visible: root.model && root.model.hasPersianKey
+            width: parent ? parent.width : 300
             text: root.model ? root.model.persianKeyPatternDescription : ""
+            wrapMode: Text.WordWrap
+        }
+
+        // Custom Persian key: choose the accidental for each note letter.
+        // The combination produces the key signature signs on the staff
+        // and the note retuning for playback.
+        Column {
+            width: parent ? parent.width : 300
+            spacing: 6
+            visible: root.model && root.model.isCustomPersianKey
+
+            StyledTextLabel {
+                text: qsTrc("propertiespanel", "Custom Persian key — choose one sign per note")
+            }
+
+            Repeater {
+                model: root.model ? root.model.letterNames : 0
+                delegate: Row {
+                    id: letterRow
+                    required property int index
+                    required property var modelData
+
+                    width: parent ? parent.width : 300
+                    spacing: 8
+
+                    StyledTextLabel {
+                        width: 44
+                        text: letterRow.modelData
+                    }
+
+                    StyledDropdown {
+                        width: letterRow.width - 44 - 70
+
+                        navigation.name: "PersianKeyCustomLetter" + letterRow.index
+                        navigation.panel: root.navigationPanel
+                        navigation.row: root.navigationRowStart + 10 + letterRow.index
+
+                        model: root.model ? root.model.variantNames : []
+                        currentIndex: root.model && root.model.customVariants.length > letterRow.index
+                                     ? root.model.customVariants[letterRow.index] : 0
+                        onActivated: function(variantIdx) {
+                            if (root.model) {
+                                root.model.setCustomVariant(letterRow.index, variantIdx)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

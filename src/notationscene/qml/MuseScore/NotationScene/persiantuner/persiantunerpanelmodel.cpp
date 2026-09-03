@@ -17,6 +17,7 @@
 
 #include "engraving/dom/accidental.h"
 #include "engraving/dom/chord.h"
+#include "engraving/dom/masterscore.h"
 #include "engraving/dom/note.h"
 #include "engraving/dom/property.h"
 #include "engraving/dom/score.h"
@@ -195,6 +196,9 @@ QVariantList PersianTunerPanelModel::keySigPatterns() const
 {
     QVariantList rows;
     for (const PersianKeySig& keySig : predefinedPersianKeySigs()) {
+        if (isLegacyPersianKeySigId(keySig.id)) {
+            continue;
+        }
         QVariantMap row;
         row.insert(QStringLiteral("id"), QString::fromStdString(keySig.id));
         row.insert(QStringLiteral("nameFa"), QString::fromStdString(keySig.nameFa));
@@ -213,16 +217,28 @@ QVariantList PersianTunerPanelModel::keySigPatterns() const
     return rows;
 }
 
+static std::vector<const PersianKeySig*> visiblePersianKeyPatterns()
+{
+    std::vector<const PersianKeySig*> result;
+    for (const PersianKeySig& keySig : predefinedPersianKeySigs()) {
+        if (!isLegacyPersianKeySigId(keySig.id)) {
+            result.push_back(&keySig);
+        }
+    }
+    return result;
+}
+
 int PersianTunerPanelModel::keySigPatternIndex() const
 {
     if (m_currentKeySigPattern.isEmpty()) {
         return -1;
     }
-    const int idx = std::find_if(predefinedPersianKeySigs().begin(), predefinedPersianKeySigs().end(),
-                                 [id = m_currentKeySigPattern.toStdString()] (const PersianKeySig& keySig) {
-        return keySig.id == id;
-    }) - predefinedPersianKeySigs().begin();
-    return idx >= 0 && idx < (int)predefinedPersianKeySigs().size() ? idx : -1;
+    const auto patterns = visiblePersianKeyPatterns();
+    const auto it = std::find_if(patterns.begin(), patterns.end(),
+                                 [id = m_currentKeySigPattern.toStdString()] (const PersianKeySig* keySig) {
+        return keySig->id == id;
+    });
+    return it == patterns.end() ? -1 : static_cast<int>(it - patterns.begin());
 }
 
 QString PersianTunerPanelModel::keySigPattern() const
@@ -825,11 +841,11 @@ std::optional<int> PersianTunerPanelModel::nextChangeTick(const QString& id, con
 
 void PersianTunerPanelModel::setKeySigPatternIndex(int index)
 {
-    const auto& keySigs = predefinedPersianKeySigs();
+    const auto keySigs = visiblePersianKeyPatterns();
     if (index < 0 || index >= (int)keySigs.size()) {
         return;
     }
-    const QString id = QString::fromStdString(keySigs[index].id);
+    const QString id = QString::fromStdString(keySigs[index]->id);
     if (m_currentKeySigPattern == id) {
         return;
     }
@@ -921,7 +937,9 @@ void PersianTunerPanelModel::applyPersianKeySig(const QString& patternId)
     auto centsFor = [this](const std::string& letter, const std::string& variant) -> double {
         return tableCents(QString::fromStdString(letter), QString::fromStdString(variant));
     };
-    const int changed = EditPersianKeySig::applyScoreKeySig(sc, mapping, centsFor);
+    // Write the signs into the key signature on the staves AND respell /
+    // retune the notes (what you see is what you hear).
+    const int changed = EditPersianKeySig::applyKeySigToStaves(sc->masterScore(), mapping, centsFor);
 
     // Remember the key in the tuning memory so "Re-apply memory"
     // reproduces it

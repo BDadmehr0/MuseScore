@@ -324,9 +324,11 @@ PalettePtr PaletteCreator::newKeySigPalette()
     nk->setKeySigEvent(nke);
     sp->appendElement(nk, TConv::userName(Key::C, true));
 
-    // Persian key signatures (charghah) - draggable like the Western ones
+    // Persian key signatures (dastgah / charghah) - draggable like the
+    // Western ones. Legacy duplicate ids are hidden (they still resolve
+    // when an old score references them).
     for (const PersianKeySig& keySig : predefinedPersianKeySigs()) {
-        if (keySig.notes.empty()) {
+        if (keySig.notes.empty() || isLegacyPersianKeySigId(keySig.id)) {
             // an all-natural Persian key looks identical to C major; skip it
             continue;
         }

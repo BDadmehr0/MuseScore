@@ -1625,8 +1625,16 @@ EngravingItem* Measure::drop(Transaction& tx, EditData& data)
 
         // A Persian key signature also respells and retunes the notes so that
         // the koron / sori / flat accidentals actually sound (like the tuner).
+        // Predefined dastgah patterns and custom flat/koron/sori/sharp
+        // combinations are both supported.
+        std::vector<PersianKeySigNote> persianMapping;
         if (const PersianKeySig* persian = persianKeySigFromKeySigEvent(k)) {
-            EditPersianKeySig::applyScoreKeySig(score()->masterScore(), persian->notes);
+            persianMapping = persian->notes;
+        } else if (isPersianKeySigEvent(k)) {
+            persianMapping = persianKeySigNotesFromEvent(k);
+        }
+        if (!persianMapping.empty()) {
+            EditPersianKeySig::applyScoreKeySig(score()->masterScore(), persianMapping);
         }
 
         break;

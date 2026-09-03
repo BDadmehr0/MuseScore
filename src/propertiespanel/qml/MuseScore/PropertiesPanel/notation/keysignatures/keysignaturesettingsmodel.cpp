@@ -23,16 +23,20 @@
 #include "keysignaturesettingsmodel.h"
 
 #include <algorithm>
+#include <map>
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
 #include "engraving/dom/keysig.h"
+#include "engraving/dom/masterscore.h"
 #include "engraving/dom/measure.h"
 #include "engraving/dom/layoutbreak.h"
 #include "engraving/dom/score.h"
+#include "engraving/dom/staff.h"
 #include "engraving/editing/persiankeysig.h"
+#include "engraving/editing/transaction/transaction.h"
 
 #include "notation/inotation.h"
 #include "notation/inotationelements.h"
@@ -46,7 +50,34 @@
 using namespace mu::propertiespanel;
 
 static const muse::Settings::Key kPersianKeyByScore("persianTuner", "keySigByScore");
+static const muse::Settings::Key kPersianKeyCustom("persianTuner", "keySigCustom");
 static const muse::Settings::Key kPersianTuningTable("persianTuner", "tuningTable");
+
+namespace {
+const std::vector<std::string> kLetters = { "C", "D", "E", "F", "G", "A", "B" };
+// Order shown in the UI: natural, flat, koron, sori, sharp
+const std::vector<std::string> kVariants = { "natural", "flat", "koron", "sori", "sharp" };
+
+QString letterSource(const std::string& letter)
+{
+    static const std::map<std::string, QString> names = {
+        { "C", "Do" }, { "D", "Re" }, { "E", "Mi" }, { "F", "Fa" },
+        { "G", "Sol" }, { "A", "La" }, { "B", "Si" }
+    };
+    auto it = names.find(letter);
+    return it == names.end() ? QString::fromStdString(letter) : it->second;
+}
+
+int variantIndex(const std::string& variant)
+{
+    for (size_t i = 0; i < kVariants.size(); ++i) {
+        if (kVariants[i] == variant) {
+            return static_cast<int>(i);
+        }
+    }
+    return 0;
+}
+}
 
 KeySignatureSettingsModel::KeySignatureSettingsModel(QObject* parent, const muse::modularity::ContextPtr& iocCtx,
                                                      IElementRepositoryService* repository)
@@ -78,7 +109,7 @@ void KeySignatureSettingsModel::loadProperties()
     bool enableCourtesy = true;
 
     for (const mu::engraving::EngravingItem* element : m_elementList) {
-        if (element->generated() || toKeySig(element)->isCourtesy()) {
+        if (element->generated() || mu::engraving::toKeySig(element)->isCourtesy()) {
             enableMode = false;
         }
 
@@ -110,6 +141,9 @@ QVariantList KeySignatureSettingsModel::persianKeyPatterns() const
 {
     QVariantList rows;
     for (const engraving::PersianKeySig& keySig : engraving::predefinedPersianKeySigs()) {
+        if (engraving::isLegacyPersianKeySigId(keySig.id)) {
+            continue;
+        }
         QVariantMap row;
         row.insert(QStringLiteral("id"), QString::fromStdString(keySig.id));
         row.insert(QStringLiteral("nameEn"), QString::fromStdString(keySig.nameEn));
@@ -117,7 +151,7 @@ QVariantList KeySignatureSettingsModel::persianKeyPatterns() const
 
         QStringList parts;
         for (const engraving::PersianKeySigNote& n : keySig.notes) {
-            parts << QString::fromStdString(n.letter) + " " + QString::fromStdString(n.variant);
+            parts << letterSource(n.letter) + " " + QString::fromStdString(n.variant);
         }
         row.insert(QStringLiteral("description"), parts.join(QStringLiteral(", ")));
         rows << row;
@@ -125,20 +159,47 @@ QVariantList KeySignatureSettingsModel::persianKeyPatterns() const
     return rows;
 }
 
+static std::vector<const engraving::PersianKeySig*> visiblePersianKeyPatterns()
+{
+    std::vector<const engraving::PersianKeySig*> result;
+    for (const engraving::PersianKeySig& keySig : engraving::predefinedPersianKeySigs()) {
+        if (!engraving::isLegacyPersianKeySigId(keySig.id)) {
+            result.push_back(&keySig);
+        }
+    }
+    return result;
+}
+
 int KeySignatureSettingsModel::persianKeyPatternIndex() const
 {
+    const auto patterns = visiblePersianKeyPatterns();
     if (m_persianKeyPatternId.isEmpty()) {
         return -1;
     }
-    const int idx = std::find_if(engraving::predefinedPersianKeySigs().begin(), engraving::predefinedPersianKeySigs().end(),
-                                 [id = m_persianKeyPatternId.toStdString()] (const engraving::PersianKeySig& keySig) {
-        return keySig.id == id;
-    }) - engraving::predefinedPersianKeySigs().begin();
-    return idx >= 0 && idx < (int)engraving::predefinedPersianKeySigs().size() ? idx : -1;
+    static const QString customId = QStringLiteral("custom");
+    if (m_persianKeyPatternId == customId) {
+        return static_cast<int>(patterns.size());
+    }
+    const auto it = std::find_if(patterns.begin(), patterns.end(),
+                                 [id = m_persianKeyPatternId.toStdString()] (const engraving::PersianKeySig* keySig) {
+        return keySig->id == id;
+    });
+    return it == patterns.end() ? -1 : static_cast<int>(it - patterns.begin());
 }
 
 QString KeySignatureSettingsModel::persianKeyPatternDescription() const
 {
+    if (m_persianKeyPatternId == QLatin1String("custom")) {
+        QStringList parts;
+        for (int i = 0; i < m_customVariants.size(); ++i) {
+            const int v = m_customVariants.value(i).toInt();
+            if (v > 0) {
+                parts << letterSource(kLetters[i]) + " " + QString::fromStdString(kVariants[v]);
+            }
+        }
+        return parts.isEmpty() ? muse::qtrc("propertiespanel", "Custom — all notes natural")
+               : muse::qtrc("propertiespanel", "Custom: %1").arg(parts.join(QStringLiteral(", ")));
+    }
     const engraving::PersianKeySig* pattern = m_persianKeyPatternId.isEmpty()
                                               ? nullptr : engraving::persianKeySigById(m_persianKeyPatternId.toStdString());
     if (!pattern) {
@@ -146,7 +207,7 @@ QString KeySignatureSettingsModel::persianKeyPatternDescription() const
     }
     QStringList parts;
     for (const engraving::PersianKeySigNote& n : pattern->notes) {
-        parts << QString::fromStdString(n.letter) + " " + QString::fromStdString(n.variant);
+        parts << letterSource(n.letter) + " " + QString::fromStdString(n.variant);
     }
     return parts.isEmpty() ? QStringLiteral("natural") : parts.join(QStringLiteral(", "));
 }
@@ -156,11 +217,57 @@ bool KeySignatureSettingsModel::hasPersianKey() const
     return !m_persianKeyPatternId.isEmpty();
 }
 
+QVariantList KeySignatureSettingsModel::letterNames() const
+{
+    QVariantList rows;
+    for (const std::string& letter : kLetters) {
+        rows << muse::qtrc("propertiespanel", muse::String(letterSource(letter)));
+    }
+    return rows;
+}
+
+QVariantList KeySignatureSettingsModel::variantNames() const
+{
+    QVariantList rows;
+    for (const std::string& variant : kVariants) {
+        QString name;
+        if (variant == "natural") {
+            name = muse::qtrc("propertiespanel", "Natural");
+        } else if (variant == "flat") {
+            name = muse::qtrc("propertiespanel", "Flat");
+        } else if (variant == "koron") {
+            name = muse::qtrc("propertiespanel", "Koron");
+        } else if (variant == "sori") {
+            name = muse::qtrc("propertiespanel", "Sori");
+        } else {
+            name = muse::qtrc("propertiespanel", "Sharp");
+        }
+        rows << name;
+    }
+    return rows;
+}
+
+QVariantList KeySignatureSettingsModel::customVariants() const
+{
+    return m_customVariants;
+}
+
+bool KeySignatureSettingsModel::isCustomPersianKey() const
+{
+    return m_persianKeyPatternId == QLatin1String("custom");
+}
+
 void KeySignatureSettingsModel::setPersianKeyPatternIndex(int index)
 {
-    const auto& keySigs = engraving::predefinedPersianKeySigs();
-    if (index >= 0 && index < (int)keySigs.size()) {
-        applyPersianKeyPattern(QString::fromStdString(keySigs[index].id));
+    const auto patterns = visiblePersianKeyPatterns();
+    if (index == static_cast<int>(patterns.size())) {
+        // "Custom" entry: switch to the current custom mapping (or all
+        // naturals) without rebuilding it from a predefined pattern.
+        applyPersianKeyPattern(QStringLiteral("custom"), storedCustomMapping());
+        return;
+    }
+    if (index >= 0 && index < static_cast<int>(patterns.size())) {
+        applyPersianKeyPattern(QString::fromStdString(patterns[index]->id));
     } else {
         applyPersianKeyPattern(QString());
     }
@@ -168,7 +275,11 @@ void KeySignatureSettingsModel::setPersianKeyPatternIndex(int index)
 
 void KeySignatureSettingsModel::applyPersianKey()
 {
-    applyPersianKeyPattern(m_persianKeyPatternId);
+    if (m_persianKeyPatternId == QLatin1String("custom")) {
+        applyPersianKeyPattern(QStringLiteral("custom"), storedCustomMapping());
+    } else {
+        applyPersianKeyPattern(m_persianKeyPatternId);
+    }
 }
 
 void KeySignatureSettingsModel::clearPersianKey()
@@ -176,10 +287,32 @@ void KeySignatureSettingsModel::clearPersianKey()
     applyPersianKeyPattern(QString());
 }
 
+void KeySignatureSettingsModel::setCustomVariant(int letterIndex, int variantIndexIdx)
+{
+    if (letterIndex < 0 || letterIndex >= (int)kLetters.size()) {
+        return;
+    }
+    if (variantIndexIdx < 0 || variantIndexIdx >= (int)kVariants.size()) {
+        return;
+    }
+
+    QVariantMap mapping = storedCustomMapping();
+    mapping.insert(QString::fromStdString(kLetters[letterIndex]), variantIndexIdx);
+    applyPersianKeyPattern(QStringLiteral("custom"), mapping);
+}
+
+void KeySignatureSettingsModel::resetCustomKey()
+{
+    applyPersianKeyPattern(QStringLiteral("custom"), QVariantMap());
+}
+
 void KeySignatureSettingsModel::refreshPersianKey()
 {
     m_persianKeyPatternId = persianKeyPatternId();
+    setCustomVariantsFromPattern(m_persianKeyPatternId, m_persianKeyPatternId == QLatin1String("custom")
+                                 ? storedCustomMapping() : QVariantMap());
     emit persianKeyPatternIndexChanged();
+    emit customVariantsChanged();
 }
 
 QString KeySignatureSettingsModel::persianKeyPatternId() const
@@ -193,10 +326,50 @@ QString KeySignatureSettingsModel::persianKeyPatternId() const
     const QString json = muse::settings()->value(kPersianKeyByScore).toQString();
     const QJsonObject obj = QJsonDocument::fromJson(json.toUtf8()).object();
     const QString id = obj.value(scoreId).toString();
+    if (id == QLatin1String("custom")) {
+        return id;
+    }
     return engraving::persianKeySigById(id.toStdString()) ? id : QString();
 }
 
-void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
+QVariantMap KeySignatureSettingsModel::storedCustomMapping() const
+{
+    auto project = context()->currentProject();
+    const QString scoreId = project ? project->displayName() : QString();
+    if (scoreId.isEmpty()) {
+        return QVariantMap();
+    }
+    const QString json = muse::settings()->value(kPersianKeyCustom).toQString();
+    const QJsonObject root = QJsonDocument::fromJson(json.toUtf8()).object();
+    return root.value(scoreId).toObject().toVariantMap();
+}
+
+void KeySignatureSettingsModel::setCustomVariantsFromPattern(const QString& patternId, const QVariantMap& customMapping)
+{
+    QVariantList variants;
+    variants.reserve(int(kLetters.size()));
+    std::map<std::string, std::string> patternNotes;
+    if (patternId != QLatin1String("custom")) {
+        if (const engraving::PersianKeySig* p = engraving::persianKeySigById(patternId.toStdString())) {
+            for (const engraving::PersianKeySigNote& n : p->notes) {
+                patternNotes[n.letter] = n.variant;
+            }
+        }
+    }
+    for (const std::string& letter : kLetters) {
+        int v = 0;
+        if (patternId == QLatin1String("custom")) {
+            v = customMapping.value(QString::fromStdString(letter), 0).toInt();
+            v = std::clamp(v, 0, int(kVariants.size()) - 1);
+        } else if (patternNotes.count(letter)) {
+            v = variantIndex(patternNotes.at(letter));
+        }
+        variants << v;
+    }
+    m_customVariants = variants;
+}
+
+void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId, const QVariantMap& customMapping)
 {
     mu::notation::INotationPtr n = context()->currentNotation();
     if (!n || !n->elements()) {
@@ -207,12 +380,22 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
         return;
     }
 
-    const engraving::PersianKeySig* pattern = patternId.isEmpty() ? nullptr
-                                              : engraving::persianKeySigById(patternId.toStdString());
+    const bool isCustom = (patternId == QLatin1String("custom"));
+    const engraving::PersianKeySig* pattern = (!isCustom && !patternId.isEmpty())
+                                              ? engraving::persianKeySigById(patternId.toStdString())
+                                              : nullptr;
 
+    // Build the letter -> variant mapping.
     std::vector<engraving::PersianKeySigNote> mapping;
     if (pattern) {
         mapping = pattern->notes;
+    } else if (isCustom) {
+        for (int i = 0; i < (int)kLetters.size(); ++i) {
+            const int v = customMapping.value(QString::fromStdString(kLetters[i]), 0).toInt();
+            if (v > 0 && v < (int)kVariants.size()) {
+                mapping.push_back({ kLetters[i], kVariants[v] });
+            }
+        }
     }
 
     // Use the cents the user has set in the Persian tuner, when available
@@ -227,12 +410,15 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
         return engraving::defaultPersianVariantCents(variant);
     };
 
-    n->undoStack()->prepareChanges(
-        pattern ? muse::TranslatableString("undoableAction", "Apply Persian key signature %1").arg(
-            muse::String::fromStdString(pattern->nameEn))
-        : muse::TranslatableString("undoableAction", "Clear Persian key signature"));
-    engraving::EditPersianKeySig::applyScoreKeySig(sc, mapping, centsFor);
-    n->undoStack()->commitChanges();
+    const muse::TranslatableString actionName = !mapping.empty()
+                                                ? muse::TranslatableString("undoableAction", "Apply Persian key signature")
+                                                : muse::TranslatableString("undoableAction", "Clear Persian key signature");
+
+    n->undoStack()->transaction(actionName, [&](mu::engraving::Transaction&) {
+        // Write the real key signature on the staff AND respell/retune
+        // the notes (what you see is what you hear).
+        engraving::EditPersianKeySig::applyKeySigToStaves(sc->masterScore(), mapping, centsFor);
+    });
     n->notationChanged().send(muse::RectF());
 
     // Keep the pattern in the shared settings (the Persian tuner shows it too)
@@ -248,6 +434,21 @@ void KeySignatureSettingsModel::applyPersianKeyPattern(const QString& patternId)
         }
         muse::settings()->setSharedValue(kPersianKeyByScore,
                                          muse::Val(QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact))));
+
+        if (isCustom) {
+            const QString customJson = muse::settings()->value(kPersianKeyCustom).toQString();
+            QJsonObject customRoot = QJsonDocument::fromJson(customJson.toUtf8()).object();
+            QJsonObject entry;
+            for (int i = 0; i < (int)kLetters.size(); ++i) {
+                const int v = customMapping.value(QString::fromStdString(kLetters[i]), 0).toInt();
+                if (v > 0) {
+                    entry.insert(QString::fromStdString(kLetters[i]), v);
+                }
+            }
+            customRoot.insert(scoreId, entry);
+            muse::settings()->setSharedValue(kPersianKeyCustom,
+                                             muse::Val(QString::fromUtf8(QJsonDocument(customRoot).toJson(QJsonDocument::Compact))));
+        }
     }
 
     refreshPersianKey();
