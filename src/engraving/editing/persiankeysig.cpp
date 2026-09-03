@@ -42,6 +42,43 @@
 namespace mu::engraving {
 namespace {
 //---------------------------------------------------------
+//   letterDegree
+///    Note letter ("C" .. "B") to a C-major scale degree (0..6).
+///    Returns -1 for unknown letters.
+//---------------------------------------------------------
+
+int letterDegree(const std::string& letter)
+{
+    static const std::map<std::string, int> kDegrees = {
+        { "C", 0 }, { "D", 1 }, { "E", 2 }, { "F", 3 }, { "G", 4 }, { "A", 5 }, { "B", 6 }
+    };
+    auto it = kDegrees.find(letter);
+    return it == kDegrees.end() ? -1 : it->second;
+}
+
+//---------------------------------------------------------
+//   variantSymId
+///    Persian variant to the accidental symbol used in a custom
+///    key signature. Natural letters stay implicit (noSym).
+//---------------------------------------------------------
+
+SymId variantSymId(const std::string& variant)
+{
+    if (variant == "flat") {
+        return SymId::accidentalFlat;
+    }
+    if (variant == "sharp") {
+        return SymId::accidentalSharp;
+    }
+    if (variant == "sori") {
+        return SymId::accidentalSori;
+    }
+    if (variant == "koron") {
+        return SymId::accidentalKoron;
+    }
+    return SymId::noSym;
+}
+//---------------------------------------------------------
 //   variantAccidentalType
 //---------------------------------------------------------
 
@@ -244,6 +281,51 @@ double defaultPersianVariantCents(const std::string& variant)
         return 100.0;
     }
     return 0.0;
+}
+
+//---------------------------------------------------------
+//   persianKeySigToKeySigEvent
+//---------------------------------------------------------
+
+KeySigEvent persianKeySigToKeySigEvent(const PersianKeySig& keySig)
+{
+    KeySigEvent e;
+    e.setConcertKey(Key::C);
+    e.setCustom(true);
+    for (const PersianKeySigNote& n : keySig.notes) {
+        const int degree = letterDegree(n.letter);
+        if (degree < 0) {
+            continue;
+        }
+        const SymId sym = variantSymId(n.variant);
+        if (sym == SymId::noSym) {
+            // natural letters are implicit in a key signature
+            continue;
+        }
+        CustDef c;
+        c.degree = degree;
+        c.sym = sym;
+        e.customKeyDefs().push_back(c);
+    }
+    return e;
+}
+
+//---------------------------------------------------------
+//   persianKeySigFromKeySigEvent
+//---------------------------------------------------------
+
+const PersianKeySig* persianKeySigFromKeySigEvent(const KeySigEvent& event)
+{
+    if (!event.custom() || event.isAtonal()) {
+        return nullptr;
+    }
+    for (const PersianKeySig& keySig : predefinedPersianKeySigs()) {
+        const KeySigEvent candidate = persianKeySigToKeySigEvent(keySig);
+        if (candidate == event) {
+            return &keySig;
+        }
+    }
+    return nullptr;
 }
 
 void EditPersianKeySig::applyNoteVariant(Note* note, const std::string& variant, double targetCents)

@@ -30,6 +30,7 @@
 #include "../editing/editstaffbrackets.h"
 #include "../editing/editclef.h"
 #include "../editing/editkeysig.h"
+#include "../editing/persiankeysig.h"
 #include "../editing/editmeasures.h"
 #include "../editing/editmeasurerepeat.h"
 #include "../editing/editstaff.h"
@@ -1620,6 +1621,12 @@ EngravingItem* Measure::drop(Transaction& tx, EditData& data)
             for (Staff* s : score()->staves()) {
                 EditKeySig::undoChangeKeySig(tx, score(), s, tick(), k);
             }
+        }
+
+        // A Persian key signature also respells and retunes the notes so that
+        // the koron / sori / flat accidentals actually sound (like the tuner).
+        if (const PersianKeySig* persian = persianKeySigFromKeySigEvent(k)) {
+            EditPersianKeySig::applyScoreKeySig(score()->masterScore(), persian->notes);
         }
 
         break;

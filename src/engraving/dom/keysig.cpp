@@ -31,6 +31,7 @@
 #include "part.h"
 
 #include "editing/editkeysig.h"
+#include "editing/persiankeysig.h"
 #include "editing/transaction/transaction.h"
 #include "editing/transpose.h"
 
@@ -101,6 +102,14 @@ EngravingItem* KeySig::drop(Transaction& tx, EditData& data)
             EditKeySig::undoChangeKeySig(tx, score(), s, tick(), k);
         }
     }
+
+    // A Persian key signature also respells and retunes the notes so that the
+    // koron / sori / flat accidentals actually sound (like the Persian tuner).
+    // Done after the key has been written, inside the same open transaction.
+    if (const PersianKeySig* persian = persianKeySigFromKeySigEvent(k)) {
+        EditPersianKeySig::applyScoreKeySig(score()->masterScore(), persian->notes);
+    }
+
     return this;
 }
 

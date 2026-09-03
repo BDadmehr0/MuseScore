@@ -1335,16 +1335,27 @@ void SingleLayout::layout(KeySig* item, const Context& ctx)
                 KeySym ks;
                 ks.line = line;
                 ks.xPos = xpos;
-                // for quadruple sharp use two double sharps
-                if (cd.sym == SymId::accidentalTripleSharp) {
-                    ks.sym = SymId::accidentalDoubleSharp;
-                    sym = SymId::accidentalDoubleSharp;
-                } else {
-                    ks.sym = key > 0 ? SymId::accidentalSharp : SymId::accidentalFlat;
+                // Persian (koron / sori) quarter-tone accidentals are standalone
+                // glyphs and must be drawn alone, not prefixed by a sharp/flat
+                const bool standalone = cd.sym == SymId::accidentalKoron || cd.sym == SymId::accidentalSori;
+                if (standalone) {
+                    ks.sym = cd.sym;
                     sym = cd.sym;
+                    ldata->keySymbols.push_back(ks);
+                    // the symbol was already pushed; suppress the generic pass below
+                    sym = SymId::accidentalNatural;
+                } else {
+                    // for quadruple sharp use two double sharps
+                    if (cd.sym == SymId::accidentalTripleSharp) {
+                        ks.sym = SymId::accidentalDoubleSharp;
+                        sym = SymId::accidentalDoubleSharp;
+                    } else {
+                        ks.sym = key > 0 ? SymId::accidentalSharp : SymId::accidentalFlat;
+                        sym = cd.sym;
+                    }
+                    ldata->keySymbols.push_back(ks);
+                    xpos += Spatium(key < 0 ? 0.7 : 1); // flats closer
                 }
-                ldata->keySymbols.push_back(ks);
-                xpos += Spatium(key < 0 ? 0.7 : 1); // flats closer
             }
             // create symbol; natural only if is user defined
             if (sym != SymId::accidentalNatural || sym == cd.sym) {
