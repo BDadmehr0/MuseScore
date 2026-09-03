@@ -56,12 +56,6 @@ static const ActionCode SHOW_IRREGULAR_CODE("show-irregular");
 static const ActionCode TOGGLE_CONCERT_PITCH_CODE("concert-pitch");
 static const ActionCode TOGGLE_AUTOMATION_CODE("toggle-automation");
 
-static const ActionCode NOTATION_ADD_FLAT_CODE("notation/add-flat");
-static const ActionCode NOTATION_ADD_NATURAL_CODE("notation/add-natural");
-static const ActionCode NOTATION_ADD_SHARP_CODE("notation/add-sharp");
-static const ActionCode NOTATION_ADD_KORON_CODE("notation/add-koron");
-static const ActionCode NOTATION_ADD_SORI_CODE("notation/add-sori");
-
 // avoid translation duplication
 
 // //: This is comment for translator
@@ -366,42 +360,6 @@ const UiActionList NotationUiActions::s_actions = {
              mu::context::CTX_NOTATION_FOCUSED,
              TranslatableString("action", "Up octave"),
              TranslatableString("action", "Move pitch up an octave")
-             ),
-
-    // Accidentals (top "symbols" row): the four Western signs plus the
-    // two Persian quarter-tone signs (koron / sori)
-    UiAction(NOTATION_ADD_FLAT_CODE,
-             mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_FOCUSED,
-             TranslatableString("action", "Add flat"),
-             TranslatableString("action", "Add accidental: flat"),
-             IconCode::Code::FLAT
-             ),
-    UiAction(NOTATION_ADD_NATURAL_CODE,
-             mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_FOCUSED,
-             TranslatableString("action", "Add natural"),
-             TranslatableString("action", "Add accidental: natural"),
-             IconCode::Code::NATURAL
-             ),
-    UiAction(NOTATION_ADD_KORON_CODE,
-             mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_FOCUSED,
-             TranslatableString("action", "Add koron"),
-             TranslatableString("action", "Add accidental: koron (Persian, quarter tone down)")
-             ),
-    UiAction(NOTATION_ADD_SORI_CODE,
-             mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_FOCUSED,
-             TranslatableString("action", "Add sori"),
-             TranslatableString("action", "Add accidental: sori (Persian, quarter tone up)")
-             ),
-    UiAction(NOTATION_ADD_SHARP_CODE,
-             mu::context::UiCtxProjectOpened,
-             mu::context::CTX_NOTATION_FOCUSED,
-             TranslatableString("action", "Add sharp"),
-             TranslatableString("action", "Add accidental: sharp"),
-             IconCode::Code::SHARP
              ),
     UiAction("double-duration",
              mu::context::UiCtxProjectOpened,
@@ -2556,6 +2514,20 @@ const UiActionList NotationUiActions::s_actions = {
              TranslatableString("action", "Toggle accidental: double-sharp"),
              IconCode::Code::SHARP_DOUBLE
              ),
+    //! NOTE Persian quarter-tone accidentals. The icon font has no glyphs for them,
+    //! so the note input bar draws the SMuFL symbols itself (see NoteInputBar.qml)
+    UiAction("koron",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Toggle koron"),
+             TranslatableString("action", "Toggle accidental: koron (Persian, quarter tone down)")
+             ),
+    UiAction("sori",
+             mu::context::UiCtxProjectOpened,
+             mu::context::CTX_NOTATION_OPENED,
+             TranslatableString("action", "Toggle sori"),
+             TranslatableString("action", "Toggle accidental: sori (Persian, quarter tone up)")
+             ),
     UiAction("tie",
              mu::context::UiCtxProjectOpened,
              mu::context::CTX_NOTATION_OPENED,
@@ -3147,7 +3119,9 @@ AccidentalType NotationUiActions::actionAccidentalType(const ActionCode& actionC
         { "flat", AccidentalType::FLAT },
         { "nat", AccidentalType::NATURAL },
         { "sharp", AccidentalType::SHARP },
-        { "sharp2", AccidentalType::SHARP2 }
+        { "sharp2", AccidentalType::SHARP2 },
+        { "koron", AccidentalType::KORON },
+        { "sori", AccidentalType::SORI }
     };
 
     AccidentalType type = AccidentalType::NONE;
@@ -3244,7 +3218,9 @@ const muse::ui::ToolConfig& NotationUiActions::defaultNoteInputBarConfig()
             { "", true },
             { "flat2", true },
             { "flat", true },
+            { "koron", true },
             { "nat", true },
+            { "sori", true },
             { "sharp", true },
             { "sharp2", true },
             { "", true },

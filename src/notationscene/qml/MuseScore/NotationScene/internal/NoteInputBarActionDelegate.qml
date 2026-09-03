@@ -60,13 +60,32 @@ Item {
             }
         }
 
-        StyledIconLabel {
+        Item {
             Layout.alignment: Qt.AlignLeft
 
             Layout.preferredWidth: 36
             Layout.preferredHeight: 36
 
-            iconCode: Boolean(root.item) ? root.item.icon : IconCode.NONE
+            readonly property string actionCode: Boolean(root.item) ? root.item.id() : ""
+
+            //! NOTE The Persian accidentals (koron, sori) have no icon in the icon font,
+            //! so the SMuFL glyph is shown for them instead
+            readonly property bool useAccidentalGlyph: Boolean(root.item) && root.item.icon === IconCode.NONE
+                                                       && (actionCode === "koron" || actionCode === "sori")
+
+            StyledIconLabel {
+                anchors.fill: parent
+
+                visible: !parent.useAccidentalGlyph
+                iconCode: Boolean(root.item) ? root.item.icon : IconCode.NONE
+            }
+
+            AccidentalGlyphLabel {
+                anchors.fill: parent
+
+                visible: parent.useAccidentalGlyph
+                actionCode: parent.actionCode
+            }
         }
 
         StyledTextLabel {

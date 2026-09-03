@@ -147,7 +147,9 @@ static const std::map<Command, AccidentalType> ACCIDENTAL_COMMANDS = {
     { TOGGLE_FLAT_COMMAND, AccidentalType::FLAT },
     { TOGGLE_NAT_COMMAND, AccidentalType::NATURAL },
     { TOGGLE_SHARP_COMMAND, AccidentalType::SHARP },
-    { TOGGLE_SHARP2_COMMAND, AccidentalType::SHARP2 }
+    { TOGGLE_SHARP2_COMMAND, AccidentalType::SHARP2 },
+    { TOGGLE_KORON_COMMAND, AccidentalType::KORON },
+    { TOGGLE_SORI_COMMAND, AccidentalType::SORI }
 };
 
 static const std::vector<Command> ADD_COMMANDS = {

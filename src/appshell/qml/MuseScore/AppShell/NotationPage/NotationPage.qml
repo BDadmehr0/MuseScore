@@ -23,7 +23,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 
 import Muse.Ui
 import Muse.UiComponents
@@ -142,30 +141,11 @@ DockPage {
 
             navigationSection: root.topToolbarKeyNavSec
 
-            // The notation toolbar holds a single content component. The
-            // "symbols" row (flat / koron / natural / sori / sharp - the two
-            // Persian quarter-tone signs next to the Western ones) is kept in
-            // the SAME toolbar by wrapping both items in one RowLayout, instead
-            // of adding AccidentalSymbolsBar as a second direct child (which
-            // DockToolBar's single-content default property rejects).
-            RowLayout {
-                spacing: 2
+            NotationToolBar {
+                isCompactMode: notationToolBar.isCompact
 
-                NotationToolBar {
-                    Layout.fillWidth: false
-
-                    isCompactMode: notationToolBar.isCompact
-
-                    navigationPanel.section: notationToolBar.navigationSection
-                    navigationPanel.order: 2
-                }
-
-                AccidentalSymbolsBar {
-                    Layout.alignment: Qt.AlignVCenter
-
-                    navigationPanel.section: notationToolBar.navigationSection
-                    navigationPanel.order: 3
-                }
+                navigationPanel.section: notationToolBar.navigationSection
+                navigationPanel.order: 2
             }
         },
 
