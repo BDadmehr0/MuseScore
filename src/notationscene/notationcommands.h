@@ -151,6 +151,10 @@ inline static const muse::rcommand::Command TOGGLE_NAT_COMMAND("command://notati
 inline static const muse::rcommand::Command TOGGLE_SHARP_COMMAND("command://notation/toggle-sharp");
 inline static const muse::rcommand::Command TOGGLE_SHARP2_COMMAND("command://notation/toggle-sharp2");
 
+// Persian quarter-tone accidentals (note input toggles)
+inline static const muse::rcommand::Command TOGGLE_KORON_COMMAND("command://notation/toggle-koron");
+inline static const muse::rcommand::Command TOGGLE_SORI_COMMAND("command://notation/toggle-sori");
+
 inline static const muse::rcommand::Command ADD_SHARP2_COMMAND("command://notation/add-sharp2");
 inline static const muse::rcommand::Command ADD_SHARP_COMMAND("command://notation/add-sharp");
 inline static const muse::rcommand::Command ADD_NAT_COMMAND("command://notation/add-nat");

@@ -236,6 +236,8 @@ void NotationActionController::init()
     registerCommand(TOGGLE_NAT_COMMAND, [this]() { toggleAccidental(AccidentalType::NATURAL); });
     registerCommand(TOGGLE_SHARP_COMMAND, [this]() { toggleAccidental(AccidentalType::SHARP); });
     registerCommand(TOGGLE_SHARP2_COMMAND, [this]() { toggleAccidental(AccidentalType::SHARP2); });
+    registerCommand(TOGGLE_KORON_COMMAND, [this]() { toggleAccidental(AccidentalType::KORON); });
+    registerCommand(TOGGLE_SORI_COMMAND, [this]() { toggleAccidental(AccidentalType::SORI); });
 
     registerCommand(ADD_SHARP2_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::SHARP2, PlayMode::PlayNote);
     registerCommand(ADD_SHARP_COMMAND, &Interaction::changeAccidental, mu::engraving::AccidentalType::SHARP, PlayMode::PlayNote);
@@ -677,11 +679,6 @@ void NotationActionController::init()
             { "notation-move-left", MOVE_LEFT_COMMAND, {} },
             { "notation-move-right-quickly", MOVE_RIGHT_QUICKLY_COMMAND, {} },
             { "notation-move-left-quickly", MOVE_LEFT_QUICKLY_COMMAND, {} },
-            { "notation/add-flat", ADD_FLAT_COMMAND, {} },
-            { "notation/add-natural", ADD_NAT_COMMAND, {} },
-            { "notation/add-sharp", ADD_SHARP_COMMAND, {} },
-            { "notation/add-koron", ADD_KORON_COMMAND, {} },
-            { "notation/add-sori", ADD_SORI_COMMAND, {} },
             { "pitch-up", PITCH_UP_COMMAND, {} },
             { "pitch-down", PITCH_DOWN_COMMAND, {} },
             { "pitch-up-octave", PITCH_UP_OCTAVE_COMMAND, {} },
@@ -729,6 +726,8 @@ void NotationActionController::init()
             { "nat", TOGGLE_NAT_COMMAND, {} },
             { "sharp", TOGGLE_SHARP_COMMAND, {} },
             { "sharp2", TOGGLE_SHARP2_COMMAND, {} },
+            { "koron", TOGGLE_KORON_COMMAND, {} },
+            { "sori", TOGGLE_SORI_COMMAND, {} },
             { "sharp2-post", ADD_SHARP2_COMMAND, {} },
             { "sharp-post", ADD_SHARP_COMMAND, {} },
             { "nat-post", ADD_NAT_COMMAND, {} },

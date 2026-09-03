@@ -517,6 +517,22 @@ static const std::vector<CommandInfo> s_commandInfos = {
         InputSchema(),
         Decoration(IconCode::Code::SHARP_DOUBLE)
     },
+    //! NOTE Persian quarter-tone accidentals. There is no icon for them in the icon font,
+    //! the note input bar renders the SMuFL glyph instead (see NoteInputBar.qml)
+    CommandInfo{
+        TOGGLE_KORON_COMMAND,
+        TranslatableString("action", "Toggle koron"),
+        TranslatableString("action", "Toggle accidental: koron (Persian, quarter tone down)"),
+        InputSchema(),
+        Decoration()
+    },
+    CommandInfo{
+        TOGGLE_SORI_COMMAND,
+        TranslatableString("action", "Toggle sori"),
+        TranslatableString("action", "Toggle accidental: sori (Persian, quarter tone up)"),
+        InputSchema(),
+        Decoration()
+    },
 
     CommandInfo{
         ADD_SHARP2_COMMAND,

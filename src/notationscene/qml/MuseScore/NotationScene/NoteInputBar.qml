@@ -127,6 +127,23 @@ Item {
             icon: Boolean(item) ? item.icon : IconCode.NONE
             iconFont: ui.theme.toolbarIconsFont
 
+            //! NOTE Some accidentals (the Persian koron and sori) have no icon in the icon font,
+            //! so for them the SMuFL glyph is drawn instead of the regular icon
+            readonly property bool useAccidentalGlyph: Boolean(item) && item.icon === IconCode.NONE
+                                                       && (item.code === "koron" || item.code === "sori")
+
+            contentItem: btn.useAccidentalGlyph ? accidentalGlyphComponent : null
+
+            Component {
+                id: accidentalGlyphComponent
+
+                AccidentalGlyphLabel {
+                    actionCode: Boolean(btn.item) ? btn.item.code : ""
+                    iconPixelSize: btn.iconFont.pixelSize
+                    color: btn.iconColor
+                }
+            }
+
             toolTipTitle: Boolean(item) ? item.title : ""
             toolTipDescription: Boolean(item) ? item.description : ""
             toolTipShortcut: Boolean(item) ? item.shortcuts : ""
