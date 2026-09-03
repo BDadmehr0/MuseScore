@@ -28,6 +28,9 @@
 #include "dom/accidental.h"
 #include "dom/chord.h"
 #include "dom/factory.h"
+#include "dom/key.h"
+#include "dom/keysig.h"
+#include "dom/masterscore.h"
 #include "dom/measure.h"
 #include "dom/note.h"
 #include "dom/pitchspelling.h"
@@ -35,7 +38,9 @@
 #include "dom/segment.h"
 #include "dom/staff.h"
 
+#include "editkeysig.h"
 #include "editnote.h"
+#include "transaction/transaction.h"
 
 #include "log.h"
 
@@ -78,6 +83,25 @@ SymId variantSymId(const std::string& variant)
     }
     return SymId::noSym;
 }
+
+//---------------------------------------------------------
+//   variantForSym
+///    Inverse of variantSymId for the custom-key symbols that
+///    can appear in a Persian key signature. Empty string for
+///    everything else.
+//---------------------------------------------------------
+
+std::string variantForSym(SymId sym)
+{
+    switch (sym) {
+    case SymId::accidentalFlat: return "flat";
+    case SymId::accidentalSharp: return "sharp";
+    case SymId::accidentalKoron: return "koron";
+    case SymId::accidentalSori: return "sori";
+    default: return std::string();
+    }
+}
+
 //---------------------------------------------------------
 //   variantAccidentalType
 //---------------------------------------------------------
@@ -220,31 +244,91 @@ std::string noteVariant(const Note* note)
 
 const std::vector<PersianKeySig>& predefinedPersianKeySigs()
 {
+    // The twelve classical Persian modal systems (7 dastgah + 5 avaz).
+    //
+    // The accidental sets follow the traditional fixed-letter notation
+    // (Vaziri) used in printed scores: flats followed by korons in the key
+    // signature. Koron is used for the characteristic quarter-flat
+    // degrees; degrees that are a whole semitone lower are notated flat
+    // (e.g. in Homayun all three altered degrees are flats, while in Shur
+    // the neutral sixth degree is written La koron). LilyPond's persian.ly
+    // tunings (shur, shurk, esfahan, mokhalefsegah, chahargah, mahur) give
+    // the same scale steps.
+    //
+    // Playback does not rely on the signs in the key signature: when a
+    // pattern is applied every note of the score is respelled with the
+    // matching sign and retuned (flat -100c, koron -50c, sori +50c,
+    // sharp +100c, overridable per letter/sign in the Persian tuner).
     static const std::vector<PersianKeySig> kKeySigs = {
-        // Rast: no accidentals (all notes natural)
+        // Rast-Panjgah / Mahur: no accidentals (all notes natural),
+        // major-like. Also used as the "clear" state.
         {
-            "rast", "راست", "Rast",
+            "rast", "راست پنج‌گاه / ماهور", "Rast / Mahur",
             {}
         },
-        // Do Koron: La koron + Re koron
+        // Shur (on Do): Mi flat, La koron, Si flat. Nava, Dashti,
+        // Abu'ata, Bayat-e Tork and Bayat-e Kord use the same signature
+        // (they are transpositions/avaz of the same scale type).
         {
-            "do-koron", "چارگاه دو کرن", "Do Koron",
-            { { "A", "koron" }, { "D", "koron" } }
+            "shur", "شور", "Shur (on Do)",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
         },
-        // Fa: Si flat, Re koron, Sol koron
         {
-            "fa", "چارگاه فا", "Fa",
-            { { "B", "flat" }, { "D", "koron" }, { "G", "koron" } }
+            "nava", "نوا", "Nava",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
         },
-        // Segah: Re koron + Sol koron
         {
-            "segah", "چارگاه سگاه", "Segah",
-            { { "D", "koron" }, { "G", "koron" } }
+            "dashti", "دشتی", "Dashti",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
         },
-        // Homayun: La koron, Re koron, Sol koron
         {
-            "homayun", "چارگاه همایون", "Homayun",
-            { { "A", "koron" }, { "D", "koron" }, { "G", "koron" } }
+            "abuata", "ابوعطا", "Abu'ata",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
+        },
+        {
+            "bayate-tork", "بیات ترک", "Bayat-e Tork",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
+        },
+        {
+            "bayate-kord", "بیات کرد", "Bayat-e Kord",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
+        },
+        // Afshari (Avaz of Shur): Shur signature plus Sol koron (shurk).
+        {
+            "afshari", "افشاری", "Afshari",
+            { { "E", "flat" }, { "G", "koron" }, { "A", "koron" }, { "B", "flat" } }
+        },
+        // Homayun (on Do): Mi flat, La flat, Si flat (all three flats;
+        // the koron forms appear in gushehs/modulations).
+        {
+            "homayun", "همایون", "Homayun (on Do)",
+            { { "E", "flat" }, { "A", "flat" }, { "B", "flat" } }
+        },
+        // Bayat-e Esfahan (Avaz of Homayun, on Do): Mi flat, La koron.
+        {
+            "esfahan", "بیات اصفهان", "Bayat-e Esfahan (on Do)",
+            { { "E", "flat" }, { "A", "koron" } }
+        },
+        // Segah (on Do): Mi flat, La koron, Si koron (mokhalef segah).
+        {
+            "segah", "سه‌گاه", "Segah (on Do)",
+            { { "E", "flat" }, { "A", "koron" }, { "B", "koron" } }
+        },
+        // Chahargah (on Do): Re koron, La koron.
+        {
+            "chahargah", "چهارگاه", "Chahargah (on Do)",
+            { { "D", "koron" }, { "A", "koron" } }
+        },
+        // ---- Legacy ids kept for settings saved by earlier versions ----
+        // "Do Koron" was the Chahargah pattern (Re koron, La koron).
+        {
+            "do-koron", "چهارگاه (دو کرن)", "Do Koron (Chahargah)",
+            { { "D", "koron" }, { "A", "koron" } }
+        },
+        // "Fa" was an early Shur/Homayun-style pattern.
+        {
+            "fa", "فا (شور)", "Fa (Shur)",
+            { { "B", "flat" }, { "E", "flat" }, { "A", "koron" } }
         },
     };
     return kKeySigs;
@@ -259,6 +343,11 @@ const PersianKeySig* persianKeySigById(const std::string& id)
         }
     }
     return nullptr;
+}
+
+bool isLegacyPersianKeySigId(const std::string& id)
+{
+    return id == "do-koron" || id == "fa";
 }
 
 bool isValidPersianVariant(const std::string& variant)
@@ -287,27 +376,117 @@ double defaultPersianVariantCents(const std::string& variant)
 //   persianKeySigToKeySigEvent
 //---------------------------------------------------------
 
-KeySigEvent persianKeySigToKeySigEvent(const PersianKeySig& keySig)
+KeySigEvent persianKeySigToKeySigEvent(const std::vector<PersianKeySigNote>& mapping)
 {
     KeySigEvent e;
     e.setConcertKey(Key::C);
     e.setCustom(true);
-    for (const PersianKeySigNote& n : keySig.notes) {
-        const int degree = letterDegree(n.letter);
-        if (degree < 0) {
+
+    // Order the symbols like a traditional Persian key signature:
+    // flats first, then korons, then soris/sharps; within a group the
+    // western circle-of-fifths order (B, E, A, D, G, C, F).
+    static const std::vector<std::string> kOrder
+        = { "B", "E", "A", "D", "G", "C", "F" };
+    auto rank = [](const std::string& variant) -> int {
+        if (variant == "flat") {
+            return 0;
+        }
+        if (variant == "koron") {
+            return 1;
+        }
+        if (variant == "sharp") {
+            return 2;
+        }
+        if (variant == "sori") {
+            return 3;
+        }
+        return 4;
+    };
+
+    std::vector<PersianKeySigNote> notes;
+    for (const PersianKeySigNote& n : mapping) {
+        if (letterDegree(n.letter) < 0 || !isValidPersianVariant(n.variant)) {
             continue;
         }
+        if (n.variant == "natural") {
+            continue; // natural letters are implicit in a key signature
+        }
+        notes.push_back(n);
+    }
+    std::sort(notes.begin(), notes.end(), [&](const PersianKeySigNote& a, const PersianKeySigNote& b) {
+        const int ra = rank(a.variant);
+        const int rb = rank(b.variant);
+        if (ra != rb) {
+            return ra < rb;
+        }
+        const auto ia = std::find(kOrder.begin(), kOrder.end(), a.letter);
+        const auto ib = std::find(kOrder.begin(), kOrder.end(), b.letter);
+        return ia < ib;
+    });
+
+    for (const PersianKeySigNote& n : notes) {
         const SymId sym = variantSymId(n.variant);
         if (sym == SymId::noSym) {
-            // natural letters are implicit in a key signature
             continue;
         }
         CustDef c;
-        c.degree = degree;
+        c.degree = letterDegree(n.letter);
         c.sym = sym;
         e.customKeyDefs().push_back(c);
     }
     return e;
+}
+
+KeySigEvent persianKeySigToKeySigEvent(const PersianKeySig& keySig)
+{
+    return persianKeySigToKeySigEvent(keySig.notes);
+}
+
+std::vector<PersianKeySigNote> persianKeySigNotesFromMapping(const std::map<std::string, std::string>& mapping)
+{
+    std::vector<PersianKeySigNote> notes;
+    for (const auto& p : mapping) {
+        if (letterDegree(p.first) < 0 || !isValidPersianVariant(p.second)) {
+            continue;
+        }
+        if (p.second == "natural") {
+            continue;
+        }
+        notes.push_back({ p.first, p.second });
+    }
+    return notes;
+}
+
+bool isPersianKeySigEvent(const KeySigEvent& event)
+{
+    if (!event.custom() || event.isAtonal()) {
+        return false;
+    }
+    for (const CustDef& c : event.customKeyDefs()) {
+        if (variantForSym(c.sym).empty()) {
+            return false;
+        }
+    }
+    return !event.customKeyDefs().empty();
+}
+
+std::vector<PersianKeySigNote> persianKeySigNotesFromEvent(const KeySigEvent& event)
+{
+    std::vector<PersianKeySigNote> notes;
+    if (!event.custom()) {
+        return notes;
+    }
+    static const char* kLetters[] = { "C", "D", "E", "F", "G", "A", "B" };
+    for (const CustDef& c : event.customKeyDefs()) {
+        if (c.degree < 0 || c.degree > 6) {
+            continue;
+        }
+        const std::string variant = variantForSym(c.sym);
+        if (!variant.empty()) {
+            notes.push_back({ kLetters[c.degree], variant });
+        }
+    }
+    return notes;
 }
 
 //---------------------------------------------------------
@@ -422,5 +601,43 @@ int EditPersianKeySig::applyScoreKeySig(Score* score, const std::vector<PersianK
     }
 
     return changed;
+}
+
+//---------------------------------------------------------
+//   EditPersianKeySig::applyKeySigToStaves
+//    Writes the Persian key signature (flat/koron/sori/sharp signs)
+//    at the beginning of every staff and retunes the notes. The same
+//    path is used by the palette drop, the Properties panel and the
+//    Persian tuner panel, so what you see on the staff always matches
+//    what you hear.
+//---------------------------------------------------------
+
+int EditPersianKeySig::applyKeySigToStaves(MasterScore* masterScore, const std::vector<PersianKeySigNote>& mapping,
+                                           const std::function<double(const std::string&, const std::string&)>& centsFor)
+{
+    if (!masterScore) {
+        return 0;
+    }
+
+    // 1. Write the key signature event at tick 0 of every staff.
+    const KeySigEvent keyEvent = mapping.empty() ? [] {
+        // a plain (all-natural) key signature restores C major
+        KeySigEvent e;
+        e.setConcertKey(Key::C);
+        return e;
+    }() : persianKeySigToKeySigEvent(mapping);
+
+    if (Measure* firstMeasure = masterScore->tick2measure(Fraction(0, 1))) {
+        Transaction& tx = masterScore->transactionManager()->currentOrDummyTransaction();
+        for (Staff* staff : masterScore->staves()) {
+            if (staff) {
+                EditKeySig::undoChangeKeySig(tx, masterScore, staff, firstMeasure->tick(), keyEvent);
+            }
+        }
+    }
+
+    // 2. Respell and retune the notes so that koron/sori/flat/sharp
+    //    signs actually sound.
+    return applyScoreKeySig(masterScore, mapping, centsFor);
 }
 } // namespace mu::engraving
