@@ -77,6 +77,17 @@ int variantIndex(const std::string& variant)
     }
     return 0;
 }
+
+std::vector<const mu::engraving::PersianKeySig*> visiblePersianKeyPatterns()
+{
+    std::vector<const mu::engraving::PersianKeySig*> result;
+    for (const mu::engraving::PersianKeySig& keySig : mu::engraving::predefinedPersianKeySigs()) {
+        if (!mu::engraving::isLegacyPersianKeySigId(keySig.id)) {
+            result.push_back(&keySig);
+        }
+    }
+    return result;
+}
 }
 
 KeySignatureSettingsModel::KeySignatureSettingsModel(QObject* parent, const muse::modularity::ContextPtr& iocCtx,
@@ -157,17 +168,6 @@ QVariantList KeySignatureSettingsModel::persianKeyPatterns() const
         rows << row;
     }
     return rows;
-}
-
-static std::vector<const engraving::PersianKeySig*> visiblePersianKeyPatterns()
-{
-    std::vector<const engraving::PersianKeySig*> result;
-    for (const engraving::PersianKeySig& keySig : engraving::predefinedPersianKeySigs()) {
-        if (!engraving::isLegacyPersianKeySigId(keySig.id)) {
-            result.push_back(&keySig);
-        }
-    }
-    return result;
 }
 
 int KeySignatureSettingsModel::persianKeyPatternIndex() const
