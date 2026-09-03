@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+#include "dom/key.h"
+
 namespace mu::engraving {
 class Note;
 class Score;
@@ -70,6 +72,18 @@ bool isValidPersianVariant(const std::string& variant);
 //! Default target cents (relative to the natural of the letter) for a variant:
 //! flat -100, koron -50, natural 0, sori +50, sharp +100.
 double defaultPersianVariantCents(const std::string& variant);
+
+//! Build a custom KeySigEvent for a predefined Persian key signature so that
+//! it can be used as a real (drag-and-drop) key signature on the staff.
+//! The base key is C; only the altered letters get a CustDef entry
+//! (natural letters stay implicit). Koron / sori / flat / sharp symbols are
+//! used for the corresponding variants.
+KeySigEvent persianKeySigToKeySigEvent(const PersianKeySig& keySig);
+
+//! Return the predefined Persian key signature whose custom KeySigEvent
+//! matches \a event (by its CustDef list), or nullptr when \a event does not
+//! correspond to any predefined Persian key.
+const PersianKeySig* persianKeySigFromKeySigEvent(const KeySigEvent& event);
 
 class EditPersianKeySig
 {

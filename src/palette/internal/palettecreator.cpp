@@ -78,6 +78,7 @@
 #include "engraving/dom/staff.h"
 #include "engraving/dom/stafftext.h"
 #include "engraving/dom/stringtunings.h"
+#include "engraving/editing/persiankeysig.h"
 #include "engraving/dom/systemtext.h"
 #include "engraving/dom/tapping.h"
 #include "engraving/dom/tempotext.h"
@@ -322,6 +323,20 @@ PalettePtr PaletteCreator::newKeySigPalette()
     auto nk = Factory::makeKeySig(paletteScore()->dummy()->segment());
     nk->setKeySigEvent(nke);
     sp->appendElement(nk, TConv::userName(Key::C, true));
+
+    // Persian key signatures (charghah) - draggable like the Western ones
+    for (const PersianKeySig& keySig : predefinedPersianKeySigs()) {
+        if (keySig.notes.empty()) {
+            // an all-natural Persian key looks identical to C major; skip it
+            continue;
+        }
+        KeySigEvent ke = persianKeySigToKeySigEvent(keySig);
+        auto kk = Factory::makeKeySig(paletteScore()->dummy()->segment());
+        kk->setKeySigEvent(ke);
+        const QString name = QString::fromStdString(keySig.nameFa) + QStringLiteral(" (")
+                             + QString::fromStdString(keySig.nameEn) + QStringLiteral(")");
+        sp->appendElement(kk, name);
+    }
 
     return sp;
 }
