@@ -455,6 +455,79 @@ AccidentalVal Measure::findAccidental(const Note* note) const
 }
 
 //---------------------------------------------------------
+//   findCentOffset
+///   Microtonal (cent) offset in effect at the note position,
+///   coming from a Persian koron / sori in the key signature or
+///   from an explicit koron / sori earlier in the measure on the
+///   same line (mirrors the state used by Note::updateAccidental).
+//---------------------------------------------------------
+
+double Measure::findCentOffset(const Note* note) const
+{
+    const Chord* chord = note->chord();
+    const Staff* vStaff = chord->score()->staff(chord->vStaffIdx());
+    AccidentalState tversatz;
+    tversatz.init(vStaff->keySigEvent(tick()));
+
+    const TrackRange trackRange = vStaff->part()->trackRange();
+    track_idx_t mainTrack = chord->vStaffIdx() * VOICES;
+
+    auto lineCents = [](const Note* n, double inherited) -> double {
+        if (const Accidental* a = n->accidental()) {
+            return Accidental::isMicrotonal(a->accidentalType()) ? Accidental::subtype2centOffset(a->accidentalType()) : 0.0;
+        }
+        return inherited;
+    };
+
+    for (const Segment* segment = first(); segment; segment = segment->next()) {
+        if (segment->isKeySigType()) {
+            const KeySig* ks = toKeySig(segment->element(mainTrack));
+            if (!ks) {
+                continue;
+            }
+            tversatz.init(vStaff->keySigEvent(segment->tick()));
+        } else if (segment->segmentType() == SegmentType::ChordRest) {
+            for (track_idx_t track = trackRange.startTrack; track < trackRange.endTrack; ++track) {
+                const EngravingItem* e = segment->element(track);
+                if (!e || !e->isChord()) {
+                    continue;
+                }
+                const Chord* crd = toChord(e);
+                for (const Chord* chord1 : crd->graceNotes()) {
+                    if (chord1->vStaffIdx() != chord->vStaffIdx()) {
+                        continue;
+                    }
+                    for (const Note* note1 : chord1->notes()) {
+                        const int line = absStep(note1->tpc(), note1->epitch());
+                        if (note == note1) {
+                            return tversatz.centOffset(line);
+                        }
+                        if (note1->tieBack() && !note1->accidental()) {
+                            continue;
+                        }
+                        tversatz.setCentOffset(line, lineCents(note1, tversatz.centOffset(line)));
+                    }
+                }
+                if (crd->vStaffIdx() != chord->vStaffIdx()) {
+                    continue;
+                }
+                for (const Note* note1 : crd->notes()) {
+                    const int line = absStep(note1->tpc(), note1->epitch());
+                    if (note == note1) {
+                        return tversatz.centOffset(line);
+                    }
+                    if (note1->tieBack() && !note1->accidental()) {
+                        continue;
+                    }
+                    tversatz.setCentOffset(line, lineCents(note1, tversatz.centOffset(line)));
+                }
+            }
+        }
+    }
+    return 0.0;
+}
+
+//---------------------------------------------------------
 //   findAccidental
 ///   Compute accidental state at segment/staffIdx for
 ///   relative staff line.

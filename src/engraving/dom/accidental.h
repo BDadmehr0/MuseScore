@@ -325,6 +325,8 @@ private:
 };
 
 extern AccidentalVal sym2accidentalVal(SymId id);
+//! microtonal cent offset carried by an accidental symbol (e.g. koron / sori)
+extern double sym2centOffset(SymId id);
 }
 
 #ifndef NO_QT_SUPPORT

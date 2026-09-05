@@ -25,6 +25,8 @@
 #include "engraving/editing/persiankeysig.h"
 #include "engraving/types/types.h"
 
+#include "realfn.h"
+
 #include "notation/inotation.h"
 #include "notation/inotationelements.h"
 #include "notation/inotationinteraction.h"
@@ -649,6 +651,13 @@ PersianTunerPanelModel::NoteIdentity PersianTunerPanelModel::identityOf(const No
             ident.variant = QStringLiteral("flat");
         } else if (fifths > 0) {
             ident.variant = QStringLiteral("sharp");
+        } else if (note->centOffsetInherited()
+                   && muse::RealIsEqual(note->centOffset(), Accidental::subtype2centOffset(AccidentalType::KORON))) {
+            // koron given by the key signature (no sign in front of the note)
+            ident.variant = QStringLiteral("koron");
+        } else if (note->centOffsetInherited()
+                   && muse::RealIsEqual(note->centOffset(), Accidental::subtype2centOffset(AccidentalType::SORI))) {
+            ident.variant = QStringLiteral("sori");
         } else {
             ident.variant = QStringLiteral("natural");
         }
@@ -692,6 +701,9 @@ double PersianTunerPanelModel::effectiveTarget(const Note* note) const
             contribution = -100.0;
         } else if (ident.variant == QLatin1String("sharp")) {
             contribution = 100.0;
+        } else if (note->centOffsetInherited()) {
+            // koron / sori inherited from the key signature
+            contribution = note->centOffset();
         }
     }
     return round1(contribution + note->tuning());

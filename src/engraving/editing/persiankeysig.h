@@ -47,9 +47,13 @@ class KeySigEvent;
 // variants (flat / koron / sori / sharp) applied to note
 // letters. Letters not present in the pattern are natural.
 //
-// Examples (from the Persian tuner project spec):
-//   - "Do Koron": La koron + Re koron   (A koron, D koron)
-//   - "Fa":       Si flat, Re koron, Sol koron
+// The predefined patterns are the tunings of LilyPond's persian.ly
+// (shur, shurk, esfahan, mokhalefsegah, chahargah, mahur, delkashMahur),
+// e.g. chahargah = Re koron + La koron (D koron, A koron).
+//
+// The signs of the key signature are the default for the notes: a note on
+// an altered line inherits the koron / sori / flat (also in playback) and
+// is written without a sign of its own - see AccidentalState::centOffset().
 //---------------------------------------------------------
 
 /// A single entry of a Persian key signature pattern.

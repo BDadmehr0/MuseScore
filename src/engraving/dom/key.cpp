@@ -321,6 +321,7 @@ static const int ACC_STATE_SHARP = int(AccidentalVal::SHARP) - int(AccidentalVal
 void AccidentalState::init(Key key)
 {
     memset(m_state, ACC_STATE_NATURAL, MAX_ACC_STATE);
+    m_centOffset.fill(0.0);
     // The numerical value of key tells us the number of sharps (or flats, if negative) in the key signature
     if (key > 0 && key <= Key::MAX) {
         for (int i = 0; i < int(key); ++i) {
@@ -361,12 +362,18 @@ void AccidentalState::init(const KeySigEvent& keySig)
             SymId sym = keySig.symInKey(d.sym, d.degree);
             int degree = keySig.degInKey(d.degree);
             AccidentalVal a = sym2accidentalVal(sym);
+            // Persian koron / sori (and other microtonal symbols) carry a cent
+            // offset on top of the semitone value; keep it in the state so that
+            // notes on this line inherit it - just like they inherit a flat or
+            // a sharp - without needing an explicit accidental in front.
+            const double cents = sym2centOffset(sym);
             for (int octave = 0; octave < (11 * 7); octave += 7) {
                 int i = degree + octave;
                 if (i >= MAX_ACC_STATE) {
                     break;
                 }
                 m_state[i] = static_cast<uint8_t>(int(a) - int(AccidentalVal::MIN));
+                m_centOffset[i] = cents;
             }
         }
     }
@@ -415,6 +422,22 @@ void AccidentalState::setForceRestateAccidental(int line, bool forceRestate)
 {
     assert(line >= MIN_ACC_STATE && line < MAX_ACC_STATE);
     m_forceRestateAccidental[line] = forceRestate;
+}
+
+double AccidentalState::centOffset(int line) const
+{
+    if (line < MIN_ACC_STATE || line >= MAX_ACC_STATE) {
+        return 0.0;
+    }
+    return m_centOffset[line];
+}
+
+void AccidentalState::setCentOffset(int line, double cents)
+{
+    if (line < MIN_ACC_STATE || line >= MAX_ACC_STATE) {
+        return;
+    }
+    m_centOffset[line] = cents;
 }
 
 //---------------------------------------------------------

@@ -121,10 +121,17 @@ public:
     void setAccidentalVal(int line, AccidentalVal val, bool tieContext = false);
     void setForceRestateAccidental(int line, bool forceRestate);
 
+    //! Microtonal (cent) offset currently in effect on \a line, in addition
+    //! to the semitone value: set by a Persian koron / sori in the key
+    //! signature or by an explicit koron / sori earlier in the measure.
+    double centOffset(int line) const;
+    void setCentOffset(int line, double cents);
+
 private:
 
     uint8_t m_state[MAX_ACC_STATE] = {};      // (0 -- 4) | TIE_CONTEXT
     std::array<bool, MAX_ACC_STATE> m_forceRestateAccidental;
+    std::array<double, MAX_ACC_STATE> m_centOffset = {};
 };
 
 struct Interval;

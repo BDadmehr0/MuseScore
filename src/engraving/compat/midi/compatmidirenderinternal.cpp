@@ -244,10 +244,10 @@ static void playNote(EventsHolder& events, const Note* note, PlayNoteParams para
     }
 
     events[params.channel].emplace(std::max(0, params.onTime - params.offset), ev);
-    Accidental* acc = note->accidental();
-    if (acc) {
-        AccidentalType type = acc->accidentalType();
-        double cents = Accidental::subtype2centOffset(type);
+    // microtonal offset: from the note's own accidental, or inherited from a
+    // (Persian koron / sori) key signature
+    {
+        double cents = note->centOffset();
         if (!muse::RealIsNull(cents)) {
             double pwValue = cents / 100.0 * (double)g_wheelSpec.mLimit / (double)g_wheelSpec.mAmplitude;
             PitchWheelRenderer::PitchWheelFunction func;
