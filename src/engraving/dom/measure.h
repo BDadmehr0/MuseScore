@@ -309,6 +309,7 @@ public:
     void adjustToLen(Fraction, bool appendRestsIfNecessary = true);
 
     AccidentalVal findAccidental(const Note*) const;
+    double findCentOffset(const Note*) const;
     AccidentalVal findAccidental(const Segment* s, staff_idx_t staffIdx, int line, bool& error) const;
     void checkMultiVoices(staff_idx_t staffIdx);
     bool hasVoice(track_idx_t track) const;

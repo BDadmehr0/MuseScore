@@ -4303,9 +4303,17 @@ static void writePitch(XmlWriter& xml, const Note* const note, const bool useDru
         default:                                             break;
         }
     }
+    // Persian koron / sori: explicit sign or inherited from the key
+    // signature. The Persian tuner stores the fine tuning of the note as a
+    // complement of the sign, so the two add up to the sounding alteration.
+    const bool persianQuarterTone = note->centOffsetInherited()
+                                    || (acc && (acc->accidentalType() == AccidentalType::KORON
+                                                || acc->accidentalType() == AccidentalType::SORI));
     // Override accidental with explicit note tuning
     double tuning = note->tuning();
-    if (!muse::RealIsNull(tuning)) {
+    if (persianQuarterTone) {
+        microtonalAlter = (note->centOffset() + tuning) / 100.0;
+    } else if (!muse::RealIsNull(tuning)) {
         microtonalAlter = tuning / 100.0;
     }
     if (alter || microtonalAlter) {

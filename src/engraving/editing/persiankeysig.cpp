@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "realfn.h"
+
 #include "dom/accidental.h"
 #include "dom/chord.h"
 #include "dom/factory.h"
@@ -150,9 +152,26 @@ double variantContribution(const std::string& variant)
 }
 
 //---------------------------------------------------------
+//   variantSignCents
+///    Microtonal cents carried by the sign of \a variant
+///    itself (koron -67, sori +33, 0 for the others).
+//---------------------------------------------------------
+
+double variantSignCents(const std::string& variant)
+{
+    if (variant == "sori") {
+        return Accidental::subtype2centOffset(AccidentalType::SORI);
+    }
+    if (variant == "koron") {
+        return Accidental::subtype2centOffset(AccidentalType::KORON);
+    }
+    return 0.0;
+}
+
+//---------------------------------------------------------
 //   ensureAccidentalElement
 ///    Make sure \a note carries an explicit \a type accidental
-///    element, creating it when missing.
+///    element, creating or replacing it when needed.
 //---------------------------------------------------------
 
 void ensureAccidentalElement(Score* score, Note* note, AccidentalType type)
@@ -162,7 +181,12 @@ void ensureAccidentalElement(Score* score, Note* note, AccidentalType type)
         return;
     }
     if (acc) {
-        return; // changeAccidental() has already handled the replacement
+        Accidental* a = acc->clone();
+        a->setParent(note);
+        a->setAccidentalType(type);
+        a->setRole(AccidentalRole::USER);
+        score->undoChangeElement(acc, a);
+        return;
     }
     Accidental* acc1 = Factory::createAccidental(note);
     acc1->setParent(note);
@@ -172,23 +196,32 @@ void ensureAccidentalElement(Score* score, Note* note, AccidentalType type)
 }
 
 //---------------------------------------------------------
-//   noteNeedsNaturalSign
-///    True when a natural sounding \a note still needs an
-///    explicit natural sign to be correct on the page (the
-///    key signature or earlier accidentals of the measure
-///    alter its line).
+//   noteNeedsSign
+///    True when \a note, spelled as \a variant, needs an
+///    explicit sign in front of it: the state of its line
+///    (key signature + earlier accidentals of the measure,
+///    including a koron / sori of a Persian key) differs from
+///    the variant. A note that just follows the key signature
+///    gets no sign - the key signature is the default.
 //---------------------------------------------------------
 
-bool noteNeedsNaturalSign(const Note* note)
+bool noteNeedsSign(const Note* note, const std::string& variant)
 {
-    if (tpc2alter(note->tpc()) != AccidentalVal::NATURAL) {
+    const AccidentalVal targetVal = Accidental::subtype2value(variantAccidentalType(variant));
+    const double targetCents = variantSignCents(variant);
+    if (tpc2alter(note->tpc()) != targetVal) {
         return true;
     }
-    if (const Measure* m = note->findMeasure()) {
-        return m->findAccidental(note) != AccidentalVal::NATURAL;
+    const Measure* m = note->findMeasure();
+    if (!m) {
+        return false;
     }
-    return false;
+    if (m->findAccidental(note) != targetVal) {
+        return true;
+    }
+    return !muse::RealIsEqual(m->findCentOffset(note), targetCents);
 }
+
 
 //---------------------------------------------------------
 //   noteLetter
@@ -238,98 +271,89 @@ std::string noteVariant(const Note* note)
     if (fifths > 0) {
         return "sharp";
     }
+    // no sign of its own: a koron / sori may be inherited from the key
+    // signature (or from an earlier sign in the measure)
+    if (const Measure* m = note->findMeasure()) {
+        const double cents = m->findCentOffset(note);
+        if (muse::RealIsEqual(cents, Accidental::subtype2centOffset(AccidentalType::KORON))) {
+            return "koron";
+        }
+        if (muse::RealIsEqual(cents, Accidental::subtype2centOffset(AccidentalType::SORI))) {
+            return "sori";
+        }
+    }
     return "natural";
 }
 } // namespace
 
 const std::vector<PersianKeySig>& predefinedPersianKeySigs()
 {
-    // The twelve classical Persian modal systems (7 dastgah + 5 avaz).
+    // Persian tunings, taken one-to-one from LilyPond's persian.ly
+    // (Kees van den Doel / Werner Lemberg), all given on Do (C):
     //
-    // The accidental sets follow the traditional fixed-letter notation
-    // (Vaziri) used in printed scores: flats followed by korons in the key
-    // signature. Koron is used for the characteristic quarter-flat
-    // degrees; degrees that are a whole semitone lower are notated flat
-    // (e.g. in Homayun all three altered degrees are flats, while in Shur
-    // the neutral sixth degree is written La koron). LilyPond's persian.ly
-    // tunings (shur, shurk, esfahan, mokhalefsegah, chahargah, mahur) give
-    // the same scale steps.
+    //   shur          : Re koron, Mi bemol, La bemol, Si bemol
+    //   shurk         : shur with a koron 5th degree (Sol koron)
+    //   esfahan       : Mi bemol, La koron
+    //   mokhalefsegah : Mi bemol, La koron, Si koron
+    //   chahargah     : Re koron, La koron
+    //   mahur         : no accidentals
+    //   delkashMahur  : La koron, Si bemol
     //
-    // Playback does not rely on the signs in the key signature: when a
-    // pattern is applied every note of the score is respelled with the
-    // matching sign and retuned (flat -100c, koron -50c, sori +50c,
-    // sharp +100c, overridable per letter/sign in the Persian tuner).
+    // Dashti, Abu'ata, Bayat-e Tork and Nava use \shur; Afshari and Segah
+    // use \shurk; Homayun is \esfahan (a fifth apart); Rast-Panjgah is
+    // \mahur. The key signature only lists the altered letters - letters
+    // that are not listed stay natural.
+    //
+    // The signs of the key signature are the default for the notes: a note
+    // on an altered line inherits the koron / sori / flat of the key (in
+    // playback too) and is written without its own sign. Cents: flat -100,
+    // koron -50, sori +50, sharp +100 by default; persian.ly tunes koron
+    // to -60 and sori to +40 cents - both are adjustable per letter/sign
+    // in the Persian tuner.
     static const std::vector<PersianKeySig> kKeySigs = {
-        // Rast-Panjgah / Mahur: no accidentals (all notes natural),
-        // major-like. Also used as the "clear" state.
         {
-            "rast", "راست پنج‌گاه / ماهور", "Rast / Mahur",
-            {}
-        },
-        // Shur (on Do): Mi flat, La koron, Si flat. Nava, Dashti,
-        // Abu'ata, Bayat-e Tork and Bayat-e Kord use the same signature
-        // (they are transpositions/avaz of the same scale type).
-        {
-            "shur", "شور", "Shur (on Do)",
-            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
+            "shur", "شور (دشتی، ابوعطا، بیات ترک، نوا)", "Shur",
+            { { "D", "koron" }, { "E", "flat" }, { "A", "flat" }, { "B", "flat" } }
         },
         {
-            "nava", "نوا", "Nava",
-            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
+            "shurk", "شور با سل کرن (افشاری، سه‌گاه)", "Shur-k (Afshari, Segah)",
+            { { "D", "koron" }, { "E", "flat" }, { "G", "koron" }, { "A", "flat" }, { "B", "flat" } }
         },
         {
-            "dashti", "دشتی", "Dashti",
-            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
-        },
-        {
-            "abuata", "ابوعطا", "Abu'ata",
-            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
-        },
-        {
-            "bayate-tork", "بیات ترک", "Bayat-e Tork",
-            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
-        },
-        {
-            "bayate-kord", "بیات کرد", "Bayat-e Kord",
-            { { "E", "flat" }, { "A", "koron" }, { "B", "flat" } }
-        },
-        // Afshari (Avaz of Shur): Shur signature plus Sol koron (shurk).
-        {
-            "afshari", "افشاری", "Afshari",
-            { { "E", "flat" }, { "G", "koron" }, { "A", "koron" }, { "B", "flat" } }
-        },
-        // Homayun (on Do): Mi flat, La flat, Si flat (all three flats;
-        // the koron forms appear in gushehs/modulations).
-        {
-            "homayun", "همایون", "Homayun (on Do)",
-            { { "E", "flat" }, { "A", "flat" }, { "B", "flat" } }
-        },
-        // Bayat-e Esfahan (Avaz of Homayun, on Do): Mi flat, La koron.
-        {
-            "esfahan", "بیات اصفهان", "Bayat-e Esfahan (on Do)",
+            "esfahan", "اصفهان (همایون)", "Esfahan (Homayun)",
             { { "E", "flat" }, { "A", "koron" } }
         },
-        // Segah (on Do): Mi flat, La koron, Si koron (mokhalef segah).
         {
-            "segah", "سه‌گاه", "Segah (on Do)",
+            "mokhalefsegah", "مخالف سه‌گاه", "Mokhalef-e Segah",
             { { "E", "flat" }, { "A", "koron" }, { "B", "koron" } }
         },
-        // Chahargah (on Do): Re koron, La koron.
         {
-            "chahargah", "چهارگاه", "Chahargah (on Do)",
+            "chahargah", "چهارگاه", "Chahargah",
             { { "D", "koron" }, { "A", "koron" } }
         },
-        // ---- Legacy ids kept for settings saved by earlier versions ----
-        // "Do Koron" was the Chahargah pattern (Re koron, La koron).
         {
-            "do-koron", "چهارگاه (دو کرن)", "Do Koron (Chahargah)",
-            { { "D", "koron" }, { "A", "koron" } }
+            "mahur", "ماهور / راست پنج‌گاه", "Mahur (Rast-Panjgah)",
+            {}
         },
-        // "Fa" was an early Shur/Homayun-style pattern.
         {
-            "fa", "فا (شور)", "Fa (Shur)",
-            { { "B", "flat" }, { "E", "flat" }, { "A", "koron" } }
+            "delkash-mahur", "دلکش ماهور", "Delkash Mahur",
+            { { "A", "koron" }, { "B", "flat" } }
         },
+        // ---- Legacy ids kept only to resolve settings saved by earlier
+        //      versions (hidden from the palette and the panels) ----
+        { "rast", "راست پنج‌گاه", "Rast-Panjgah", {} },
+        { "nava", "نوا", "Nava", { { "D", "koron" }, { "E", "flat" }, { "A", "flat" }, { "B", "flat" } } },
+        { "dashti", "دشتی", "Dashti", { { "D", "koron" }, { "E", "flat" }, { "A", "flat" }, { "B", "flat" } } },
+        { "abuata", "ابوعطا", "Abu'ata", { { "D", "koron" }, { "E", "flat" }, { "A", "flat" }, { "B", "flat" } } },
+        { "bayate-tork", "بیات ترک", "Bayat-e Tork", { { "D", "koron" }, { "E", "flat" }, { "A", "flat" }, { "B", "flat" } } },
+        { "bayate-kord", "بیات کرد", "Bayat-e Kord", { { "D", "koron" }, { "E", "flat" }, { "A", "flat" }, { "B", "flat" } } },
+        { "afshari", "افشاری", "Afshari",
+          { { "D", "koron" }, { "E", "flat" }, { "G", "koron" }, { "A", "flat" }, { "B", "flat" } } },
+        { "segah", "سه‌گاه", "Segah",
+          { { "D", "koron" }, { "E", "flat" }, { "G", "koron" }, { "A", "flat" }, { "B", "flat" } } },
+        { "homayun", "همایون", "Homayun", { { "E", "flat" }, { "A", "koron" } } },
+        { "do-koron", "چهارگاه (دو کرن)", "Do Koron (Chahargah)", { { "D", "koron" }, { "A", "koron" } } },
+        { "fa", "فا (شور)", "Fa (Shur)", { { "B", "flat" }, { "E", "flat" }, { "A", "koron" } } },
     };
     return kKeySigs;
 }
@@ -347,7 +371,15 @@ const PersianKeySig* persianKeySigById(const std::string& id)
 
 bool isLegacyPersianKeySigId(const std::string& id)
 {
-    return id == "do-koron" || id == "fa";
+    static const char* kLegacy[] = {
+        "rast", "nava", "dashti", "abuata", "bayate-tork", "bayate-kord", "afshari", "segah", "homayun", "do-koron", "fa"
+    };
+    for (const char* legacy : kLegacy) {
+        if (id == legacy) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool isValidPersianVariant(const std::string& variant)
@@ -518,40 +550,36 @@ void EditPersianKeySig::applyNoteVariant(Note* note, const std::string& variant,
     }
 
     Score* score = note->score();
-    Accidental* acc = note->accidental();
-    const AccidentalType current = acc ? acc->accidentalType() : AccidentalType::NONE;
+    const AccidentalType target = variantAccidentalType(variant);
+    const AccidentalVal targetVal = Accidental::subtype2value(target);
 
-    if (variant == "natural") {
-        // Restore the natural pitch when the note is altered
-        if (tpc2alter(note->tpc()) != AccidentalVal::NATURAL) {
-            EditNote::changeAccidental(score, note, AccidentalType::NATURAL);
-        }
-        // changeAccidental() keeps a leftover non-natural element when it
-        // cannot prove the sign is needed (e.g. Bb with an explicit flat
-        // in Bb major) - drop it, we want a natural note here
-        Accidental* leftover = note->accidental();
-        if (leftover && leftover->accidentalType() != AccidentalType::NATURAL) {
-            score->undoRemoveElement(leftover);
-        }
-        // An explicit natural sign is only needed while the surrounding
-        // state (key signature / earlier accidentals) is not natural
-        const bool needSign = noteNeedsNaturalSign(note);
-        acc = note->accidental();
-        if (acc && !needSign) {
-            score->undoRemoveElement(acc);
-        } else if (!acc && needSign) {
-            ensureAccidentalElement(score, note, AccidentalType::NATURAL);
-        }
-    } else {
-        const AccidentalType target = variantAccidentalType(variant);
-        if (current != target) {
-            EditNote::changeAccidental(score, note, target);
-        }
-        ensureAccidentalElement(score, note, target);
+    // 1. Pitch / spelling: make the note sound and be spelled as the
+    //    variant (changeAccidental() also takes care of linked notes).
+    const Accidental* acc = note->accidental();
+    const AccidentalType current = acc ? acc->accidentalType() : AccidentalType::NONE;
+    const bool currentIsMicrotonal = acc && Accidental::isMicrotonal(current);
+    if (tpc2alter(note->tpc()) != targetVal || currentIsMicrotonal != Accidental::isMicrotonal(target)
+        || (currentIsMicrotonal && current != target)) {
+        EditNote::changeAccidental(score, note, target);
     }
 
-    // The accidental element contributes variantContribution(variant)
-    // cents by itself; the note tuning completes the target.
+    // 2. Sign: only when the key signature (or an earlier accidental of
+    //    the measure) does not already provide the variant on this line.
+    //    With a Persian key signature the koron / sori / flat of the key
+    //    is the default - the notes must not repeat it.
+    //    Evaluate the state *without* the note's own sign, since an
+    //    explicit sign always matches the target by construction.
+    const bool needSign = noteNeedsSign(note, variant);
+    Accidental* own = note->accidental();
+    if (needSign) {
+        ensureAccidentalElement(score, note, target);
+    } else if (own) {
+        score->undoRemoveElement(own);
+    }
+
+    // 3. Playback: the sign (explicit or inherited from the key) already
+    //    contributes variantContribution(variant) cents; the note tuning
+    //    completes the target.
     const double required = targetCents - variantContribution(variant);
     note->undoChangeProperty(Pid::TUNING, required);
 }
@@ -586,10 +614,11 @@ int EditPersianKeySig::applyScoreKeySig(Score* score, const std::vector<PersianK
                 const std::string variant = letterVariant.count(letter) ? letterVariant.at(letter) : std::string("natural");
                 const double requiredTuning = targetCents(letter, variant) - variantContribution(variant);
                 bool upToDate = (noteVariant(note) == variant) && (std::abs(note->tuning() - requiredTuning) < 0.05);
-                if (upToDate && variant == "natural") {
-                    // a natural note may still require an explicit
-                    // natural sign (key signature / earlier accidentals)
-                    upToDate = (note->accidental() != nullptr) == noteNeedsNaturalSign(note);
+                if (upToDate) {
+                    // the sign must be present exactly when the key
+                    // signature / earlier accidentals do not already give
+                    // the variant (no doubled koron / flat signs)
+                    upToDate = (note->accidental() != nullptr) == noteNeedsSign(note, variant);
                 }
                 if (upToDate) {
                     continue;

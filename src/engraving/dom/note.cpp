@@ -717,6 +717,7 @@ Note::Note(const Note& n, bool link)
     m_deadNote          = n.m_deadNote;
     m_pitch             = n.m_pitch;
     m_centOffset        = n.m_centOffset;
+    m_centOffsetInherited = n.m_centOffsetInherited;
     m_tpc[0]            = n.m_tpc[0];
     m_tpc[1]            = n.m_tpc[1];
     m_dotsHidden        = n.m_dotsHidden;
@@ -1402,6 +1403,7 @@ void Note::add(EngravingItem* e)
     case ElementType::ACCIDENTAL:
         m_accidental = toAccidental(e);
         m_centOffset = Accidental::subtype2centOffset(toAccidental(e)->accidentalType());
+        m_centOffsetInherited = false;
         break;
     case ElementType::TEXTLINE:
     case ElementType::NOTELINE:
@@ -1468,6 +1470,7 @@ void Note::remove(EngravingItem* e)
     case ElementType::ACCIDENTAL:
         m_accidental = 0;
         m_centOffset = 0;
+        m_centOffsetInherited = false;
         break;
 
     case ElementType::TEXTLINE:
@@ -2203,21 +2206,41 @@ void Note::updateAccidental(AccidentalState* as)
 
     int absLine = absStep(tpc(), epitch());
 
+    // Microtonal (cent) offset the line already carries from the key
+    // signature or from an earlier koron / sori in this measure. A note on
+    // such a line inherits it - exactly like a note inherits a flat or a
+    // sharp of a Western key signature - without an explicit sign.
+    const double inheritedCents = as->centOffset(absLine);
+    const bool hasMicrotonalAcc = m_accidental && Accidental::isMicrotonal(m_accidental->accidentalType());
+
     // Ensure m_centOffset and microtonal accidental match (they can mismatch when switching from TAB)
-    if (muse::RealIsNull(m_centOffset)) {
-        if (m_accidental && !muse::RealIsNull(Accidental::subtype2centOffset(m_accidental->accidentalType()))) {
+    if (hasMicrotonalAcc) {
+        const double accCents = Accidental::subtype2centOffset(m_accidental->accidentalType());
+        if (muse::RealIsNull(m_centOffset)) {
             score()->undoRemoveElement(m_accidental);
+        } else if (!muse::RealIsEqual(accCents, m_centOffset)) {
+            m_accidental->undoChangeProperty(Pid::ACCIDENTAL_TYPE, static_cast<int>(Accidental::centOffset2Subtype(m_centOffset)));
         }
-    } else {
-        if (m_accidental) {
-            bool correct = muse::RealIsEqual(Accidental::subtype2centOffset(m_accidental->accidentalType()), m_centOffset);
-            if (!correct) {
-                m_accidental->undoChangeProperty(Pid::ACCIDENTAL_TYPE, static_cast<int>(Accidental::centOffset2Subtype(m_centOffset)));
-            }
-        } else {
-            AccidentalType accType = Accidental::value2MicrotonalSubtype(tpc2alter(tpc()), quarterToneOffset());
-            updateLine();
-            EditNote::changeAccidental(score(), this, accType);
+    } else if (!m_centOffsetInherited && !muse::RealIsNull(m_centOffset) && !muse::RealIsEqual(m_centOffset, inheritedCents)) {
+        // the note carries its own microtonal offset (e.g. set on a TAB
+        // staff) that the key does not provide: it needs a sign
+        AccidentalType accType = Accidental::value2MicrotonalSubtype(tpc2alter(tpc()), quarterToneOffset());
+        updateLine();
+        EditNote::changeAccidental(score(), this, accType);
+    }
+
+    // A microtonal sign that merely restates the current state of the line
+    // (koron / sori already given by the key signature or earlier in the
+    // measure) is redundant when it was generated automatically; an
+    // explicit user sign is kept as a courtesy accidental.
+    if (m_accidental && Accidental::isMicrotonal(m_accidental->accidentalType())
+        && m_accidental->role() == AccidentalRole::AUTO
+        && muse::RealIsEqual(Accidental::subtype2centOffset(m_accidental->accidentalType()), inheritedCents)) {
+        bool lineError = false;
+        const AccidentalVal lineVal = as->accidentalVal(absLine, lineError);
+        if (!lineError && Accidental::subtype2value(m_accidental->accidentalType()) == lineVal
+            && !as->forceRestateAccidental(absLine)) {
+            score()->undoRemoveElement(m_accidental);
         }
     }
 
@@ -2282,6 +2305,15 @@ void Note::updateAccidental(AccidentalState* as)
                 }
             }
         }
+
+        // Microtonal state of the line: an explicit (non microtonal) sign
+        // in front of the note - natural, flat, sharp - cancels a koron /
+        // sori inherited from the key signature; otherwise the note takes
+        // the offset of the line (so it also plays as koron / sori).
+        const double cents = m_accidental ? 0.0 : as->centOffset(absLine);
+        m_centOffset = cents;
+        m_centOffsetInherited = !muse::RealIsNull(cents);
+        as->setCentOffset(absLine, cents);
     } else {
         // microtonal accidentals playback as naturals
         // in 1.X, they had no effect on accidental state of measure
@@ -2290,6 +2322,9 @@ void Note::updateAccidental(AccidentalState* as)
         // this is an incompatible change, but better to break it for 2.0 than wait until later
         AccidentalVal accVal = Accidental::subtype2value(m_accidental->accidentalType());
         as->setAccidentalVal(absLine, accVal, m_tieBack != 0 && m_accidental == 0);
+        // ... and the koron / sori now applies to the rest of the measure
+        // on this line, like a Western accidental does
+        as->setCentOffset(absLine, Accidental::subtype2centOffset(m_accidental->accidentalType()));
     }
 
     as->setForceRestateAccidental(absLine, false);
@@ -3093,7 +3128,9 @@ PropertyValue Note::getProperty(Pid propertyId) const
     case Pid::PITCH:
         return pitch();
     case Pid::CENT_OFFSET:
-        return centOffset();
+        // an offset inherited from a (Persian) key signature is recomputed
+        // at layout time; only an offset owned by the note is a property
+        return m_centOffsetInherited ? 0.0 : centOffset();
     case Pid::TPC1:
         return m_tpc[0];
     case Pid::TPC2:

@@ -240,6 +240,20 @@ AccidentalVal sym2accidentalVal(SymId id)
 }
 
 //---------------------------------------------------------
+//   sym2centOffset
+//---------------------------------------------------------
+
+double sym2centOffset(SymId id)
+{
+    for (const Acc& a : ACC_LIST) {
+        if (a.sym == id) {
+            return a.centOffset;
+        }
+    }
+    return 0.0;
+}
+
+//---------------------------------------------------------
 //   Accidental
 //---------------------------------------------------------
 
