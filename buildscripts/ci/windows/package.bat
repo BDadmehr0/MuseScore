@@ -24,10 +24,15 @@ SHIFT
 IF NOT "%1" == "" GOTO GETOPTS
 
 : Try get from env
-IF %BUILD_MODE% == "" ( SET /p BUILD_MODE=<%ARTIFACTS_DIR%\env\build_mode.env)
-
-: Check args
-IF %BUILD_MODE% == "" ( ECHO "error: not set BUILD_MODE" & GOTO END_ERROR)
+IF "%BUILD_MODE%" == "" (
+    IF NOT EXIST "%ARTIFACTS_DIR%\env\build_mode.env" (
+        ECHO "error: %ARTIFACTS_DIR%\env\build_mode.env not found"
+        ECHO "Generate it first with: bash buildscripts/ci/tools/make_build_mode_env.sh -e workflow_dispatch -m stable"
+        GOTO END_ERROR
+    )
+    SET /p BUILD_MODE=<%ARTIFACTS_DIR%\env\build_mode.env
+)
+IF "%BUILD_MODE%" == "" ( ECHO "error: BUILD_MODE is empty" & GOTO END_ERROR)
 IF NOT %TARGET_PROCESSOR_BITS% == 64 (
     IF NOT %TARGET_PROCESSOR_BITS% == 32 (
         ECHO "error: not set TARGET_PROCESSOR_BITS, must be 32 or 64, current TARGET_PROCESSOR_BITS: %TARGET_PROCESSOR_BITS%"
@@ -71,10 +76,21 @@ IF %DO_SIGN% == ON (
 
 SET SIGN="buildscripts\ci\windows\sign.bat"
 
+FOR %%f IN (build_version.env build_number.env build_branch.env build_revision.env) DO (
+    IF NOT EXIST "%ARTIFACTS_DIR%\env\%%f" (
+        ECHO "error: %ARTIFACTS_DIR%\env\%%f not found"
+        ECHO "Generate build artifacts first (run build.bat) or create the env files manually."
+        GOTO END_ERROR
+    )
+)
 SET /p BUILD_VERSION=<%ARTIFACTS_DIR%\env\build_version.env
 SET /p BUILD_NUMBER=<%ARTIFACTS_DIR%\env\build_number.env
 SET /p BUILD_BRANCH=<%ARTIFACTS_DIR%\env\build_branch.env
 SET /p BUILD_REVISION=<%ARTIFACTS_DIR%\env\build_revision.env
+IF "%BUILD_VERSION%" == "" ( ECHO "error: BUILD_VERSION is empty" & GOTO END_ERROR )
+IF "%BUILD_NUMBER%" == "" ( ECHO "error: BUILD_NUMBER is empty" & GOTO END_ERROR )
+IF "%BUILD_BRANCH%" == "" ( ECHO "error: BUILD_BRANCH is empty" & GOTO END_ERROR )
+IF "%BUILD_REVISION%" == "" ( ECHO "error: BUILD_REVISION is empty" & GOTO END_ERROR )
 
 ECHO "BUILD_MODE: %BUILD_MODE%"
 ECHO "BUILD_NUMBER: %BUILD_NUMBER%"
