@@ -222,7 +222,6 @@ bool noteNeedsSign(const Note* note, const std::string& variant)
     return !muse::RealIsEqual(m->findCentOffset(note), targetCents);
 }
 
-
 //---------------------------------------------------------
 //   noteLetter
 ///    Note letter ("C" .. "B") from its TPC.
