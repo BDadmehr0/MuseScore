@@ -1,5 +1,60 @@
 # ساخت نصبکننده (Setup) ویندوز ۶۴ بیتی از همین نسخه و برنچ، بهصورت لوکال
 
+## ۰) راه سریع: اسکریپت خودکار `build_setup_x64.ps1`
+
+اگر نمی‌خواهید مرحله‌به‌مرحله جلو بروید، در ریشه‌ی مخزن یک اسکریپت پاورشل هست که **تمام** مراحل این
+راهنما (چک پیش‌نیازها → ساب‌ماژول‌ها → `setup.bat` → متادیتای بیلد → `build.bat` → `package.bat` →
+checksum) را یک‌جا انجام می‌دهد و مشکلات شناخته‌شده‌ی
+[`windows-build-troubleshooting.md`](windows-build-troubleshooting.md) را هم خودکار مدیریت می‌کند.
+
+**یک PowerShell با دسترسی Administrator باز کنید** (اگر ادمین نباشد، خودش پنجره‌ی ادمین باز می‌کند) و:
+
+```powershell
+cd C:\MuseScore
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build_setup_x64.ps1
+```
+
+نمونه‌های پرکاربرد:
+
+```powershell
+# فقط بررسی اینکه سیستم آماده‌ی بیلد هست یا نه (سریع، چیزی نمی‌سازد)
+.\build_setup_x64.ps1 -CheckOnly
+
+# ساخت MSI پایدار با شماره‌ی بیلد دلخواه و مسیر Qt دستی
+.\build_setup_x64.ps1 -BuildMode stable -BuildNumber 2026090501 -QtDir C:\Qt\6.10.2\msvc2022_64
+
+# نسخه‌ی PortableApps (.paf.exe)
+.\build_setup_x64.ps1 -Portable
+
+# فقط بسته‌بندی دوباره روی بیلدی که قبلاً کامل شده (چند دقیقه به‌جای چند ساعت)
+.\build_setup_x64.ps1 -PackageOnly
+
+# نصب خودکار ابزارهای CLI با Chocolatey + بیلد کامل تمیز
+.\build_setup_x64.ps1 -InstallPrereqs -Clean -Yes
+```
+
+سوییچ‌های مهم: `-BuildMode devel|nightly|testing|stable`، `-BuildNumber`، `-Portable`، `-QtDir`،
+`-WixDir`، `-UpgradeGuid`، `-DockWidgetsV2 ON|OFF`، `-InstallPrereqs`، `-SkipDeps`،
+`-SkipSubmodules`، `-BuildOnly`، `-PackageOnly`، `-CheckOnly`، `-Clean`، `-Yes`، `-NoElevate`.
+راهنمای کامل: `Get-Help .\build_setup_x64.ps1 -Full`.
+
+اسکریپت این مشکلات را خودش حل می‌کند:
+
+- پیدا کردن **Git Bash** و جلو انداختن آن نسبت به `bash.exe` مربوط به WSL
+  (منشأ خطای `WSL ERROR: execvpe(/bin/bash) failed`).
+- ساخت فایل‌های `build.artifacts/env/*.env` قبل از اجرای `.bat`ها (و بازسازی آن‌ها در حالت `-PackageOnly`).
+- مسیر hard-code شده‌ی `uuidgen.exe` در `package.bat`: نسخه‌ی واقعی Windows SDK پیدا می‌شود و اگر
+  نبود، GUID با خود PowerShell ساخته می‌شود. **فایل اصلی مخزن دست‌کاری نمی‌شود** و یک کپی اصلاح‌شده
+  در `build.artifacts\package_x64.generated.bat` اجرا می‌شود.
+- تشخیص زودهنگام اجرای `package.bat` قبل از آماده بودن `build.release`.
+- تنظیم `QT_DIR/QTDIR/Qt6_DIR/CMAKE_PREFIX_PATH/WIX/PATH` و بررسی وجود VS 2022 + MSVC x64،
+  CMake ≥ 3.28، Ninja، 7-Zip، ماژول‌های لازم Qt، فضای دیسک و فعال بودن Long Path.
+- لاگ کامل اجرا در `build.artifacts\logs\build_setup_x64_<timestamp>.log`.
+
+بقیه‌ی این سند، همان مراحل را به‌صورت دستی توضیح می‌دهد.
+
+---
+
 ## مهمترین نکته
 
 - این پروژه (MuseScore / Persian Timer) برای ویندوز **از داخل لینوکس کراس‌کامپایل نمی‌شود**. ساخت نصب‌کننده‌ی `.msi` و `.paf.exe` باید روی یک **ویندوز ۱۰/۱۱ ۶۴ بیتی** (یا ویندوز CI) انجام شود.
