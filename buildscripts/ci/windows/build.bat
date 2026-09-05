@@ -27,7 +27,16 @@ IF NOT %TARGET_PROCESSOR_BITS% == 64 (
     )
 )
 
+IF NOT EXIST "%ARTIFACTS_DIR%\env\build_mode.env" (
+    ECHO "error: %ARTIFACTS_DIR%\env\build_mode.env not found"
+    ECHO "Generate it first with: bash buildscripts/ci/tools/make_build_mode_env.sh -e workflow_dispatch -m stable"
+    EXIT /b 1
+)
 SET /p BUILD_MODE=<%ARTIFACTS_DIR%\env\build_mode.env
+IF "%BUILD_MODE%" == "" (
+    ECHO "error: BUILD_MODE is empty (file %ARTIFACTS_DIR%\env\build_mode.env may be empty)"
+    EXIT /b 1
+)
 SET "MUSE_APP_BUILD_MODE=dev"
 IF %BUILD_MODE% == devel   ( SET "MUSE_APP_BUILD_MODE=dev" ) ELSE (
 IF %BUILD_MODE% == nightly ( SET "MUSE_APP_BUILD_MODE=dev" ) ELSE (
@@ -56,7 +65,16 @@ IF %BUILD_WIN_PORTABLE% == ON (
 )
 
 bash ./buildscripts/ci/tools/make_revision_env.sh 
+IF NOT EXIST "%ARTIFACTS_DIR%\env\build_revision.env" (
+    ECHO "error: %ARTIFACTS_DIR%\env\build_revision.env not found after running make_revision_env.sh"
+    ECHO "Make sure bash (Git Bash / WSL) is available and the script completed successfully."
+    EXIT /b 1
+)
 SET /p MUSESCORE_REVISION=<%ARTIFACTS_DIR%\env\build_revision.env
+IF "%MUSESCORE_REVISION%" == "" (
+    ECHO "error: MUSESCORE_REVISION is empty"
+    EXIT /b 1
+)
 
 SET MUSESCORE_BUILD_CONFIGURATION=%MUSESCORE_BUILD_CONFIGURATION%
 SET MUSE_APP_BUILD_MODE=%MUSE_APP_BUILD_MODE%
