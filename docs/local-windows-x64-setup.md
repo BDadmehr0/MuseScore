@@ -34,7 +34,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build_setup_x64.ps1
 ```
 
 سوییچ‌های مهم: `-BuildMode devel|nightly|testing|stable`، `-BuildNumber`، `-Portable`، `-QtDir`،
-`-WixDir`، `-UpgradeGuid`، `-DockWidgetsV2 ON|OFF`، `-InstallPrereqs`، `-SkipDeps`،
+`-WixDir`، `-UpgradeGuid`، `-DockWidgetsV2 ON|OFF`، `-WebSocket ON|OFF|AUTO`، `-InstallPrereqs`، `-SkipDeps`،
 `-SkipSubmodules`، `-BuildOnly`، `-PackageOnly`، `-CheckOnly`، `-Clean`، `-Yes`، `-NoElevate`.
 راهنمای کامل: `Get-Help .\build_setup_x64.ps1 -Full`.
 
@@ -49,6 +49,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build_setup_x64.ps1
 - تشخیص زودهنگام اجرای `package.bat` قبل از آماده بودن `build.release`.
 - تنظیم `QT_DIR/QTDIR/Qt6_DIR/CMAKE_PREFIX_PATH/WIX/PATH` و بررسی وجود VS 2022 + MSVC x64،
   CMake ≥ 3.28، Ninja، 7-Zip، ماژول‌های لازم Qt، فضای دیسک و فعال بودن Long Path.
+- اگر ماژول `qtwebsockets` در Qt نصب نباشد، اسکریپت به‌جای خطای CMake
+  (`Failed to find required Qt component "WebSockets"`) API وب‌سوکت پلاگین را خاموش می‌کند
+  (`--websocket OFF`). بقیه‌ی ماژول‌های اضافه (`qt5compat`, `qtnetworkauth`, `qtshadertools`)
+  همچنان خطای پیش‌نیاز می‌دهند.
 - لاگ کامل اجرا در `build.artifacts\logs\build_setup_x64_<timestamp>.log`.
 
 بقیه‌ی این سند، همان مراحل را به‌صورت دستی توضیح می‌دهد.
