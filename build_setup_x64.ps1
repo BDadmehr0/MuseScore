@@ -30,6 +30,10 @@
            package.bat is never modified; a patched copy is used from %TEMP%.
         *  package.bat started before build.release exists -> detected up front with
            a clear message instead of the confusing CMake / "File not found - WIX".
+        *  Missing Qt6WebSockets ("Failed to find required Qt component WebSockets")
+           -> the plugin WebSocket API is auto-disabled so CMake can configure.
+           Other extra Qt modules (qt5compat, qtnetworkauth, qtshadertools) still
+           fail the prerequisite check immediately.
 
 .PARAMETER BuildMode
     devel | nightly | testing | stable.  stable/testing produce an .msi,
@@ -56,6 +60,12 @@
 
 .PARAMETER DockWidgetsV2
     ON/OFF, passed to build.bat as --dockwidgets_v2. Default: ON (same as CI).
+
+.PARAMETER WebSocket
+    ON | OFF | AUTO. Controls the plugin WebSocket API (Qt6WebSockets).
+    AUTO (default) enables it when the Qt module is installed and disables it
+    otherwise, so a local Qt install that omitted qtwebsockets still builds.
+    ON requires Qt6WebSockets and fails the prerequisite check if it is missing.
 
 .PARAMETER InstallPrereqs
     Install the missing command line tools with Chocolatey
@@ -130,6 +140,9 @@ param(
     [ValidateSet('ON', 'OFF')]
     [string] $DockWidgetsV2 = 'ON',
 
+    [ValidateSet('ON', 'OFF', 'AUTO')]
+    [string] $WebSocket = 'AUTO',
+
     [switch] $InstallPrereqs,
     [switch] $SkipDeps,
     [switch] $SkipSubmodules,
@@ -163,6 +176,7 @@ $MinCMakeVersion = [version]'3.28'
 $script:StepNo    = 0
 $script:BashExe   = $null
 $script:LastNativeExitCode = 0
+$script:BuildWebSocket = 'ON'
 $script:Warnings  = New-Object System.Collections.Generic.List[string]
 $script:StartTime = Get-Date
 
@@ -429,18 +443,51 @@ function Resolve-Qt {
         Write-Warn "windeployqt.exe missing in $qtHome\bin - the install step will fail."
     }
 
-    # Required Qt modules (the build fails late and cryptically when one is missing)
-    $requiredModules = @{
-        'Qt6Core5Compat'  = 'qt5compat'
-        'Qt6NetworkAuth'  = 'qtnetworkauth'
-        'Qt6ShaderTools'  = 'qtshadertools'
-        'Qt6WebSockets'   = 'qtwebsockets'
+    # Hard-required extra Qt modules. A missing one used to only warn here and then
+    # fail hours later in CMake ("Failed to find required Qt component ...").
+    $hardRequired = @{
+        'Qt6Core5Compat' = 'qt5compat'
+        'Qt6NetworkAuth' = 'qtnetworkauth'
+        'Qt6ShaderTools' = 'qtshadertools'
     }
-    foreach ($module in $requiredModules.Keys) {
+    $missingHard = New-Object System.Collections.Generic.List[string]
+    foreach ($module in @($hardRequired.Keys)) {
         $cmakeDir = Join-Path $qtHome ('lib\cmake\{0}' -f $module)
         if (-not (Test-Path -LiteralPath $cmakeDir)) {
-            Write-Warn ("Qt module '{0}' ({1}) seems to be missing in this Qt installation." -f $requiredModules[$module], $module)
+            Write-Fail ("Qt module '{0}' ({1}) is missing in {2}." -f $hardRequired[$module], $module, $qtHome)
+            $missingHard.Add($hardRequired[$module]) | Out-Null
         }
+    }
+    if ($missingHard.Count -gt 0) {
+        Write-Note 'Install the missing extra modules, for example with aqtinstall:'
+        Write-Note ('  aqt install-qt windows desktop 6.10.2 win64_msvc2022_64 -O C:\Qt -m {0}' -f ($missingHard -join ' '))
+        return $false
+    }
+
+    # Qt WebSockets is only needed for the plugin WebSocket API
+    # (MUSE_MODULE_NETWORK_WEBSOCKET). CI installs it; many local Qt installs do not.
+    $wsCmakeDir = Join-Path $qtHome 'lib\cmake\Qt6WebSockets'
+    $wsPresent  = Test-Path -LiteralPath $wsCmakeDir
+    if ($WebSocket -eq 'OFF') {
+        $script:BuildWebSocket = 'OFF'
+        Write-Info 'Plugin WebSocket API disabled (-WebSocket OFF).'
+    }
+    elseif ($wsPresent) {
+        $script:BuildWebSocket = 'ON'
+        Write-Info 'Qt6WebSockets found - plugin WebSocket API will be enabled.'
+    }
+    elseif ($WebSocket -eq 'ON') {
+        Write-Fail "Qt module 'qtwebsockets' (Qt6WebSockets) is missing, but -WebSocket ON was requested."
+        Write-Note 'aqtinstall:  aqt install-qt windows desktop 6.10.2 win64_msvc2022_64 -O C:\Qt -m qtwebsockets'
+        Write-Note 'Or re-run without -WebSocket ON to build without the plugin WebSocket API.'
+        return $false
+    }
+    else {
+        $script:BuildWebSocket = 'OFF'
+        Write-Warn "Qt module 'qtwebsockets' (Qt6WebSockets) is missing - building without the plugin WebSocket API."
+        Write-Note 'This is enough for a normal MuseScore / Persian Tuner installer.'
+        Write-Note 'To enable it:  aqt install-qt windows desktop 6.10.2 win64_msvc2022_64 -O C:\Qt -m qtwebsockets'
+        Write-Note 'Then re-run with -WebSocket ON (add -Clean so CMake picks up the new module).'
     }
 
     $env:QT_DIR      = $qtHome
@@ -749,9 +796,10 @@ function Invoke-BuildStep {
 
     Write-Step 'Building MuseScore Studio (RelWithDebInfo + install)'
     Write-Info 'This is the long part: expect 2-4+ hours for a first build.'
+    Write-Info ("Plugin WebSocket API: {0}" -f $script:BuildWebSocket)
 
     $portableArg = if ($Portable) { ' --portable ON' } else { '' }
-    $commandLine = '{0} -n {1} --dockwidgets_v2 {2}{3}' -f $BuildBat, $Number, $DockWidgetsV2, $portableArg
+    $commandLine = '{0} -n {1} --dockwidgets_v2 {2} --websocket {3}{4}' -f $BuildBat, $Number, $DockWidgetsV2, $script:BuildWebSocket, $portableArg
 
     Invoke-CmdScript -Title 'build.bat' -CommandLine $commandLine
 
@@ -928,6 +976,7 @@ function Write-Summary {
     Write-Host ('=' * 78) -ForegroundColor DarkGreen
 
     Write-Host ("  Build mode : {0}{1}" -f $BuildMode, $(if ($Portable) { ' (PortableApps)' } else { '' }))
+    Write-Host ("  WebSocket  : {0}" -f $script:BuildWebSocket)
     Write-Host ("  Elapsed    : {0:hh\:mm\:ss}" -f $elapsed)
 
     if (Test-Path -LiteralPath $ArtifactsDir) {
@@ -983,6 +1032,9 @@ function Write-FailureHelp {
     Write-Host '      -> re-run without -PackageOnly so build.bat regenerates the env files'
     Write-Host '    * "CMake Error: The source directory ... does not contain CMakeLists.txt"'
     Write-Host '      -> build.release is missing/broken; run a full build (add -Clean)'
+    Write-Host '    * "Failed to find required Qt component ""WebSockets"""'
+    Write-Host '      -> install qtwebsockets, or re-run this script (it now disables'
+    Write-Host '         the plugin WebSocket API when Qt6WebSockets is missing)'
     Write-Host '    * Re-run just the check with:  .\build_setup_x64.ps1 -CheckOnly'
     Write-Host ''
 }
@@ -1043,6 +1095,7 @@ try {
     if ($CheckOnly) {
         Write-Host ''
         Write-Ok 'Check finished - this machine is ready to build the x64 setup.'
+        Write-Info ("Plugin WebSocket API: {0}" -f $script:BuildWebSocket)
         Write-Host ''
         Write-Host '  Next:  .\build_setup_x64.ps1 -BuildMode stable' -ForegroundColor Cyan
     }
