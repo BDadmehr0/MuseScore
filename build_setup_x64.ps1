@@ -1033,8 +1033,11 @@ function Write-FailureHelp {
     Write-Host '    * "CMake Error: The source directory ... does not contain CMakeLists.txt"'
     Write-Host '      -> build.release is missing/broken; run a full build (add -Clean)'
     Write-Host '    * "Failed to find required Qt component ""WebSockets"""'
-    Write-Host '      -> install qtwebsockets, or re-run this script (it now disables'
-    Write-Host '         the plugin WebSocket API when Qt6WebSockets is missing)'
+    Write-Host '      -> install qtwebsockets, or re-run this script (it disables the plugin'
+    Write-Host '         WebSocket API when Qt6WebSockets is missing). If the log already says'
+    Write-Host '         "Plugin WebSocket API: OFF", make sure build.bat exports'
+    Write-Host '         SET "MUSESCORE_BUILD_WEBSOCKET=OFF" without quotes/trailing space'
+    Write-Host '         (an older build.bat sent "OFF " which CMake treats as ON) and add -Clean'
     Write-Host '    * Re-run just the check with:  .\build_setup_x64.ps1 -CheckOnly'
     Write-Host ''
 }
