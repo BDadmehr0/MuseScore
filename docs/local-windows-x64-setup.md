@@ -64,6 +64,41 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build_setup_x64.ps1
 
 ---
 
+## ۰.۵) خطای `SSL peer certificate ... not OK` هنگام دانلود وابستگی‌های CMake
+
+این خطا هنگام `configure` نمایش داده می‌شود و **مشکل کامپایلر یا کتابخانه نیست**:
+
+```
+-- [fetch] attempt 1 failed: https://github.com/musescore/... (60;"SSL peer
+   certificate or SSH remote key was not OK. ... CMAKE_TLS_VERIFY=0 ...")
+CMake Error at muse_deps/buildtools/build_dependency.cmake:104 (message):
+  [fetch] all sources failed for C:\Users\...\.cache\extdeps\downloads\ogg\...
+```
+
+علت: CMake برای `file(DOWNLOAD)` از libcurl/OpenSSL خودش استفاده می‌کند و
+`cmake.exe` مربوط به MinGW/MSYS2 (مثلاً `C:\mingw64\bin\cmake.exe`) معمولاً
+مسیر فایل CA bundle را نمی‌داند. `setup.bat` سالم است چون از `curl.exe` ویندوز
+استفاده می‌کند که به Certificate Store ویندوز وصل است.
+
+اسکریپت `build_setup_x64.ps1` این مورد را خودکار حل می‌کند:
+
+- دنبال CA bundle داخل Git for Windows / MSYS2 می‌گردد و `CMAKE_TLS_CAINFO` را تنظیم می‌کند.
+- اگر پیدا نشد، با یکی از این دستورها اجرا کنید:
+
+```powershell
+.\build_setup_x64.ps1 -BuildMode stable -TlsCaInfo "C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt"
+```
+
+یا به‌عنوان راه‌حل موقت لوکال (کمتر امن):
+
+```powershell
+.\build_setup_x64.ps1 -BuildMode stable -TlsVerify OFF
+```
+
+اگر `build.release` از اجرای ناموفق قبلی باقی مانده، `-Clean` را هم اضافه کنید.
+
+---
+
 ## مهمترین نکته
 
 - این پروژه (MuseScore / Persian Timer) برای ویندوز **از داخل لینوکس کراس‌کامپایل نمی‌شود**. ساخت نصب‌کننده‌ی `.msi` و `.paf.exe` باید روی یک **ویندوز ۱۰/۱۱ ۶۴ بیتی** (یا ویندوز CI) انجام شود.

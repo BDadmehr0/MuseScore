@@ -226,6 +226,10 @@ endif(MUSE_COMPILE_USE_COMPILER_CACHE)
 set(FETCHCONTENT_QUIET OFF)
 set(FETCHCONTENT_BASE_DIR ${PROJECT_BINARY_DIR}/_deps)
 
+# Resolve CMake TLS settings before the first file(DOWNLOAD) so HTTPS
+# downloads of the soundfont and extdeps work with MinGW/MSYS2 CMake builds.
+include(ResolveDownloadTls)
+
 include(SetupQt6)
 
 if (MUE_DOWNLOAD_SOUNDFONT)

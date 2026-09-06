@@ -37,6 +37,7 @@ It performs, in order: prerequisite detection and environment setup -> `git subm
 
 | Symptom in log | Root cause | Fix applied |
 |---|---|---|
+| `SSL peer certificate or SSH remote key was not OK (60)` during CMake's `[fetch]` lines | CMake's `file(DOWNLOAD)` cannot locate/validate a CA bundle. This is common with the MinGW/MSYS2 `cmake.exe` (e.g. `C:\mingw64\bin\cmake.exe`) and happens before any code is compiled. | Re-run `.\build_setup_x64.ps1`. It now auto-detects a Git for Windows / MSYS2 CA bundle and sets `CMAKE_TLS_CAINFO`. If none is found, pass `-TlsCaInfo "C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt"`, or use `-TlsVerify OFF` as a local-only workaround. |
 | `WSL ERROR: execvpe(/bin/bash) failed` | Git Bash / WSL bash is not installed or `bash` is not in `PATH`. | Ensure Git for Windows (with Git Bash) is installed. The scripts keep the bash dependency. |
 | `The system cannot find the path specified.` when reading `build.artifacts\env\build_mode.env` | The env file was never generated because `make_build_mode_env.sh` failed. | Added `IF NOT EXIST ...` checks in `build.bat` and `package.bat` with clear error messages. |
 | `( was unexpected at this time.` after `SET "MUSE_APP_BUILD_MODE=dev"` | `BUILD_MODE` was empty, making `IF == devel` invalid batch syntax. | Added `IF "%BUILD_MODE%" == "" ( ... EXIT /b 1 )` guard before the `IF` chain. |
@@ -44,6 +45,62 @@ It performs, in order: prerequisite detection and environment setup -> `git subm
 | `File not found - WIX` when copying MSI logs | The MSIs were never produced (CMake/package step failed). | Same fix: complete the build first, then package. |
 | `Failed to find required Qt component "WebSockets"` / `Could NOT find Qt6WebSockets` | Qt 6 was installed without the extra `qtwebsockets` module, while `build.bat` used to hard-code `MUSESCORE_BUILD_WEBSOCKET=ON`. | Install the module (`aqt install-qt windows desktop 6.10.2 win64_msvc2022_64 -O C:\Qt -m qtwebsockets`) **or** re-run `.\build_setup_x64.ps1` — it auto-disables the plugin WebSocket API when `lib\cmake\Qt6WebSockets` is missing. Force it with `-WebSocket ON` / `-WebSocket OFF`. |
 | Same error **even though** the log shows `Plugin WebSocket API: OFF` and `build.bat ... --websocket OFF` | `cmd.exe` quoting bug in `build.bat`: `SET BUILD_WEBSOCKET=%2 & SHIFT` kept a trailing space and `SET MUSESCORE_BUILD_WEBSOCKET="%BUILD_WEBSOCKET%"` kept the literal quote characters, so CMake received `-DMUSE_MODULE_NETWORK_WEBSOCKET="OFF "`. CMake only treats the bare constants `OFF/0/NO/FALSE/N/IGNORE/NOTFOUND` as false — `"OFF "` (with quotes) is **true**, so `SetupConfigure.cmake` set `QT_ADD_WEBSOCKET ON` and `SetupQt6.cmake` demanded `Qt6WebSockets`. Visible in the log as `SET MUSESCORE_BUILD_WEBSOCKET="OFF "`. | Fixed in `build.bat`: the option is parsed with `SET "BUILD_WEBSOCKET=%~2"`, validated (`ON`/`OFF` only) and exported without quotes (`SET "MUSESCORE_BUILD_WEBSOCKET=OFF"`). Re-run `.\build_setup_x64.ps1 -BuildMode stable` (add `-Clean` if `build.release` already contains the failed CMake cache). |
+
+---
+
+## 1.5 CMake TLS / `SSL peer certificate ... was not OK (60)`
+
+This error usually appears while CMake is configuring, in lines like:
+
+```
+-- [fetch] attempt 1 failed: https://github.com/musescore/... (60;"SSL peer
+   certificate or SSH remote key was not OK. ... CMAKE_TLS_VERIFY=0 ...")
+CMake Error at muse_deps/buildtools/build_dependency.cmake:104 (message):
+  [fetch] all sources failed for C:\Users\...\.cache\extdeps\downloads\ogg\...
+```
+
+It is **not** a missing library or compiler problem. It happens because CMake uses
+its own libcurl/OpenSSL for `file(DOWNLOAD)`, and the MSYS2/MinGW `cmake.exe`
+often does not know where to load a CA bundle. `setup.bat` still succeeds because
+it uses Windows `curl.exe`, which uses the Windows certificate store.
+
+`build_setup_x64.ps1` now handles this automatically:
+
+- It looks for a CA bundle shipped with Git for Windows / MSYS2
+  (for example `C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt`).
+- If one is found it exports `CMAKE_TLS_CAINFO=<bundle>` and keeps verification ON.
+- The CMake modules also honor `CMAKE_TLS_VERIFY` / `CMAKE_TLS_CAINFO` directly.
+
+If the machine still has no usable bundle, run with an explicit path:
+
+```powershell
+.\build_setup_x64.ps1 -BuildMode stable -TlsCaInfo "C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt"
+```
+
+For a **local-only** quick bypass (downloads are still SHA-256 checked by
+`muse_deps`, but the TLS handshake is not verified):
+
+```powershell
+.\build_setup_x64.ps1 -BuildMode stable -TlsVerify OFF
+```
+
+Equivalent when running `build.bat` directly:
+
+```bat
+set CMAKE_TLS_CAINFO=C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt
+set CMAKE_TLS_VERIFY=ON
+buildscripts\ci\windows\build.bat -n 260906171 --dockwidgets_v2 ON --websocket OFF
+```
+
+Or:
+
+```bat
+set CMAKE_TLS_VERIFY=OFF
+buildscripts\ci\windows\build.bat -n 260906171 --dockwidgets_v2 ON --websocket OFF
+```
+
+Always add `-Clean` if `build.release` already contains a failed CMake cache, so
+CMake re-runs configuration after the TLS variables change.
 
 ---
 
@@ -65,6 +122,20 @@ It performs, in order: prerequisite detection and environment setup -> `git subm
 - Added empty-string guards for each read variable.
 
 ---
+
+### CMake TLS resolution for `file(DOWNLOAD)`
+
+- Added `buildscripts/cmake/ResolveDownloadTls.cmake`, included from
+  `CMakeLists.txt` **before** the first `file(DOWNLOAD)` (soundfont / extdeps).
+- The module resolves `CMAKE_TLS_VERIFY` / `CMAKE_TLS_CAINFO` from explicit
+  `-D` values, then from the environment, then auto-detects a CA bundle from
+  common Git for Windows / MSYS2 / curl locations.
+- `buildscripts/cmake/PrepareDepsSources.cmake` uses the same helper so the
+  `prepare_deps_sources` prefetch path is covered too.
+- `ninja_build.sh` now forwards `CMAKE_TLS_VERIFY` and `CMAKE_TLS_CAINFO` to the
+  CMake configure command as `-DCMAKE_TLS_*`.
+- `build_setup_x64.ps1` gained `-TlsVerify ON|OFF|AUTO` and `-TlsCaInfo <path>`;
+  it exports the equivalent environment variables before running `build.bat`.
 
 ## 3. Prerequisites that must be satisfied before running `.bat` scripts
 
