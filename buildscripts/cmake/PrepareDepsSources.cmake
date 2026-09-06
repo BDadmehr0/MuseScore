@@ -10,6 +10,10 @@ set(_self_dir "${CMAKE_CURRENT_LIST_DIR}")
 get_filename_component(_root "${_self_dir}/../.." ABSOLUTE)
 set(EXTDEPS_DIR "${_root}/muse_deps")
 
+# Apply the same CMAKE_TLS_VERIFY / CMAKE_TLS_CAINFO resolution used by the
+# main configure before any src/extdeps file(DOWNLOAD) runs.
+include("${_self_dir}/ResolveDownloadTls.cmake")
+
 include("${EXTDEPS_DIR}/buildtools/build_dependency.cmake")
 
 if (EXTDEPS_CACHE)

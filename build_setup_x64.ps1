@@ -34,6 +34,10 @@
            -> the plugin WebSocket API is auto-disabled so CMake can configure.
            Other extra Qt modules (qt5compat, qtnetworkauth, qtshadertools) still
            fail the prerequisite check immediately.
+        *  "SSL peer certificate or SSH remote key was not OK (60)" while CMake
+           downloads extdeps/soundfonts -> CMake's file(DOWNLOAD) is pointed at a
+           Git for Windows / MSYS2 CA bundle (CMAKE_TLS_CAINFO). If none exists,
+           use -TlsCaInfo <path> or -TlsVerify OFF as a local workaround.
 
 .PARAMETER BuildMode
     devel | nightly | testing | stable.  stable/testing produce an .msi,
@@ -66,6 +70,20 @@
     AUTO (default) enables it when the Qt module is installed and disables it
     otherwise, so a local Qt install that omitted qtwebsockets still builds.
     ON requires Qt6WebSockets and fails the prerequisite check if it is missing.
+
+.PARAMETER TlsVerify
+    ON | OFF | AUTO. Controls TLS certificate verification used by CMake's
+    file(DOWNLOAD) when it fetches extdeps / soundfonts over HTTPS. AUTO
+    (default) keeps verification ON and automatically points CMake at a CA
+    bundle from Git for Windows / MSYS2 when one is found. Use OFF only for a
+    local workaround when a CMake build (e.g. C:\mingw64\bin\cmake.exe) cannot
+    find any CA bundle; the same effect can be obtained with the environment
+    variables CMAKE_TLS_VERIFY=OFF / CMAKE_TLS_CAINFO=...
+
+.PARAMETER TlsCaInfo
+    Path to a CA bundle (.crt / .pem) used by CMake's HTTPS downloads. If not
+    supplied, common Git for Windows / MSYS2 / Windows curl CA bundle paths are
+    checked automatically.
 
 .PARAMETER InstallPrereqs
     Install the missing command line tools with Chocolatey
@@ -116,6 +134,12 @@
     .\build_setup_x64.ps1 -PackageOnly
     Re-create the installer from an existing build (fast, minutes instead of hours).
 
+    .\build_setup_x64.ps1 -TlsCaInfo "C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt"
+    Point CMake's file(DOWNLOAD) at a specific CA bundle (fixes SSL error 60).
+
+    .\build_setup_x64.ps1 -TlsVerify OFF
+    Local-only workaround for the same SSL error when no CA bundle can be found.
+
 .NOTES
     Run from an elevated PowerShell. If the execution policy blocks the script:
         powershell -NoProfile -ExecutionPolicy Bypass -File .\build_setup_x64.ps1
@@ -142,6 +166,11 @@ param(
 
     [ValidateSet('ON', 'OFF', 'AUTO')]
     [string] $WebSocket = 'AUTO',
+
+    [ValidateSet('ON', 'OFF', 'AUTO')]
+    [string] $TlsVerify = 'AUTO',
+
+    [string] $TlsCaInfo = '',
 
     [switch] $InstallPrereqs,
     [switch] $SkipDeps,
@@ -572,6 +601,117 @@ function Test-CMakeVersion {
     return $true
 }
 
+
+function Get-CommonCaBundlePaths {
+    $paths = New-Object System.Collections.Generic.List[string]
+
+    foreach ($gitRoot in @(
+        'C:\Program Files\Git',
+        'C:\Program Files (x86)\Git',
+        (Join-Path $env:LOCALAPPDATA 'Programs\Git')
+    )) {
+        if ($gitRoot -and (Test-Path -LiteralPath $gitRoot)) {
+            foreach ($rel in @(
+                'mingw64\etc\ssl\certs\ca-bundle.crt',
+                'mingw64\ssl\certs\ca-bundle.crt',
+                'mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem',
+                'usr\ssl\certs\ca-bundle.crt',
+                'etc\ssl\certs\ca-bundle.crt'
+            )) {
+                $p = Join-Path $gitRoot $rel
+                if (Test-Path -LiteralPath $p) {
+                    $paths.Add((Resolve-Path -LiteralPath $p).Path) | Out-Null
+                }
+            }
+        }
+    }
+
+    foreach ($p in @(
+        'C:\mingw64\etc\ssl\certs\ca-bundle.crt',
+        'C:\mingw64\ssl\certs\ca-bundle.crt',
+        'C:\msys64\mingw64\etc\ssl\certs\ca-bundle.crt',
+        'C:\Program Files\curl\libcurl\curl-ca-bundle.crt',
+        'C:\Windows\System32\curl-ca-bundle.crt',
+        'C:\Windows\curl-ca-bundle.crt',
+        (Join-Path $env:USERPROFILE '.curl-ca-bundle.crt')
+    )) {
+        if ($p -and (Test-Path -LiteralPath $p)) {
+            $paths.Add((Resolve-Path -LiteralPath $p).Path) | Out-Null
+        }
+    }
+
+    return $paths
+}
+
+function Resolve-TlsEnvironment {
+    <#
+        Sets CMAKE_TLS_VERIFY / CMAKE_TLS_CAINFO for the child build processes.
+        CMake's file(DOWNLOAD) reads these variables, so this fixes failures like:
+            SSL peer certificate or SSH remote key was not OK (60)
+            ... set environment variable CMAKE_TLS_VERIFY=0 ...
+        that appear when a MinGW/MSYS2 cmake.exe cannot find a CA bundle.
+    #>
+    # Prefer an explicit parameter, then an env value the user already set, then
+    # auto-detect a bundle from Git for Windows / MSYS2 / curl.
+    $caInfo = ''
+    if ($TlsCaInfo) {
+        if (-not (Test-Path -LiteralPath $TlsCaInfo)) {
+            Write-Fail "TLS CA bundle not found: $TlsCaInfo"
+            throw "TLS CA bundle not found: $TlsCaInfo"
+        }
+        $caInfo = (Resolve-Path -LiteralPath $TlsCaInfo).Path
+    }
+    elseif ($env:CMAKE_TLS_CAINFO) {
+        $caInfo = $env:CMAKE_TLS_CAINFO
+    }
+    elseif ($env:MUSE_CMAKE_TLS_CAINFO) {
+        $caInfo = $env:MUSE_CMAKE_TLS_CAINFO
+    }
+    else {
+        $caInfo = Get-CommonCaBundlePaths | Select-Object -First 1
+    }
+
+    $verify = 'ON'
+    if ($TlsVerify -eq 'OFF') {
+        $verify = 'OFF'
+    }
+    elseif ($TlsVerify -eq 'AUTO') {
+        if ($env:CMAKE_TLS_VERIFY) {
+            $verify = ($env:CMAKE_TLS_VERIFY -in @('OFF', '0', 'FALSE', 'NO', 'N'))
+            if ($verify) { $verify = 'OFF' } else { $verify = 'ON' }
+        }
+        else {
+            $verify = 'ON'   # secure default; the CA bundle is auto-detected above
+        }
+    }
+
+    if ($verify -eq 'OFF') {
+        $env:CMAKE_TLS_VERIFY = 'OFF'
+        $env:MUSE_CMAKE_TLS_VERIFY = 'OFF'
+        Write-Warn 'CMake TLS certificate verification is DISABLED (-TlsVerify OFF or CMAKE_TLS_VERIFY).'
+    }
+    else {
+        $env:CMAKE_TLS_VERIFY = 'ON'
+        $env:MUSE_CMAKE_TLS_VERIFY = 'ON'
+    }
+
+    if ($caInfo) {
+        $env:CMAKE_TLS_CAINFO = $caInfo
+        $env:MUSE_CMAKE_TLS_CAINFO = $caInfo
+        Write-Ok "CMake TLS: verify $verify, CA bundle: $caInfo"
+    }
+    else {
+        Remove-Item Env:CMAKE_TLS_CAINFO -ErrorAction SilentlyContinue
+        Remove-Item Env:MUSE_CMAKE_TLS_CAINFO -ErrorAction SilentlyContinue
+        if ($verify -eq 'ON') {
+            Write-Warn 'No CMake TLS CA bundle was auto-detected.'
+            Write-Note 'If the extdeps download fails with SSL error 60, re-run with one of:'
+            Write-Note '  .\build_setup_x64.ps1 -TlsCaInfo "C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt"'
+            Write-Note '  .\build_setup_x64.ps1 -TlsVerify OFF   (less secure; local build only)'
+        }
+    }
+}
+
 function Install-Prerequisites {
     $choco = Get-CommandPath 'choco.exe'
     if (-not $choco) {
@@ -642,6 +782,11 @@ function Test-Prerequisites {
     if (-not (Resolve-Bash))          { $ok = $false }
     if (-not (Resolve-VisualStudio))  { $ok = $false }
     if (-not (Resolve-Qt))            { $ok = $false }
+
+    # --- CMake TLS for file(DOWNLOAD) --------------------------------------
+    # MinGW/MSYS2 cmake sometimes cannot find a CA bundle, which makes the
+    # first HTTPS extdeps/soundfont download fail with SSL error 60.
+    Resolve-TlsEnvironment
 
     # --- WiX (only for msi / portable packaging) ---------------------------
     $needsWix = (-not $BuildOnly) -and (-not $CheckOnly) -and ($Portable -or ($BuildMode -in @('stable', 'testing')))
@@ -977,6 +1122,8 @@ function Write-Summary {
 
     Write-Host ("  Build mode : {0}{1}" -f $BuildMode, $(if ($Portable) { ' (PortableApps)' } else { '' }))
     Write-Host ("  WebSocket  : {0}" -f $script:BuildWebSocket)
+    $tlsSummary = if ($env:CMAKE_TLS_CAINFO) { "{0} + {1}" -f $env:CMAKE_TLS_VERIFY, $env:CMAKE_TLS_CAINFO } else { ([string]$env:CMAKE_TLS_VERIFY) }
+    Write-Host ("  TLS        : {0}" -f $tlsSummary)
     Write-Host ("  Elapsed    : {0:hh\:mm\:ss}" -f $elapsed)
 
     if (Test-Path -LiteralPath $ArtifactsDir) {
@@ -1038,6 +1185,9 @@ function Write-FailureHelp {
     Write-Host '         "Plugin WebSocket API: OFF", make sure build.bat exports'
     Write-Host '         SET "MUSESCORE_BUILD_WEBSOCKET=OFF" without quotes/trailing space'
     Write-Host '         (an older build.bat sent "OFF " which CMake treats as ON) and add -Clean'
+    Write-Host '    * "SSL peer certificate ... was not OK" (CMake extdeps/soundfont download)'
+    Write-Host '      -> run with -TlsCaInfo "C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt"'
+    Write-Host '         or, as a local workaround, with -TlsVerify OFF'
     Write-Host '    * Re-run just the check with:  .\build_setup_x64.ps1 -CheckOnly'
     Write-Host ''
 }
