@@ -53,6 +53,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build_setup_x64.ps1
   (`Failed to find required Qt component "WebSockets"`) API وب‌سوکت پلاگین را خاموش می‌کند
   (`--websocket OFF`). بقیه‌ی ماژول‌های اضافه (`qt5compat`, `qtnetworkauth`, `qtshadertools`)
   همچنان خطای پیش‌نیاز می‌دهند.
+  - اگر با وجود `Plugin WebSocket API: OFF` باز هم همین خطا را دیدید، `build.bat` قدیمی مقدار را
+    با کوتیشن و فاصله‌ی اضافه (`"OFF "`) به CMake می‌فرستاد و CMake آن را «روشن» حساب می‌کرد.
+    این مشکل در `buildscripts\ci\windows\build.bat` برطرف شده؛ کافی است اسکریپت را دوباره اجرا کنید
+    (اگر پوشه‌ی `build.release` از اجرای ناموفق قبلی مانده، `-Clean` را هم اضافه کنید).
+    جزئیات در `docs/windows-build-troubleshooting.md`.
 - لاگ کامل اجرا در `build.artifacts\logs\build_setup_x64_<timestamp>.log`.
 
 بقیه‌ی این سند، همان مراحل را به‌صورت دستی توضیح می‌دهد.

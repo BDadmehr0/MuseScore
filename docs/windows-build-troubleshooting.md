@@ -42,7 +42,8 @@ It performs, in order: prerequisite detection and environment setup -> `git subm
 | `( was unexpected at this time.` after `SET "MUSE_APP_BUILD_MODE=dev"` | `BUILD_MODE` was empty, making `IF == devel` invalid batch syntax. | Added `IF "%BUILD_MODE%" == "" ( ... EXIT /b 1 )` guard before the `IF` chain. |
 | `CMake Error: The source directory ... does not appear to contain CMakeLists.txt` | `package.bat` tried to run CMake in `build.release` which either does not exist or was not configured properly. | Ensure `build.bat` completes successfully (creating `build.release`) before running `package.bat`. The docs now explicitly state this prerequisite. |
 | `File not found - WIX` when copying MSI logs | The MSIs were never produced (CMake/package step failed). | Same fix: complete the build first, then package. |
-| `Failed to find required Qt component "WebSockets"` / `Could NOT find Qt6WebSockets` | Qt 6 was installed without the extra `qtwebsockets` module, while `build.bat` used to hard-code `MUSESCORE_BUILD_WEBSOCKET=ON`. | Install the module (`aqt install-qt windows desktop 6.10.2 win64_msvc2022_64 -O C:\Qt -m qtwebsockets`) **or** re-run `.\build_setup_x64.ps1` — it now auto-disables the plugin WebSocket API when `lib\cmake\Qt6WebSockets` is missing. Force it with `-WebSocket ON` / `-WebSocket OFF`. |
+| `Failed to find required Qt component "WebSockets"` / `Could NOT find Qt6WebSockets` | Qt 6 was installed without the extra `qtwebsockets` module, while `build.bat` used to hard-code `MUSESCORE_BUILD_WEBSOCKET=ON`. | Install the module (`aqt install-qt windows desktop 6.10.2 win64_msvc2022_64 -O C:\Qt -m qtwebsockets`) **or** re-run `.\build_setup_x64.ps1` — it auto-disables the plugin WebSocket API when `lib\cmake\Qt6WebSockets` is missing. Force it with `-WebSocket ON` / `-WebSocket OFF`. |
+| Same error **even though** the log shows `Plugin WebSocket API: OFF` and `build.bat ... --websocket OFF` | `cmd.exe` quoting bug in `build.bat`: `SET BUILD_WEBSOCKET=%2 & SHIFT` kept a trailing space and `SET MUSESCORE_BUILD_WEBSOCKET="%BUILD_WEBSOCKET%"` kept the literal quote characters, so CMake received `-DMUSE_MODULE_NETWORK_WEBSOCKET="OFF "`. CMake only treats the bare constants `OFF/0/NO/FALSE/N/IGNORE/NOTFOUND` as false — `"OFF "` (with quotes) is **true**, so `SetupConfigure.cmake` set `QT_ADD_WEBSOCKET ON` and `SetupQt6.cmake` demanded `Qt6WebSockets`. Visible in the log as `SET MUSESCORE_BUILD_WEBSOCKET="OFF "`. | Fixed in `build.bat`: the option is parsed with `SET "BUILD_WEBSOCKET=%~2"`, validated (`ON`/`OFF` only) and exported without quotes (`SET "MUSESCORE_BUILD_WEBSOCKET=OFF"`). Re-run `.\build_setup_x64.ps1 -BuildMode stable` (add `-Clean` if `build.release` already contains the failed CMake cache). |
 
 ---
 
@@ -55,6 +56,7 @@ It performs, in order: prerequisite detection and environment setup -> `git subm
 - Added file-existence check for `build_revision.env` and empty-string guard for `MUSESCORE_REVISION`.
 - Improved error messages that tell the user exactly which bash command to run.
 - Added `--websocket ON|OFF` (default `ON`, same as CI). `build_setup_x64.ps1` passes `OFF` when `Qt6WebSockets` is not installed, so a local Qt that omitted `qtwebsockets` no longer dies in `SetupQt6.cmake`.
+- Fixed the value actually reaching CMake. The first version of the option did `SET BUILD_WEBSOCKET=%2 & SHIFT` (cmd keeps the space before `&` as part of the value) and `SET MUSESCORE_BUILD_WEBSOCKET="%BUILD_WEBSOCKET%"` (cmd keeps the quote characters), so CMake got `-DMUSE_MODULE_NETWORK_WEBSOCKET="OFF "`, which CMake evaluates as **true**. The option is now read with `SET "BUILD_WEBSOCKET=%~2"`, validated to `ON`/`OFF`, and exported as `SET "MUSESCORE_BUILD_WEBSOCKET=%BUILD_WEBSOCKET%"`. `MUSESCORE_BUILD_VST_MODULE` and `MUSESCORE_RUN_WINDEPLOYQT` were switched to the same quote-free form (they were harmless before only because `"ON"` is truthy anyway).
 
 ### `buildscripts/ci/windows/package.bat`
 
@@ -81,6 +83,8 @@ It performs, in order: prerequisite detection and environment setup -> `git subm
    ```bat
    buildscripts\ci\windows\build.bat -n 2026090501 --dockwidgets_v2 ON
    ```
+   If your Qt install does not include `qtwebsockets`, add `--websocket OFF`
+   (`build_setup_x64.ps1` does this automatically).
 
 4. **Only then run `package.bat`**:
    ```bat
