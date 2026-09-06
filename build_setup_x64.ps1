@@ -651,14 +651,21 @@ function Resolve-TlsEnvironment {
             ... set environment variable CMAKE_TLS_VERIFY=0 ...
         that appear when a MinGW/MSYS2 cmake.exe cannot find a CA bundle.
     #>
+    # Prefer an explicit parameter, then an env value the user already set, then
+    # auto-detect a bundle from Git for Windows / MSYS2 / curl.
     $caInfo = ''
-
     if ($TlsCaInfo) {
         if (-not (Test-Path -LiteralPath $TlsCaInfo)) {
             Write-Fail "TLS CA bundle not found: $TlsCaInfo"
             throw "TLS CA bundle not found: $TlsCaInfo"
         }
         $caInfo = (Resolve-Path -LiteralPath $TlsCaInfo).Path
+    }
+    elseif ($env:CMAKE_TLS_CAINFO) {
+        $caInfo = $env:CMAKE_TLS_CAINFO
+    }
+    elseif ($env:MUSE_CMAKE_TLS_CAINFO) {
+        $caInfo = $env:MUSE_CMAKE_TLS_CAINFO
     }
     else {
         $caInfo = Get-CommonCaBundlePaths | Select-Object -First 1
@@ -669,13 +676,19 @@ function Resolve-TlsEnvironment {
         $verify = 'OFF'
     }
     elseif ($TlsVerify -eq 'AUTO') {
-        $verify = 'ON'   # secure default; the CA bundle is auto-detected above
+        if ($env:CMAKE_TLS_VERIFY) {
+            $verify = ($env:CMAKE_TLS_VERIFY -in @('OFF', '0', 'FALSE', 'NO', 'N'))
+            if ($verify) { $verify = 'OFF' } else { $verify = 'ON' }
+        }
+        else {
+            $verify = 'ON'   # secure default; the CA bundle is auto-detected above
+        }
     }
 
     if ($verify -eq 'OFF') {
         $env:CMAKE_TLS_VERIFY = 'OFF'
         $env:MUSE_CMAKE_TLS_VERIFY = 'OFF'
-        Write-Warn 'CMake TLS certificate verification is DISABLED (-TlsVerify OFF).'
+        Write-Warn 'CMake TLS certificate verification is DISABLED (-TlsVerify OFF or CMAKE_TLS_VERIFY).'
     }
     else {
         $env:CMAKE_TLS_VERIFY = 'ON'
